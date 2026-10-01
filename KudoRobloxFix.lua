@@ -3,7 +3,6 @@ local playerGui = player:WaitForChild("PlayerGui")
 local Lighting = game:GetService("Lighting")
 local Workspace = game:GetService("Workspace")
 local TweenService = game:GetService("TweenService")
-local SoundService = game:GetService("SoundService")
 local RunService = game:GetService("RunService")
 local Terrain = Workspace:FindFirstChildOfClass("Terrain")
 local Camera = Workspace.CurrentCamera
@@ -105,6 +104,22 @@ local function step(text, fn, percent)
 end
 
 step("Áp dụng FastFlags...", function()
+    -- UNLIMITED FPS
+    setfflag("DFIntTaskSchedulerTargetFps", "9999")
+    setfflag("DFIntFrameRateCap", "9999")
+    setfflag("DFIntMaxFrameRate", "9999")
+    setfflag("DFIntMinFrameRate", "1")
+    setfflag("FFlagDisableVSync", "True")
+    setfflag("FFlagDebugDisplayFPS", "True")
+    setfflag("DFIntFrameRateCapOverride", "9999")
+    setfflag("DFIntRenderThrottleEnabled", "0")
+    setfflag("DFIntRenderThrottleMs", "0")
+    setfflag("FFlagRenderThrottleDisable", "True")
+    setfflag("DFIntMaxFramesInFlight", "1")
+    setfflag("DFIntTripleBufferingEnabled", "0")
+    setfflag("FFlagDisableFrameLimiter", "True")
+
+    -- GRAPHICS POTATO
     setfflag("DFIntDebugFRMQualityLevelOverride", "1")
     setfflag("DFIntTextureQualityOverride", "0")
     setfflag("DFFlagTextureQualityOverrideEnabled", "True")
@@ -118,23 +133,30 @@ step("Áp dụng FastFlags...", function()
     setfflag("FFlagDisableSunRays", "True")
     setfflag("FFlagDisableColorCorrection", "True")
     setfflag("FFlagDisableAntiAliasing", "True")
-    setfflag("FFlagDisableVSync", "True")
     setfflag("FFlagDisableMotionBlur", "True")
+
+    -- SHADOW
     setfflag("FFlagRenderShadowIntensity", "0")
     setfflag("FFlagRenderShadowIntensityOverride", "True")
     setfflag("DFFlagDisableRenderShadowMap", "True")
     setfflag("FFlagDisableShadows", "True")
+
+    -- SKY / ATMOSPHERE
     setfflag("FFlagDebugSkyGray", "True")
     setfflag("FFlagDisableAtmosphere", "True")
     setfflag("FFlagDisableSky", "True")
     setfflag("FFlagDisableSkybox", "True")
     setfflag("FFlagDisableFog", "True")
     setfflag("FFlagDisableWater", "True")
+
+    -- TERRAIN
     setfflag("FFlagDisableTerrain", "True")
     setfflag("DFFlagDisableTerrainTextures", "True")
     setfflag("FFlagDisableTerrainDecoration", "True")
     setfflag("FIntFRMMaxGrassDistance", "0")
     setfflag("FIntFRMMinGrassDistance", "0")
+
+    -- LOD
     setfflag("DFIntCSGLevelOfDetailSwitchingDistance", "0")
     setfflag("DFIntCSGLevelOfDetailSwitchingDistanceL12", "0")
     setfflag("DFIntCSGLevelOfDetailSwitchingDistanceL23", "0")
@@ -142,43 +164,55 @@ step("Áp dụng FastFlags...", function()
     setfflag("FFlagDisableLODTransitions", "True")
     setfflag("FFlagForceLOD0", "True")
     setfflag("DFIntLODBias", "4")
+
+    -- LIGHTING
     setfflag("FFlagDisableDynamicLighting", "True")
     setfflag("FFlagDisablePointLightShadows", "True")
     setfflag("FFlagDisableSpotLightShadows", "True")
     setfflag("FFlagDisableSurfaceLightShadows", "True")
     setfflag("DFFlagDebugRenderForceTechnologyVoxel", "True")
     setfflag("FFlagDebugPauseVoxelizer", "True")
+
+    -- PHYSICS
     setfflag("DFIntSolverSpringDamping", "0")
     setfflag("DFIntPhysicsSendRate", "1")
     setfflag("DFIntMaxSimultaneousPhysicsJobs", "1")
     setfflag("DFIntPhysicsStepPerFrame", "1")
     setfflag("DFIntMaximumCollisionIterations", "1")
     setfflag("DFIntSolverConvergenceIterations", "1")
-    setfflag("DFIntTaskSchedulerTargetFps", "240")
-    setfflag("DFIntFrameRateCap", "240")
-    setfflag("DFIntMinFrameRate", "30")
-    setfflag("DFIntMaxFrameRate", "240")
+    setfflag("DFIntPhysicsTickerMaxTime", "1")
+    setfflag("FFlagDisableRaycastFiltering", "True")
+    setfflag("DFFlagSkipRaycastFiltering", "True")
+
+    -- GC
     setfflag("DFFlagGCEnableIncremental", "True")
-    setfflag("DFIntGCIncrementalPause", "1")
-    setfflag("DFIntGCIncrementalStepMul", "500")
+    setfflag("DFIntGCIncrementalPause", "0")
+    setfflag("DFIntGCIncrementalStepMul", "1000")
+
+    -- RENDER OPTIMIZE
     setfflag("DFIntFrameBufferPoolSize", "1")
     setfflag("DFIntRenderMeshMaxBones", "1")
     setfflag("DFIntDebugEngineOptimizationLevel", "3")
     setfflag("DFFlagForceTextureLOD", "True")
     setfflag("DFFlagTextureCompositorEnable", "False")
     setfflag("DFFlagTextureCompositorEnabled", "False")
+    setfflag("DFFlagDisableGPUOcclusion", "False")
+
+    -- ANIMATION
     setfflag("FFlagDisableAnimationBlending", "True")
     setfflag("DFFlagSkipAnimationBlending", "True")
     setfflag("FFlagDisableFacialAnimation", "True")
+
+    -- NETWORK
     setfflag("DFIntConnectionMTUSize", "1400")
-end, 15)
+end, 20)
 
 step("Hạ graphics...", function()
     settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
     settings().Rendering.MeshPartDetailLevel = Enum.MeshPartDetailLevel.Level01
     settings().Rendering.AnimationWeightedBlendFix = Enum.AnimationWeightedBlendFix.Disabled
     settings().Rendering.EagerBulkExecution = true
-end, 25)
+end, 30)
 
 step("Tối ưu Camera...", function()
     if Camera then
@@ -186,9 +220,10 @@ step("Tối ưu Camera...", function()
         Camera.CameraType = Enum.CameraType.Custom
     end
     pcall(function() Workspace.StreamingEnabled = true end)
-    pcall(function() Workspace.StreamingTargetRadius = 256 end)
+    pcall(function() Workspace.StreamingTargetRadius = 128 end)
     pcall(function() Workspace.StreamingMinRadius = 64 end)
-end, 35)
+    pcall(function() Workspace.StreamOutBehavior = Enum.StreamOutBehavior.Opportunistic end)
+end, 40)
 
 step("Tắt Terrain...", function()
     if Terrain then
@@ -198,7 +233,7 @@ step("Tắt Terrain...", function()
         Terrain.WaterTransparency = 1
         Terrain.Decoration = false
     end
-end, 45)
+end, 50)
 
 step("Tắt PostFX & Lighting...", function()
     for _, v in ipairs(Lighting:GetChildren()) do
@@ -218,20 +253,6 @@ step("Tắt PostFX & Lighting...", function()
     Lighting.ClockTime = 14
     Lighting.ExposureCompensation = 0
     Lighting.ShadowSoftness = 0
-end, 55)
-
-step("Tắt âm thanh...", function()
-    SoundService.AmbientReverb = Enum.ReverbType.NoReverb
-    SoundService.DistanceFactor = 0
-    SoundService.DopplerScale = 0
-    pcall(function() SoundService.VolumetricAudio = Enum.VolumetricAudio.Disabled end)
-    for _, v in ipairs(game:GetDescendants()) do
-        if v:IsA("Sound") then
-            v.Volume = 0
-            v.Playing = false
-            v.Looped = false
-        end
-    end
 end, 60)
 
 local potatoMaterials = {
@@ -252,16 +273,6 @@ local potatoMaterials = {
 
 -- Cache nhân vật
 local charModels = {}
-local function refreshCharModels()
-    charModels = {}
-    for _, plr in ipairs(game.Players:GetPlayers()) do
-        if plr.Character then
-            charModels[plr.Character] = true
-        end
-    end
-end
-refreshCharModels()
-
 local charConns = {}
 local function watchPlayer(plr)
     if charConns[plr] then charConns[plr]:Disconnect() end
@@ -298,7 +309,7 @@ local function isCharacterDescendant(v)
     return false
 end
 
--- Bảo vệ DUY NHẤT tên người chơi
+-- Bảo vệ tên người chơi + âm thanh
 local function isNameTag(v)
     if v:IsA("BillboardGui") then return true end
     if v:IsA("TextLabel") or v:IsA("TextButton") or v:IsA("TextScreenGui") then return true end
@@ -307,6 +318,7 @@ local function isNameTag(v)
     if v:IsA("Shirt") or v:IsA("Pants") or v:IsA("ShirtGraphic") then return true end
     if v:IsA("CharacterMesh") then return true end
     if v:IsA("BodyColors") then return true end
+    if v:IsA("Sound") then return true end
     return false
 end
 
@@ -344,8 +356,6 @@ local function optimizeObject(v)
             v.CastShadow = false
             v.Massless = true
         end)
-    elseif v:IsA("Sound") then
-        pcall(function() v.Volume = 0; v.Playing = false end)
     elseif v:IsA("Highlight") or v:IsA("SelectionBox") or v:IsA("BoxHandleAdornment") then
         pcall(function() v.Enabled = false end)
     elseif v:IsA("Attachment") then
@@ -412,7 +422,89 @@ task.spawn(function()
     end
 end)
 
--- ===== FPS COUNTER RIÊNG (không bị destroy) =====
+-- ===== CAMERA CULLING =====
+local cullConn
+cullConn = RunService.Heartbeat:Connect(function()
+    pcall(function()
+        if not Camera then return end
+        local camPos = Camera.CFrame.Position
+        local camLook = Camera.CFrame.LookVector
+        for _, v in ipairs(Workspace:GetChildren()) do
+            if v:IsA("Model") or v:IsA("BasePart") then
+                if not isCharacterDescendant(v) then
+                    if v:IsA("BasePart") then
+                        local dist = (v.Position - camPos).Magnitude
+                        if dist > 500 then
+                            v.LocalTransparencyModifier = 1
+                        else
+                            local toPart = (v.Position - camPos).Unit
+                            if camLook:Dot(toPart) < -0.3 then
+                                v.LocalTransparencyModifier = 1
+                            else
+                                v.LocalTransparencyModifier = 0
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end)
+end)
+
+task.spawn(function()
+    while sg.Parent do
+        task.wait(2)
+        pcall(function()
+            for _, v in ipairs(Workspace:GetDescendants()) do
+                if (v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam")
+                    or v:IsA("Smoke") or v:IsA("Fire") or v:IsA("Sparkles")
+                    or v:IsA("PointLight") or v:IsA("SpotLight") or v:IsA("SurfaceLight")) then
+                    if not isCharacterDescendant(v) then
+                        v.Enabled = false
+                    end
+                end
+            end
+        end)
+    end
+end)
+
+task.spawn(function()
+    while sg.Parent do
+        task.wait(1)
+        pcall(function()
+            if Camera then Camera.FieldOfView = 70 end
+        end)
+    end
+end)
+
+-- ===== TẮT HUMANOID STATE MACHINE =====
+task.spawn(function()
+    task.wait(1)
+    pcall(function()
+        for _, plr in ipairs(game.Players:GetPlayers()) do
+            local char = plr.Character
+            if char then
+                local hum = char:FindFirstChildOfClass("Humanoid")
+                if hum then
+                    hum:SetStateEnabled(Enum.HumanoidStateType.Climbing, false)
+                    hum:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
+                    hum:SetStateEnabled(Enum.HumanoidStateType.Flying, false)
+                    hum:SetStateEnabled(Enum.HumanoidStateType.Freefall, false)
+                    hum:SetStateEnabled(Enum.HumanoidStateType.Landed, false)
+                    hum:SetStateEnabled(Enum.HumanoidStateType.PlatformStanding, false)
+                    hum:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
+                    hum:SetStateEnabled(Enum.HumanoidStateType.Running, true)
+                    hum:SetStateEnabled(Enum.HumanoidStateType.RunningNoPhysics, true)
+                    hum:SetStateEnabled(Enum.HumanoidStateType.Seated, false)
+                    hum:SetStateEnabled(Enum.HumanoidStateType.StrafingNoPhysics, false)
+                    hum:SetStateEnabled(Enum.HumanoidStateType.Swimming, false)
+                end
+            end
+        end
+    end)
+end)
+
+-- ===== FPS COUNTER RIÊNG =====
 local fpsGui = Instance.new("ScreenGui")
 fpsGui.Name = "KudoFPS"
 fpsGui.ResetOnSpawn = false
@@ -420,10 +512,10 @@ fpsGui.IgnoreGuiInset = true
 fpsGui.Parent = playerGui
 
 local fpsBox = Instance.new("TextLabel")
-fpsBox.Size = UDim2.new(0, 120, 0, 26)
-fpsBox.Position = UDim2.new(1, -130, 1, -34)
+fpsBox.Size = UDim2.new(0, 150, 0, 26)
+fpsBox.Position = UDim2.new(1, -160, 1, -34)
 fpsBox.BackgroundTransparency = 1
-fpsBox.Text = "FPS: --"
+fpsBox.Text = "FPS: -- | ∞"
 fpsBox.Font = Enum.Font.GothamBold
 fpsBox.TextSize = 13
 fpsBox.TextColor3 = Color3.fromRGB(0, 255, 120)
@@ -440,14 +532,14 @@ task.spawn(function()
         local fps = math.floor(frames * 2 + 0.5)
         frames = 0
         local color
-        if fps >= 50 then
+        if fps >= 60 then
             color = Color3.fromRGB(0, 255, 120)
         elseif fps >= 30 then
             color = Color3.fromRGB(255, 220, 60)
         else
             color = Color3.fromRGB(255, 80, 80)
         end
-        fpsBox.Text = "FPS: " .. fps
+        fpsBox.Text = "FPS: " .. fps .. " | ∞"
         fpsBox.TextColor3 = color
     end
 end)
@@ -487,11 +579,17 @@ pcall(function()
     TweenService:Create(titleLabel, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
     TweenService:Create(stroke, TweenInfo.new(0.5), {Transparency = 1}):Play()
     task.wait(0.6)
+    if scanConn then scanConn:Disconnect() end
+    if cullConn then cullConn:Disconnect() end
     sg:Destroy()
 end)
 
 closeBtn.MouseButton1Click:Connect(function()
-    pcall(function() sg:Destroy() end)
+    pcall(function()
+        if scanConn then scanConn:Disconnect() end
+        if cullConn then cullConn:Disconnect() end
+        sg:Destroy()
+    end)
 end)
 
 print("✅ fix lag by kudo29001")

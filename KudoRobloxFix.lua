@@ -16,8 +16,8 @@ popupGui.IgnoreGuiInset = true
 popupGui.Parent = playerGui
 
 local popup = Instance.new("Frame")
-popup.Size = UDim2.new(0, 240, 0, 60)
-popup.Position = UDim2.new(1, 20, 0.35, -30)
+popup.Size = UDim2.new(0, 260, 0, 64)
+popup.Position = UDim2.new(1, 20, 0.35, -32)
 popup.BackgroundColor3 = Color3.fromRGB(14, 14, 20)
 popup.BackgroundTransparency = 0.05
 popup.BorderSizePixel = 0
@@ -34,7 +34,7 @@ local popupLabel = Instance.new("TextLabel")
 popupLabel.Size = UDim2.new(1, -20, 1, -12)
 popupLabel.Position = UDim2.new(0, 10, 0, 6)
 popupLabel.BackgroundTransparency = 1
-popupLabel.Text = "fix lag : ✓\nmade by kudo29001"
+popupLabel.Text = "fix lag đang hoạt động ✓\nmade by kudo29001⚡"
 popupLabel.Font = Enum.Font.GothamBold
 popupLabel.TextSize = 13
 popupLabel.TextColor3 = Color3.fromRGB(255, 70, 70)
@@ -44,13 +44,13 @@ popupLabel.TextWrapped = true
 popupLabel.Parent = popup
 
 TweenService:Create(popup, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-    Position = UDim2.new(1, -260, 0.35, -30)
+    Position = UDim2.new(1, -280, 0.35, -32)
 }):Play()
 
 task.delay(6, function()
     pcall(function()
         local out = TweenService:Create(popup, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-            Position = UDim2.new(1, 20, 0.35, -30),
+            Position = UDim2.new(1, 20, 0.35, -32),
             BackgroundTransparency = 1
         })
         out:Play()
@@ -61,8 +61,9 @@ task.delay(6, function()
     end)
 end)
 
--- ==================== FFLAG MAX ====================
+-- ==================== FFLAG CỰC KHÔ ====================
 pcall(function()
+    -- FPS không giới hạn
     setfflag("DFIntTaskSchedulerTargetFps", "9999")
     setfflag("DFIntFrameRateCap", "9999")
     setfflag("DFIntMaxFrameRate", "9999")
@@ -74,11 +75,20 @@ pcall(function()
     setfflag("FFlagRenderThrottleDisable", "True")
     setfflag("DFIntMaxFramesInFlight", "1")
     setfflag("FFlagDisableFrameLimiter", "True")
+
+    -- Graphics potato cực đoan
     setfflag("DFIntDebugFRMQualityLevelOverride", "1")
     setfflag("DFIntTextureQualityOverride", "0")
     setfflag("DFFlagTextureQualityOverrideEnabled", "True")
     setfflag("FFlagTextureQualityOverride", "True")
     setfflag("FIntDebugForceMSAASamples", "1")
+    setfflag("FFlagDisableTextures", "True")
+    setfflag("DFFlagRenderSkipMaterialTextures", "True")
+    setfflag("FFlagDisableSurfaceAppearance", "True")
+    setfflag("FFlagDisableMaterialTextures", "True")
+    setfflag("DFFlagForceTextureLOD", "True")
+
+    -- Tắt toàn bộ PostFX
     setfflag("DFFlagDisableSSAO", "True")
     setfflag("FFlagDisableSSAO", "True")
     setfflag("FFlagDisablePostFx", "True")
@@ -88,10 +98,19 @@ pcall(function()
     setfflag("FFlagDisableColorCorrection", "True")
     setfflag("FFlagDisableAntiAliasing", "True")
     setfflag("FFlagDisableMotionBlur", "True")
+    setfflag("FFlagDisableAtmosphericScattering", "True")
+
+    -- Shadow
     setfflag("FFlagRenderShadowIntensity", "0")
     setfflag("FFlagRenderShadowIntensityOverride", "True")
     setfflag("DFFlagDisableRenderShadowMap", "True")
     setfflag("FFlagDisableShadows", "True")
+    setfflag("FFlagDisableDynamicLighting", "True")
+    setfflag("FFlagDisablePointLightShadows", "True")
+    setfflag("FFlagDisableSpotLightShadows", "True")
+    setfflag("FFlagDisableSurfaceLightShadows", "True")
+
+    -- Sky / atmo / terrain
     setfflag("FFlagDebugSkyGray", "True")
     setfflag("FFlagDisableAtmosphere", "True")
     setfflag("FFlagDisableSky", "True")
@@ -103,38 +122,71 @@ pcall(function()
     setfflag("FFlagDisableTerrainDecoration", "True")
     setfflag("FIntFRMMaxGrassDistance", "0")
     setfflag("FIntFRMMinGrassDistance", "0")
+    setfflag("FIntGrassMovementReducedMotionFactor", "0")
+
+    -- LOD cực thấp
     setfflag("DFIntCSGLevelOfDetailSwitchingDistance", "0")
     setfflag("DFIntCSGLevelOfDetailSwitchingDistanceL12", "0")
     setfflag("DFIntCSGLevelOfDetailSwitchingDistanceL23", "0")
     setfflag("DFIntCSGLevelOfDetailSwitchingDistanceL34", "0")
     setfflag("FFlagDisableLODTransitions", "True")
     setfflag("FFlagForceLOD0", "True")
-    setfflag("DFIntLODBias", "4")
-    setfflag("FFlagDisableDynamicLighting", "True")
-    setfflag("FFlagDisablePointLightShadows", "True")
-    setfflag("FFlagDisableSpotLightShadows", "True")
-    setfflag("FFlagDisableSurfaceLightShadows", "True")
+    setfflag("DFIntLODBias", "8")
+
+    -- Voxel / lighting
     setfflag("DFFlagDebugRenderForceTechnologyVoxel", "True")
     setfflag("FFlagDebugPauseVoxelizer", "True")
+    setfflag("DFFlagSkipHighResolutionEnvironment", "True")
+
+    -- Physics nhẹ
     setfflag("DFIntSolverSpringDamping", "0")
     setfflag("DFIntPhysicsSendRate", "1")
     setfflag("DFIntMaxSimultaneousPhysicsJobs", "1")
     setfflag("DFIntPhysicsStepPerFrame", "1")
     setfflag("DFIntMaximumCollisionIterations", "1")
     setfflag("DFIntSolverConvergenceIterations", "1")
-    setfflag("DFFlagGCEnableIncremental", "True")
-    setfflag("DFIntGCIncrementalPause", "0")
-    setfflag("DFIntGCIncrementalStepMul", "1000")
+    setfflag("DFIntPhysicsTickerMaxTime", "1")
+    setfflag("FFlagDisableRaycastFiltering", "True")
+    setfflag("DFFlagSkipRaycastFiltering", "True")
+
+    -- Render optimize
     setfflag("DFIntFrameBufferPoolSize", "1")
     setfflag("DFIntRenderMeshMaxBones", "1")
     setfflag("DFIntDebugEngineOptimizationLevel", "3")
-    setfflag("DFFlagForceTextureLOD", "True")
     setfflag("DFFlagTextureCompositorEnable", "False")
     setfflag("DFFlagTextureCompositorEnabled", "False")
+    setfflag("DFFlagDisableGPUOcclusion", "False")
+    setfflag("DFFlagDisableRenderMeshes", "True")
+    setfflag("FFlagDisableRenderMeshes", "True")
+    setfflag("FFlagRenderDisableWireframe", "True")
+    setfflag("FFlagDisableParticleMesh", "True")
+    setfflag("FFlagDisableParticleEffects", "True")
+    setfflag("FFlagDisableTrails", "True")
+    setfflag("FFlagDisableBeams", "True")
+    setfflag("FFlagDisableBillboards", "True")
+    setfflag("FFlagDisableDecals", "True")
+    setfflag("FFlagDisableReflections", "True")
+    setfflag("FFlagDisableGlassRefraction", "True")
+    setfflag("DFFlagSkipRenderMesh", "True")
+
+    -- Animation
     setfflag("FFlagDisableAnimationBlending", "True")
     setfflag("DFFlagSkipAnimationBlending", "True")
     setfflag("FFlagDisableFacialAnimation", "True")
+
+    -- GC
+    setfflag("DFFlagGCEnableIncremental", "True")
+    setfflag("DFIntGCIncrementalPause", "0")
+    setfflag("DFIntGCIncrementalStepMul", "2000")
+
+    -- Network
     setfflag("DFIntConnectionMTUSize", "1400")
+    setfflag("DFIntS2PhysicsSenderRate", "1")
+
+    -- Graphics API
+    setfflag("FFlagDebugGraphicsDisableDirect3D11", "True")
+    setfflag("FFlagDebugGraphicsPreferOpenGL", "True")
+    setfflag("FFlagDebugGraphicsPreferVulkan", "True")
 end)
 
 -- ==================== ENGINE CONFIG ====================
@@ -154,8 +206,9 @@ task.spawn(function()
             Camera.CameraType = Enum.CameraType.Custom
         end
         Workspace.StreamingEnabled = true
-        Workspace.StreamingTargetRadius = 128
-        Workspace.StreamingMinRadius = 64
+        Workspace.StreamingTargetRadius = 64
+        Workspace.StreamingMinRadius = 32
+        Workspace.StreamOutBehavior = Enum.StreamOutBehavior.Opportunistic
     end)
 end)
 
@@ -215,13 +268,14 @@ local function isName(v)
     return v:IsA("BillboardGui") or v:IsA("TextLabel") or v:IsA("TextButton") or v:IsA("Humanoid")
 end
 
--- ==================== BULK DESTROY (KHÔNG XOÁ PART GỐC CỦA MAP) ====================
+-- ==================== BULK DESTROY CỰC KHÔ ====================
 local killTypes = {
     ParticleEmitter = true, Trail = true, Smoke = true, Fire = true,
     Sparkles = true, Beam = true, Highlight = true, SelectionBox = true,
     BoxHandleAdornment = true, PointLight = true, SpotLight = true,
     SurfaceLight = true, ForceField = true, Explosion = true,
     Sound = true, Animation = true, SurfaceAppearance = true,
+    Decal = true, Texture = true, SpecialMesh = true,
 }
 
 local descendants = Workspace:GetDescendants()
@@ -231,25 +285,31 @@ for i = 1, total do
     local v = descendants[i]
     local cn = v.ClassName
     if killTypes[cn] then
-        if not isName(v) and not isChar(v) then
-            pcall(function() v:Destroy() end)
-        end
-    elseif cn == "Decal" or cn == "Texture" then
-        if isChar(v) then
-            local parent = v.Parent
-            if not (parent and parent.Name == "Head") then
-                pcall(function() v.Transparency = 1 end)
+        -- Bảo vệ tên và mặt nhân vật
+        if not isName(v) then
+            if isChar(v) then
+                -- Với nhân vật: chỉ giữ Decal trên Head, xoá còn lại
+                if cn == "Decal" or cn == "Texture" then
+                    local parent = v.Parent
+                    if not (parent and parent.Name == "Head") then
+                        pcall(function() v.Transparency = 1 end)
+                    end
+                elseif cn == "SpecialMesh" then
+                    pcall(function()
+                        if v.MeshType == Enum.MeshType.FileMesh or v.MeshType == Enum.MeshType.Head then
+                            v.MeshType = Enum.MeshType.Head
+                            v.TextureId = ""
+                        end
+                    end)
+                elseif cn == "Sound" or cn == "Animation" then
+                    -- giữ animation/sound của char (nếu có nhu cầu), hoặc xoá
+                    pcall(function() v:Destroy() end)
+                end
+            else
+                -- Với môi trường: xoá tận gốc
+                pcall(function() v:Destroy() end)
             end
-        else
-            pcall(function() v.Transparency = 1 end)
         end
-    elseif cn == "SpecialMesh" then
-        pcall(function()
-            if v.MeshType == Enum.MeshType.FileMesh or v.MeshType == Enum.MeshType.Head then
-                v.MeshType = Enum.MeshType.Head
-                v.TextureId = ""
-            end
-        end)
     end
     if i % 500 == 0 then task.wait() end
 end
@@ -282,15 +342,19 @@ local scanConn = Workspace.DescendantAdded:Connect(function(v)
         pcall(function()
             local cn = v.ClassName
             if killTypes[cn] then
-                if not isName(v) and not isChar(v) then v:Destroy() end
-            elseif cn == "Decal" or cn == "Texture" then
-                if isChar(v) then
-                    local parent = v.Parent
-                    if parent and parent.Name ~= "Head" then
-                        v.Transparency = 1
+                if not isName(v) then
+                    if isChar(v) then
+                        if cn == "Decal" or cn == "Texture" then
+                            local parent = v.Parent
+                            if not (parent and parent.Name == "Head") then
+                                v.Transparency = 1
+                            end
+                        elseif cn == "Sound" or cn == "Animation" then
+                            v:Destroy()
+                        end
+                    else
+                        v:Destroy()
                     end
-                else
-                    v.Transparency = 1
                 end
             end
         end)
@@ -459,9 +523,9 @@ task.spawn(function()
         pingValue.Text = ping .. "ms"
 
         local pingColor
-        if ping <= 60 then
+        if ping <= 27 then
             pingColor = Color3.fromRGB(0, 255, 120)
-        elseif ping <= 150 then
+        elseif ping <= 110 then
             pingColor = Color3.fromRGB(255, 200, 60)
         else
             pingColor = Color3.fromRGB(255, 60, 60)
@@ -472,20 +536,21 @@ end)
 
 task.spawn(function()
     while statsGui.Parent do
-        task.wait(20)
+        task.wait(15)
         pcall(function() collectgarbage("collect") end)
     end
 end)
 
 task.spawn(function()
     while statsGui.Parent do
-        task.wait(3)
+        task.wait(2)
         pcall(function()
             for _, top in ipairs(Workspace:GetChildren()) do
                 if not isChar(top) then
                     for _, v in ipairs(top:GetDescendants()) do
                         if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam")
-                            or v:IsA("Smoke") or v:IsA("Fire") or v:IsA("Sparkles") then
+                            or v:IsA("Smoke") or v:IsA("Fire") or v:IsA("Sparkles")
+                            or v:IsA("PointLight") or v:IsA("SpotLight") or v:IsA("SurfaceLight") then
                             if not isName(v) then
                                 v:Destroy()
                             end

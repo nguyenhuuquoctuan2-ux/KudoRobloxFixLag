@@ -100,19 +100,14 @@ pcall(function()
     setfflag("FFlagDisableColorCorrection", "True")
     setfflag("FFlagDisableAntiAliasing", "True")
     setfflag("FFlagDisableMotionBlur", "True")
-    setfflag("FFlagDisableAtmosphericScattering", "True")
     setfflag("FFlagRenderShadowIntensity", "0")
     setfflag("FFlagRenderShadowIntensityOverride", "True")
     setfflag("DFFlagDisableRenderShadowMap", "True")
     setfflag("FFlagDisableShadows", "True")
     setfflag("FFlagDisableDynamicLighting", "True")
-    setfflag("FFlagDisablePointLightShadows", "True")
-    setfflag("FFlagDisableSpotLightShadows", "True")
-    setfflag("FFlagDisableSurfaceLightShadows", "True")
     setfflag("FFlagDebugSkyGray", "True")
     setfflag("FFlagDisableAtmosphere", "True")
     setfflag("FFlagDisableSky", "True")
-    setfflag("FFlagDisableSkybox", "True")
     setfflag("FFlagDisableFog", "True")
     setfflag("FFlagDisableWater", "True")
     setfflag("FFlagDisableTerrain", "True")
@@ -120,8 +115,6 @@ pcall(function()
     setfflag("FFlagDisableTerrainDecoration", "True")
     setfflag("FIntFRMMaxGrassDistance", "0")
     setfflag("FIntFRMMinGrassDistance", "0")
-    setfflag("FIntGrassMovementReducedMotionFactor", "0")
-    setfflag("FFlagDisableTerrainWaterReflections", "True")
     setfflag("DFIntCSGLevelOfDetailSwitchingDistance", "0")
     setfflag("DFIntCSGLevelOfDetailSwitchingDistanceL12", "0")
     setfflag("DFIntCSGLevelOfDetailSwitchingDistanceL23", "0")
@@ -141,14 +134,11 @@ pcall(function()
     setfflag("DFIntPhysicsStepPerFrame", "1")
     setfflag("DFIntMaximumCollisionIterations", "1")
     setfflag("DFIntSolverConvergenceIterations", "1")
-    setfflag("DFIntPhysicsTickerMaxTime", "1")
     setfflag("FFlagDisableRaycastFiltering", "True")
     setfflag("DFFlagSkipRaycastFiltering", "True")
-    setfflag("DFIntAdaptivePhysicsStepping", "1")
     setfflag("DFIntFrameBufferPoolSize", "1")
     setfflag("DFIntRenderMeshMaxBones", "1")
     setfflag("DFIntDebugEngineOptimizationLevel", "3")
-    setfflag("DFFlagDisableGPUOcclusion", "False")
     setfflag("DFFlagDisableRenderMeshes", "True")
     setfflag("FFlagDisableRenderMeshes", "True")
     setfflag("FFlagRenderDisableWireframe", "True")
@@ -255,8 +245,7 @@ local function isName(v)
     return v:IsA("BillboardGui") or v:IsA("TextLabel") or v:IsA("TextButton") or v:IsA("Humanoid")
 end
 
--- ==================== HÀM POTATO HOÁ BASEPART ====================
--- Đổi material sang SmoothPlastic, màu xám đơn điệu
+-- ==================== HÀM POTATO ====================
 local POTATO_COLOR = Color3.fromRGB(110, 110, 110)
 
 local function potatoPart(part)
@@ -269,7 +258,7 @@ local function potatoPart(part)
     end)
 end
 
--- ==================== BULK XỬ LÝ ====================
+-- ==================== BULK XỬ LÝ BAN ĐẦU ====================
 local killTypes = {
     ParticleEmitter = true, Trail = true, Smoke = true, Fire = true,
     Sparkles = true, Beam = true, Highlight = true, SelectionBox = true,
@@ -285,14 +274,9 @@ local total = #descendants
 for i = 1, total do
     local v = descendants[i]
     local cn = v.ClassName
-
     if cn == "Part" or cn == "MeshPart" or cn == "UnionOperation" or cn == "WedgePart"
         or cn == "TrussPart" or cn == "CornerWedgePart" or cn == "SpawnLocation" then
-        if isChar(v) then
-            potatoPart(v)
-        else
-            potatoPart(v)
-        end
+        potatoPart(v)
     elseif killTypes[cn] then
         if not isName(v) then
             if isChar(v) then
@@ -319,7 +303,7 @@ for i = 1, total do
     if i % 500 == 0 then task.wait() end
 end
 
--- Đầu nhân vật về mặc định
+-- Đầu nhân vật mặc định
 local function resetHead(character)
     if not character then return end
     local head = character:FindFirstChild("Head")
@@ -342,7 +326,7 @@ for _, plr in ipairs(game.Players:GetPlayers()) do
     end)
 end
 
--- ==================== LẮNG NGHE OBJECT MỚI ====================
+-- ==================== OBJECT MỚI ====================
 local scanConn = Workspace.DescendantAdded:Connect(function(v)
     task.defer(function()
         pcall(function()
@@ -370,20 +354,39 @@ local scanConn = Workspace.DescendantAdded:Connect(function(v)
     end)
 end)
 
--- ==================== VÒNG LẶP POTATO PART MỚI ====================
+-- ==================== CULLING ĐỆ QUY QUA GetDescendants ====================
+-- 20 studs cho mọi part không thuộc nhân vật
+-- Dùng task.spawn mỗi 0.15s thay vì Heartbeat để không làm nặng frame
+local CULL_DIST_SQ = 20 * 20
+
+local culled = {}
+
 task.spawn(function()
-    while statsGui and statsGui.Parent do
-        task.wait(2)
+    while playerGui.Parent do
+        task.wait(0.15)
         pcall(function()
-            for _, top in ipairs(Workspace:GetChildren()) do
-                if not isChar(top) then
-                    for _, v in ipairs(top:GetDescendants()) do
-                        if v:IsA("BasePart") then
-                            if v.Material ~= Enum.Material.SmoothPlastic then
-                                v.Material = Enum.Material.SmoothPlastic
+            if not Camera then return end
+            local camPos = Camera.CFrame.Position
+
+            for _, v in ipairs(Workspace:GetDescendants()) do
+                if v:IsA("BasePart") then
+                    if not isChar(v) then
+                        local pos = v.Position
+                        local dx = pos.X - camPos.X
+                        local dy = pos.Y - camPos.Y
+                        local dz = pos.Z - camPos.Z
+                        local distSq = dx*dx + dy*dy + dz*dz
+                        local shouldHide = distSq > CULL_DIST_SQ
+
+                        if shouldHide then
+                            if not culled[v] then
+                                culled[v] = true
+                                pcall(function() v.LocalTransparencyModifier = 1 end)
                             end
-                            if v.Color ~= POTATO_COLOR then
-                                v.Color = POTATO_COLOR
+                        else
+                            if culled[v] then
+                                culled[v] = false
+                                pcall(function() v.LocalTransparencyModifier = 0 end)
                             end
                         end
                     end
@@ -391,68 +394,6 @@ task.spawn(function()
             end
         end)
     end
-end)
-
--- ==================== DISTANCE CULLING ====================
-local CULL_DIST = 12
-local CULL_DIST_SQ = CULL_DIST * CULL_DIST
-
-local culledState = {}
-
-local function setVisible(obj, visible)
-    if visible then
-        pcall(function() obj.LocalTransparencyModifier = 0 end)
-        culledState[obj] = false
-    else
-        pcall(function() obj.LocalTransparencyModifier = 1 end)
-        culledState[obj] = true
-    end
-end
-
-local cullConn = RunService.Heartbeat:Connect(function()
-    pcall(function()
-        if not Camera then return end
-        local camPos = Camera.CFrame.Position
-        for _, top in ipairs(Workspace:GetChildren()) do
-            if top:IsA("Model") then
-                if not isChar(top) then
-                    local pivot
-                    pcall(function() pivot = top:GetPivot().Position end)
-                    if not pivot then
-                        local prim = top.PrimaryPart
-                        if prim then pivot = prim.Position end
-                    end
-                    if pivot then
-                        local d = pivot - camPos
-                        local distSq = d.X*d.X + d.Y*d.Y + d.Z*d.Z
-                        local visible = distSq <= CULL_DIST_SQ
-                        for _, p in ipairs(top:GetDescendants()) do
-                            if p:IsA("BasePart") then
-                                local cur = culledState[p]
-                                if visible and cur ~= false then
-                                    setVisible(p, true)
-                                elseif not visible and cur ~= true then
-                                    setVisible(p, false)
-                                end
-                            end
-                        end
-                    end
-                end
-            elseif top:IsA("BasePart") then
-                if not isChar(top) then
-                    local d = top.Position - camPos
-                    local distSq = d.X*d.X + d.Y*d.Y + d.Z*d.Z
-                    local visible = distSq <= CULL_DIST_SQ
-                    local cur = culledState[top]
-                    if visible and cur ~= false then
-                        setVisible(top, true)
-                    elseif not visible and cur ~= true then
-                        setVisible(top, false)
-                    end
-                end
-            end
-        end
-    end)
 end)
 
 -- ==================== UI FPS + PING ====================
@@ -577,16 +518,12 @@ task.spawn(function()
     while statsGui.Parent do
         task.wait(2)
         pcall(function()
-            for _, top in ipairs(Workspace:GetChildren()) do
-                if not isChar(top) then
-                    for _, v in ipairs(top:GetDescendants()) do
-                        if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam")
-                            or v:IsA("Smoke") or v:IsA("Fire") or v:IsA("Sparkles")
-                            or v:IsA("PointLight") or v:IsA("SpotLight") or v:IsA("SurfaceLight") then
-                            if not isName(v) then
-                                v:Destroy()
-                            end
-                        end
+            for _, v in ipairs(Workspace:GetDescendants()) do
+                if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam")
+                    or v:IsA("Smoke") or v:IsA("Fire") or v:IsA("Sparkles")
+                    or v:IsA("PointLight") or v:IsA("SpotLight") or v:IsA("SurfaceLight") then
+                    if not isName(v) and not isChar(v) then
+                        v:Destroy()
                     end
                 end
             end

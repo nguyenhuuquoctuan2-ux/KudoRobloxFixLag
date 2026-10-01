@@ -258,18 +258,18 @@ local function isName(v)
     return v:IsA("BillboardGui") or v:IsA("TextLabel") or v:IsA("TextButton") or v:IsA("Humanoid")
 end
 
--- ==================== HÀM POTATO (CHỈ CHO MÔI TRƯỜNG) ====================
-local POTATO_COLOR = Color3.fromRGB(110, 110, 110)
-
+-- ==================== HÀM POTATO (GIỮ MÀU GỐC, CHỈ ĐƠN GIẢN HOÁ) ====================
+-- Chỉ đổi Material phức tạp sang SmoothPlastic, GIỮ NGUYÊN Color gốc
 local function potatoPart(part)
     pcall(function()
-        part.Material = Enum.Material.SmoothPlastic
-        part.Color = POTATO_COLOR
+        -- Đổi material phức tạp thành SmoothPlastic nhưng giữ màu gốc
+        if part.Material ~= Enum.Material.SmoothPlastic 
+            and part.Material ~= Enum.Material.Plastic then
+            part.Material = Enum.Material.SmoothPlastic
+        end
         part.Reflectance = 0
         part.CastShadow = false
-        if part.Transparency < 0.5 then
-            part.Transparency = 0
-        end
+        -- Giữ nguyên part.Color
     end)
 end
 
@@ -342,11 +342,10 @@ task.spawn(function()
                         elseif cn == "Part" or cn == "MeshPart" or cn == "UnionOperation" 
                             or cn == "WedgePart" or cn == "TrussPart" or cn == "CornerWedgePart" 
                             or cn == "SpawnLocation" then
-                            if v.Material ~= Enum.Material.SmoothPlastic then
+                            -- Chỉ đổi material, giữ màu gốc
+                            if v.Material ~= Enum.Material.SmoothPlastic 
+                                and v.Material ~= Enum.Material.Plastic then
                                 v.Material = Enum.Material.SmoothPlastic
-                            end
-                            if v.Color ~= POTATO_COLOR then
-                                v.Color = POTATO_COLOR
                             end
                         end
                     end
@@ -370,7 +369,6 @@ task.spawn(function()
             for _, v in ipairs(Workspace:GetDescendants()) do
                 if v:IsA("BasePart") then
                     if not isChar(v) then
-                        -- Mặt đất không bị cull
                         local pos = v.Position
                         local isGround = (pos.Y < camPos.Y - 3)
                         

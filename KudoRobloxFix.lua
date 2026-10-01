@@ -16,18 +16,18 @@ popupGui.IgnoreGuiInset = true
 popupGui.Parent = playerGui
 
 local popup = Instance.new("Frame")
-popup.Size = UDim2.new(0, 260, 0, 64)
-popup.Position = UDim2.new(1, 20, 0.35, -32)
+popup.Size = UDim2.new(0, 240, 0, 60)
+popup.Position = UDim2.new(1, 20, 0.35, -30)
 popup.BackgroundColor3 = Color3.fromRGB(14, 14, 20)
-popup.BackgroundTransparency = 0.05
+popup.BackgroundTransparency = 0.1
 popup.BorderSizePixel = 0
 popup.Parent = popupGui
 Instance.new("UICorner", popup).CornerRadius = UDim.new(0, 10)
 
 local popupStroke = Instance.new("UIStroke")
 popupStroke.Color = Color3.fromRGB(255, 60, 60)
-popupStroke.Thickness = 1.5
-popupStroke.Transparency = 0.2
+popupStroke.Thickness = 1
+popupStroke.Transparency = 0.4
 popupStroke.Parent = popup
 
 local popupLabel = Instance.new("TextLabel")
@@ -36,7 +36,7 @@ popupLabel.Position = UDim2.new(0, 10, 0, 6)
 popupLabel.BackgroundTransparency = 1
 popupLabel.Text = "fix lag đang hoạt động ✓\nmade by kudo29001⚡"
 popupLabel.Font = Enum.Font.GothamBold
-popupLabel.TextSize = 13
+popupLabel.TextSize = 12
 popupLabel.TextColor3 = Color3.fromRGB(255, 70, 70)
 popupLabel.TextXAlignment = Enum.TextXAlignment.Center
 popupLabel.TextYAlignment = Enum.TextYAlignment.Center
@@ -44,13 +44,13 @@ popupLabel.TextWrapped = true
 popupLabel.Parent = popup
 
 TweenService:Create(popup, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-    Position = UDim2.new(1, -280, 0.35, -32)
+    Position = UDim2.new(1, -260, 0.35, -30)
 }):Play()
 
 task.delay(6, function()
     pcall(function()
         local out = TweenService:Create(popup, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-            Position = UDim2.new(1, 20, 0.35, -32),
+            Position = UDim2.new(1, 20, 0.35, -30),
             BackgroundTransparency = 1
         })
         out:Play()
@@ -61,9 +61,9 @@ task.delay(6, function()
     end)
 end)
 
--- ==================== FFLAG CỰC KHÔ ====================
+-- ==================== FFLAG POTATO CỰC ĐOAN ====================
 pcall(function()
-    -- FPS không giới hạn
+    -- FPS unlimited
     setfflag("DFIntTaskSchedulerTargetFps", "9999")
     setfflag("DFIntFrameRateCap", "9999")
     setfflag("DFIntMaxFrameRate", "9999")
@@ -76,7 +76,7 @@ pcall(function()
     setfflag("DFIntMaxFramesInFlight", "1")
     setfflag("FFlagDisableFrameLimiter", "True")
 
-    -- Graphics potato cực đoan
+    -- Texture / material: tắt hoàn toàn
     setfflag("DFIntDebugFRMQualityLevelOverride", "1")
     setfflag("DFIntTextureQualityOverride", "0")
     setfflag("DFFlagTextureQualityOverrideEnabled", "True")
@@ -87,8 +87,15 @@ pcall(function()
     setfflag("FFlagDisableSurfaceAppearance", "True")
     setfflag("FFlagDisableMaterialTextures", "True")
     setfflag("DFFlagForceTextureLOD", "True")
+    setfflag("DFFlagTextureCompositorEnable", "False")
+    setfflag("DFFlagTextureCompositorEnabled", "False")
+    setfflag("FFlagDisableNormalMap", "True")
+    setfflag("FFlagDisableRoughnessMap", "True")
+    setfflag("FFlagDisableMetalnessMap", "True")
+    setfflag("FFlagDisableEmissiveMap", "True")
+    setfflag("FFlagDisableReflectionMap", "True")
 
-    -- Tắt toàn bộ PostFX
+    -- PostFX tắt hết
     setfflag("DFFlagDisableSSAO", "True")
     setfflag("FFlagDisableSSAO", "True")
     setfflag("FFlagDisablePostFx", "True")
@@ -110,7 +117,7 @@ pcall(function()
     setfflag("FFlagDisableSpotLightShadows", "True")
     setfflag("FFlagDisableSurfaceLightShadows", "True")
 
-    -- Sky / atmo / terrain
+    -- Sky / atmo / terrain / water
     setfflag("FFlagDebugSkyGray", "True")
     setfflag("FFlagDisableAtmosphere", "True")
     setfflag("FFlagDisableSky", "True")
@@ -123,8 +130,9 @@ pcall(function()
     setfflag("FIntFRMMaxGrassDistance", "0")
     setfflag("FIntFRMMinGrassDistance", "0")
     setfflag("FIntGrassMovementReducedMotionFactor", "0")
+    setfflag("FFlagDisableTerrainWaterReflections", "True")
 
-    -- LOD cực thấp
+    -- LOD cực đoan
     setfflag("DFIntCSGLevelOfDetailSwitchingDistance", "0")
     setfflag("DFIntCSGLevelOfDetailSwitchingDistanceL12", "0")
     setfflag("DFIntCSGLevelOfDetailSwitchingDistanceL23", "0")
@@ -132,13 +140,16 @@ pcall(function()
     setfflag("FFlagDisableLODTransitions", "True")
     setfflag("FFlagForceLOD0", "True")
     setfflag("DFIntLODBias", "8")
+    setfflag("DFFlagForceLODLevel", "0")
+    setfflag("DFIntRenderFidelity", "0")
 
-    -- Voxel / lighting
+    -- Lighting voxel
     setfflag("DFFlagDebugRenderForceTechnologyVoxel", "True")
     setfflag("FFlagDebugPauseVoxelizer", "True")
     setfflag("DFFlagSkipHighResolutionEnvironment", "True")
+    setfflag("FFlagRenderDisableForwardLights", "True")
 
-    -- Physics nhẹ
+    -- Physics
     setfflag("DFIntSolverSpringDamping", "0")
     setfflag("DFIntPhysicsSendRate", "1")
     setfflag("DFIntMaxSimultaneousPhysicsJobs", "1")
@@ -148,13 +159,12 @@ pcall(function()
     setfflag("DFIntPhysicsTickerMaxTime", "1")
     setfflag("FFlagDisableRaycastFiltering", "True")
     setfflag("DFFlagSkipRaycastFiltering", "True")
+    setfflag("DFIntAdaptivePhysicsStepping", "1")
 
     -- Render optimize
     setfflag("DFIntFrameBufferPoolSize", "1")
     setfflag("DFIntRenderMeshMaxBones", "1")
     setfflag("DFIntDebugEngineOptimizationLevel", "3")
-    setfflag("DFFlagTextureCompositorEnable", "False")
-    setfflag("DFFlagTextureCompositorEnabled", "False")
     setfflag("DFFlagDisableGPUOcclusion", "False")
     setfflag("DFFlagDisableRenderMeshes", "True")
     setfflag("FFlagDisableRenderMeshes", "True")
@@ -168,11 +178,15 @@ pcall(function()
     setfflag("FFlagDisableReflections", "True")
     setfflag("FFlagDisableGlassRefraction", "True")
     setfflag("DFFlagSkipRenderMesh", "True")
+    setfflag("FFlagDisableMultiSample", "True")
+    setfflag("FFlagDisableHDR", "True")
+    setfflag("FFlagDisableToneMapping", "True")
 
     -- Animation
     setfflag("FFlagDisableAnimationBlending", "True")
     setfflag("DFFlagSkipAnimationBlending", "True")
     setfflag("FFlagDisableFacialAnimation", "True")
+    setfflag("FFlagDisableAllAnimations", "False")
 
     -- GC
     setfflag("DFFlagGCEnableIncremental", "True")
@@ -186,7 +200,6 @@ pcall(function()
     -- Graphics API
     setfflag("FFlagDebugGraphicsDisableDirect3D11", "True")
     setfflag("FFlagDebugGraphicsPreferOpenGL", "True")
-    setfflag("FFlagDebugGraphicsPreferVulkan", "True")
 end)
 
 -- ==================== ENGINE CONFIG ====================
@@ -268,7 +281,7 @@ local function isName(v)
     return v:IsA("BillboardGui") or v:IsA("TextLabel") or v:IsA("TextButton") or v:IsA("Humanoid")
 end
 
--- ==================== BULK DESTROY CỰC KHÔ ====================
+-- ==================== BULK DESTROY ====================
 local killTypes = {
     ParticleEmitter = true, Trail = true, Smoke = true, Fire = true,
     Sparkles = true, Beam = true, Highlight = true, SelectionBox = true,
@@ -285,10 +298,8 @@ for i = 1, total do
     local v = descendants[i]
     local cn = v.ClassName
     if killTypes[cn] then
-        -- Bảo vệ tên và mặt nhân vật
         if not isName(v) then
             if isChar(v) then
-                -- Với nhân vật: chỉ giữ Decal trên Head, xoá còn lại
                 if cn == "Decal" or cn == "Texture" then
                     local parent = v.Parent
                     if not (parent and parent.Name == "Head") then
@@ -302,11 +313,9 @@ for i = 1, total do
                         end
                     end)
                 elseif cn == "Sound" or cn == "Animation" then
-                    -- giữ animation/sound của char (nếu có nhu cầu), hoặc xoá
                     pcall(function() v:Destroy() end)
                 end
             else
-                -- Với môi trường: xoá tận gốc
                 pcall(function() v:Destroy() end)
             end
         end
@@ -314,7 +323,7 @@ for i = 1, total do
     if i % 500 == 0 then task.wait() end
 end
 
--- Đầu nhân vật về mặc định
+-- Đầu nhân vật mặc định
 local function resetHead(character)
     if not character then return end
     local head = character:FindFirstChild("Head")
@@ -423,7 +432,7 @@ local cullConn = RunService.Heartbeat:Connect(function()
     end)
 end)
 
--- ==================== UI FPS + PING ====================
+-- ==================== UI FPS + PING (GỌN HƠN) ====================
 local statsGui = Instance.new("ScreenGui")
 statsGui.Name = "KudoStats"
 statsGui.ResetOnSpawn = false
@@ -431,68 +440,68 @@ statsGui.IgnoreGuiInset = true
 statsGui.Parent = playerGui
 
 local box = Instance.new("Frame")
-box.Size = UDim2.new(0, 130, 0, 60)
-box.Position = UDim2.new(1, -145, 1, -75)
+box.Size = UDim2.new(0, 100, 0, 46)
+box.Position = UDim2.new(1, -110, 1, -56)
 box.BackgroundColor3 = Color3.fromRGB(14, 14, 20)
-box.BackgroundTransparency = 0.25
+box.BackgroundTransparency = 0.45
 box.BorderSizePixel = 0
 box.Parent = statsGui
-Instance.new("UICorner", box).CornerRadius = UDim.new(0, 10)
+Instance.new("UICorner", box).CornerRadius = UDim.new(0, 8)
 
 local boxStroke = Instance.new("UIStroke")
 boxStroke.Color = Color3.fromRGB(255, 60, 60)
 boxStroke.Thickness = 1
-boxStroke.Transparency = 0.4
+boxStroke.Transparency = 0.75
 boxStroke.Parent = box
 
 local sep = Instance.new("Frame")
-sep.Size = UDim2.new(1, -20, 0, 1)
-sep.Position = UDim2.new(0, 10, 0, 30)
+sep.Size = UDim2.new(1, -16, 0, 1)
+sep.Position = UDim2.new(0, 8, 0, 23)
 sep.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
-sep.BackgroundTransparency = 0.6
+sep.BackgroundTransparency = 0.8
 sep.BorderSizePixel = 0
 sep.Parent = box
 
 local fpsTitle = Instance.new("TextLabel")
-fpsTitle.Size = UDim2.new(0, 45, 0, 30)
-fpsTitle.Position = UDim2.new(0, 8, 0, 0)
+fpsTitle.Size = UDim2.new(0, 30, 0, 23)
+fpsTitle.Position = UDim2.new(0, 6, 0, 0)
 fpsTitle.BackgroundTransparency = 1
 fpsTitle.Text = "FPS"
 fpsTitle.Font = Enum.Font.GothamBold
-fpsTitle.TextSize = 11
-fpsTitle.TextColor3 = Color3.fromRGB(200, 200, 200)
+fpsTitle.TextSize = 9
+fpsTitle.TextColor3 = Color3.fromRGB(180, 180, 180)
 fpsTitle.TextXAlignment = Enum.TextXAlignment.Left
 fpsTitle.Parent = box
 
 local fpsValue = Instance.new("TextLabel")
-fpsValue.Size = UDim2.new(0, 70, 0, 30)
-fpsValue.Position = UDim2.new(1, -78, 0, 0)
+fpsValue.Size = UDim2.new(0, 56, 0, 23)
+fpsValue.Position = UDim2.new(1, -62, 0, 0)
 fpsValue.BackgroundTransparency = 1
 fpsValue.Text = "--"
 fpsValue.Font = Enum.Font.GothamBold
-fpsValue.TextSize = 14
+fpsValue.TextSize = 11
 fpsValue.TextColor3 = Color3.fromRGB(0, 255, 120)
 fpsValue.TextXAlignment = Enum.TextXAlignment.Right
 fpsValue.Parent = box
 
 local pingTitle = Instance.new("TextLabel")
-pingTitle.Size = UDim2.new(0, 45, 0, 30)
-pingTitle.Position = UDim2.new(0, 8, 0, 30)
+pingTitle.Size = UDim2.new(0, 30, 0, 23)
+pingTitle.Position = UDim2.new(0, 6, 0, 23)
 pingTitle.BackgroundTransparency = 1
 pingTitle.Text = "PING"
 pingTitle.Font = Enum.Font.GothamBold
-pingTitle.TextSize = 11
-pingTitle.TextColor3 = Color3.fromRGB(200, 200, 200)
+pingTitle.TextSize = 9
+pingTitle.TextColor3 = Color3.fromRGB(180, 180, 180)
 pingTitle.TextXAlignment = Enum.TextXAlignment.Left
 pingTitle.Parent = box
 
 local pingValue = Instance.new("TextLabel")
-pingValue.Size = UDim2.new(0, 70, 0, 30)
-pingValue.Position = UDim2.new(1, -78, 0, 30)
+pingValue.Size = UDim2.new(0, 56, 0, 23)
+pingValue.Position = UDim2.new(1, -62, 0, 23)
 pingValue.BackgroundTransparency = 1
 pingValue.Text = "--"
 pingValue.Font = Enum.Font.GothamBold
-pingValue.TextSize = 14
+pingValue.TextSize = 11
 pingValue.TextColor3 = Color3.fromRGB(0, 255, 120)
 pingValue.TextXAlignment = Enum.TextXAlignment.Right
 pingValue.Parent = box

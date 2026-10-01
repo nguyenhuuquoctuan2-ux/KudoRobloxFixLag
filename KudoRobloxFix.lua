@@ -205,8 +205,7 @@ pcall(function()
     Lighting.ShadowSoftness = 0
 end)
 
--- ==================== TERRAIN / NƯỚC ====================
--- Giữ terrain hiển thị bình thường, chỉ làm nước phẳng
+-- ==================== NƯỚC ====================
 pcall(function()
     if Terrain then
         Terrain.WaterWaveSize = 0
@@ -259,19 +258,18 @@ local function isName(v)
     return v:IsA("BillboardGui") or v:IsA("TextLabel") or v:IsA("TextButton") or v:IsA("Humanoid")
 end
 
--- ==================== HÀM POTATO ====================
+-- ==================== HÀM POTATO (CHỈ CHO MÔI TRƯỜNG) ====================
 local POTATO_COLOR = Color3.fromRGB(110, 110, 110)
 
 local function potatoPart(part)
     pcall(function()
-        -- Không ép transparency = 0 cho part trong suốt (kính, nước dạng part)
-        if part.Transparency < 0.5 then
-            part.Transparency = 0
-        end
         part.Material = Enum.Material.SmoothPlastic
         part.Color = POTATO_COLOR
         part.Reflectance = 0
         part.CastShadow = false
+        if part.Transparency < 0.5 then
+            part.Transparency = 0
+        end
     end)
 end
 
@@ -291,28 +289,14 @@ local total = #descendants
 for i = 1, total do
     local v = descendants[i]
     local cn = v.ClassName
-    if cn == "Part" or cn == "MeshPart" or cn == "UnionOperation" or cn == "WedgePart"
-        or cn == "TrussPart" or cn == "CornerWedgePart" or cn == "SpawnLocation" then
-        potatoPart(v)
-    elseif killTypes[cn] then
-        if not isName(v) then
-            if isChar(v) then
-                if cn == "Decal" or cn == "Texture" then
-                    local parent = v.Parent
-                    if not (parent and parent.Name == "Head") then
-                        pcall(function() v.Transparency = 1 end)
-                    end
-                elseif cn == "SpecialMesh" then
-                    pcall(function()
-                        if v.MeshType == Enum.MeshType.FileMesh or v.MeshType == Enum.MeshType.Head then
-                            v.MeshType = Enum.MeshType.Head
-                            v.TextureId = ""
-                        end
-                    end)
-                elseif cn == "Sound" or cn == "Animation" then
-                    pcall(function() v:Destroy() end)
-                end
-            else
+    
+    -- BỎ QUA HOÀN TOÀN OBJECT TRONG NHÂN VẬT
+    if not isChar(v) then
+        if cn == "Part" or cn == "MeshPart" or cn == "UnionOperation" or cn == "WedgePart"
+            or cn == "TrussPart" or cn == "CornerWedgePart" or cn == "SpawnLocation" then
+            potatoPart(v)
+        elseif killTypes[cn] then
+            if not isName(v) then
                 pcall(function() v:Destroy() end)
             end
         end
@@ -320,51 +304,18 @@ for i = 1, total do
     if i % 500 == 0 then task.wait() end
 end
 
--- Đầu nhân vật mặc định
-local function resetHead(character)
-    if not character then return end
-    local head = character:FindFirstChild("Head")
-    if not head then return end
-    for _, v in ipairs(head:GetChildren()) do
-        if v:IsA("SpecialMesh") then
-            pcall(function() v:Destroy() end)
-        end
-    end
-    local newMesh = Instance.new("SpecialMesh")
-    newMesh.MeshType = Enum.MeshType.Head
-    newMesh.Parent = head
-end
-
-for _, plr in ipairs(game.Players:GetPlayers()) do
-    if plr.Character then resetHead(plr.Character) end
-    plr.CharacterAdded:Connect(function(c)
-        task.wait(0.5)
-        resetHead(c)
-    end)
-end
-
 -- ==================== OBJECT MỚI ====================
 local scanConn = Workspace.DescendantAdded:Connect(function(v)
     task.defer(function()
         pcall(function()
+            if isChar(v) then return end
             local cn = v.ClassName
             if cn == "Part" or cn == "MeshPart" or cn == "UnionOperation" or cn == "WedgePart"
                 or cn == "TrussPart" or cn == "CornerWedgePart" or cn == "SpawnLocation" then
                 potatoPart(v)
             elseif killTypes[cn] then
                 if not isName(v) then
-                    if isChar(v) then
-                        if cn == "Decal" or cn == "Texture" then
-                            local parent = v.Parent
-                            if not (parent and parent.Name == "Head") then
-                                v.Transparency = 1
-                            end
-                        elseif cn == "Sound" or cn == "Animation" then
-                            v:Destroy()
-                        end
-                    else
-                        v:Destroy()
-                    end
+                    v:Destroy()
                 end
             end
         end)
@@ -377,18 +328,11 @@ task.spawn(function()
         task.wait(2)
         pcall(function()
             for _, v in ipairs(Workspace:GetDescendants()) do
-                local cn = v.ClassName
-                if not isName(v) then
-                    if isChar(v) then
-                        if cn == "Decal" or cn == "Texture" then
-                            local parent = v.Parent
-                            if parent and parent.Name ~= "Head" then
-                                if v.Transparency ~= 1 then v.Transparency = 1 end
-                            end
-                        elseif cn == "SurfaceAppearance" then
-                            v:Destroy()
-                        end
-                    else
+                if isChar(v) then
+                    -- Không đụng nhân vật
+                else
+                    local cn = v.ClassName
+                    if not isName(v) then
                         if cn == "ParticleEmitter" or cn == "Trail" or cn == "Beam"
                             or cn == "Smoke" or cn == "Fire" or cn == "Sparkles"
                             or cn == "PointLight" or cn == "SpotLight" or cn == "SurfaceLight"
@@ -412,13 +356,13 @@ task.spawn(function()
     end
 end)
 
--- ==================== CULLING (nới lên 40 studs, không cull part thấp) ====================
+-- ==================== CULLING ====================
 local CULL_DIST_SQ = 40 * 40
 local culled = {}
 
 task.spawn(function()
     while playerGui.Parent do
-        task.wait(0.15)
+        task.wait(0.2)
         pcall(function()
             if not Camera then return end
             local camPos = Camera.CFrame.Position
@@ -426,12 +370,11 @@ task.spawn(function()
             for _, v in ipairs(Workspace:GetDescendants()) do
                 if v:IsA("BasePart") then
                     if not isChar(v) then
-                        -- Không cull part thấp hơn chân người chơi 3 studs (mặt đất)
+                        -- Mặt đất không bị cull
                         local pos = v.Position
                         local isGround = (pos.Y < camPos.Y - 3)
                         
                         if isGround then
-                            -- Mặt đất luôn hiển thị
                             if culled[v] then
                                 culled[v] = false
                                 pcall(function() v.LocalTransparencyModifier = 0 end)

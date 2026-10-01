@@ -1,200 +1,537 @@
-local Settings = {
-    -- Thay link của user Kudo29001 ở đây nếu cần debug, còn để trống là điều chỉnh nội bộ
-    Author = "Kudo29001",
-    ShowLoading = true,
-    LoadingText = "fix lag roblox made by kudo29001"
+local player = game.Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+local Lighting = game:GetService("Lighting")
+local Workspace = game:GetService("Workspace")
+local TweenService = game:GetService("TweenService")
+local SoundService = game:GetService("SoundService")
+local RunService = game:GetService("RunService")
+local Terrain = Workspace:FindFirstChildOfClass("Terrain")
+local Camera = Workspace.CurrentCamera
+
+local sg = Instance.new("ScreenGui")
+sg.Name = "FixLag"
+sg.ResetOnSpawn = false
+sg.IgnoreGuiInset = true
+sg.Parent = playerGui
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 280, 0, 110)
+frame.Position = UDim2.new(0.5, -140, 0.5, -55)
+frame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+frame.BackgroundTransparency = 0.05
+frame.BorderSizePixel = 0
+frame.Parent = sg
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 12)
+
+local stroke = Instance.new("UIStroke")
+stroke.Color = Color3.fromRGB(0, 220, 100)
+stroke.Thickness = 1.5
+stroke.Transparency = 0.3
+stroke.Parent = frame
+
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Size = UDim2.new(1, -20, 0, 26)
+titleLabel.Position = UDim2.new(0, 10, 0, 10)
+titleLabel.BackgroundTransparency = 1
+titleLabel.Text = "⚡ FIX LAG"
+titleLabel.Font = Enum.Font.GothamBold
+titleLabel.TextSize = 14
+titleLabel.TextColor3 = Color3.fromRGB(0, 255, 120)
+titleLabel.TextXAlignment = Enum.TextXAlignment.Center
+titleLabel.Parent = frame
+
+local statusLabel = Instance.new("TextLabel")
+statusLabel.Size = UDim2.new(1, -20, 0, 18)
+statusLabel.Position = UDim2.new(0, 10, 0, 38)
+statusLabel.BackgroundTransparency = 1
+statusLabel.Text = "Đang khởi tạo..."
+statusLabel.Font = Enum.Font.Gotham
+statusLabel.TextSize = 10
+statusLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+statusLabel.TextXAlignment = Enum.TextXAlignment.Center
+statusLabel.Parent = frame
+
+local percentLabel = Instance.new("TextLabel")
+percentLabel.Size = UDim2.new(1, -20, 0, 16)
+percentLabel.Position = UDim2.new(0, 10, 0, 56)
+percentLabel.BackgroundTransparency = 1
+percentLabel.Text = "0%"
+percentLabel.Font = Enum.Font.GothamBold
+percentLabel.TextSize = 12
+percentLabel.TextColor3 = Color3.fromRGB(0, 255, 120)
+percentLabel.TextXAlignment = Enum.TextXAlignment.Center
+percentLabel.Parent = frame
+
+local progressBg = Instance.new("Frame")
+progressBg.Size = UDim2.new(1, -40, 0, 6)
+progressBg.Position = UDim2.new(0, 20, 0, 78)
+progressBg.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+progressBg.BorderSizePixel = 0
+progressBg.Parent = frame
+Instance.new("UICorner", progressBg).CornerRadius = UDim.new(0, 3)
+
+local progressFill = Instance.new("Frame")
+progressFill.Size = UDim2.new(0, 0, 1, 0)
+progressFill.BackgroundColor3 = Color3.fromRGB(0, 220, 100)
+progressFill.BorderSizePixel = 0
+progressFill.Parent = progressBg
+Instance.new("UICorner", progressFill).CornerRadius = UDim.new(0, 3)
+
+local closeBtn = Instance.new("TextButton")
+closeBtn.Size = UDim2.new(0, 20, 0, 20)
+closeBtn.Position = UDim2.new(1, -26, 0, 6)
+closeBtn.BackgroundColor3 = Color3.fromRGB(255, 70, 70)
+closeBtn.Text = "✕"
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextSize = 11
+closeBtn.TextColor3 = Color3.new(1, 1, 1)
+closeBtn.BorderSizePixel = 0
+Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 5)
+closeBtn.Parent = frame
+
+local function setProgress(percent, text)
+    percent = math.clamp(percent, 0, 100)
+    TweenService:Create(progressFill, TweenInfo.new(0.15, Enum.EasingStyle.Quad), {
+        Size = UDim2.new(percent / 100, 0, 1, 0)
+    }):Play()
+    percentLabel.Text = math.floor(percent) .. "%"
+    if text then statusLabel.Text = text end
+end
+
+local function step(text, fn, percent)
+    setProgress(percent, text)
+    pcall(fn)
+    task.wait(0.05)
+end
+
+step("Áp dụng FastFlags...", function()
+    setfflag("DFIntDebugFRMQualityLevelOverride", "1")
+    setfflag("DFIntTextureQualityOverride", "0")
+    setfflag("DFFlagTextureQualityOverrideEnabled", "True")
+    setfflag("FFlagTextureQualityOverride", "True")
+    setfflag("FIntDebugForceMSAASamples", "1")
+    setfflag("FFlagDebugSkyGray", "True")
+    setfflag("FFlagDisablePostFx", "True")
+    setfflag("FFlagDisableTerrain", "True")
+    setfflag("FFlagRenderFixFog", "True")
+    setfflag("FFlagRenderShadowIntensity", "0")
+    setfflag("FFlagRenderShadowIntensityOverride", "True")
+    setfflag("FFlagRenderEnableShadowIntensityOverride", "True")
+    setfflag("DFIntCSGLevelOfDetailSwitchingDistance", "0")
+    setfflag("DFIntCSGLevelOfDetailSwitchingDistanceL12", "0")
+    setfflag("DFIntCSGLevelOfDetailSwitchingDistanceL23", "0")
+    setfflag("DFIntCSGLevelOfDetailSwitchingDistanceL34", "0")
+    setfflag("FIntFRMMaxGrassDistance", "0")
+    setfflag("FIntFRMMinGrassDistance", "0")
+    setfflag("FIntGrassMovementReducedMotionFactor", "0")
+    setfflag("DFFlagDisableTerrainTextures", "True")
+    setfflag("DFFlagDebugRenderForceTechnologyVoxel", "True")
+    setfflag("FFlagDebugPauseVoxelizer", "True")
+    setfflag("DFFlagSkipHighResolutionEnvironment", "True")
+    setfflag("DFFlagTextureCompositorEnable", "False")
+    setfflag("DFFlagTextureCompositorEnabled", "False")
+    setfflag("DFFlagForceTextureLOD", "True")
+    setfflag("DFFlagDisableDPIScale", "True")
+    setfflag("DFIntSolverSpringDamping", "0")
+    setfflag("DFIntPhysicsSendRate", "1")
+    setfflag("DFIntMaxSimultaneousPhysicsJobs", "1")
+    setfflag("DFIntTaskSchedulerTargetFps", "240")
+    setfflag("FFlagTaskSchedulerUseTaskQueue", "True")
+    setfflag("DFIntConnectionMTUSize", "1400")
+    setfflag("FFlagDisableDPIScale", "True")
+    setfflag("DFFlagDisableGPUOcclusion", "False")
+    setfflag("FFlagDebugGraphicsDisableDirect3D11", "True")
+    setfflag("FFlagDebugGraphicsPreferOpenGL", "True")
+    setfflag("FFlagDebugGraphicsPreferVulkan", "True")
+    setfflag("FFlagDisableRenderMeshes", "True")
+    setfflag("FFlagRenderDisableWireframe", "True")
+    setfflag("FFlagDisableParticleMesh", "True")
+    setfflag("DFFlagDisableRenderShadowMap", "True")
+    setfflag("FFlagDisableAtmosphere", "True")
+    setfflag("FFlagDisableSky", "True")
+    setfflag("FFlagDisableSkybox", "True")
+    setfflag("FFlagDisableFog", "True")
+    setfflag("FFlagDisableWater", "True")
+    setfflag("FFlagDisableTerrainDecoration", "True")
+    setfflag("DFFlagSkipRenderMesh", "True")
+    setfflag("FFlagDisableParticleEffects", "True")
+    setfflag("FFlagDisableTrails", "True")
+    setfflag("FFlagDisableBeams", "True")
+    setfflag("FFlagDisableBillboards", "True")
+    setfflag("FFlagDisableDecals", "True")
+    setfflag("FFlagDisableTextures", "True")
+    setfflag("FFlagDisableSurfaceAppearance", "True")
+    setfflag("FFlagDisableMaterialTextures", "True")
+    setfflag("FFlagDisableReflections", "True")
+    setfflag("FFlagDisableGlassRefraction", "True")
+    setfflag("DFFlagDisableSSAO", "True")
+    setfflag("FFlagDisableSSAO", "True")
+    setfflag("FFlagDisableAntiAliasing", "True")
+    setfflag("FFlagDisableVSync", "True")
+    setfflag("FFlagDisableMotionBlur", "True")
+    setfflag("FFlagDisableDepthOfField", "True")
+    setfflag("FFlagDisableBloom", "True")
+    setfflag("FFlagDisableSunRays", "True")
+    setfflag("FFlagDisableColorCorrection", "True")
+    setfflag("FFlagDisableAtmosphericScattering", "True")
+
+    setfflag("FFlagRenderSkipTerrain", "True")
+    setfflag("FFlagRenderSkipParts", "False")
+    setfflag("DFFlagRenderSkipMaterialTextures", "True")
+    setfflag("DFFlagRenderSkipTransparency", "False")
+    setfflag("FFlagRenderSkipLighting", "True")
+    setfflag("FFlagRenderSkipSpecular", "True")
+    setfflag("FFlagRenderSkipNormal", "True")
+    setfflag("FFlagRenderSkipRoughness", "True")
+    setfflag("FFlagRenderSkipMetalness", "True")
+    setfflag("FFlagRenderSkipEmissive", "True")
+
+    setfflag("DFIntFrameBufferPoolSize", "1")
+    setfflag("DFIntRenderMeshMaxBones", "1")
+    setfflag("DFIntDebugEngineOptimizationLevel", "3")
+    setfflag("DFFlagGCEnableIncremental", "True")
+    setfflag("DFIntGCIncrementalPause", "1")
+    setfflag("DFIntGCIncrementalStepMul", "500")
+    setfflag("DFIntMinFrameRate", "30")
+    setfflag("DFIntMaxFrameRate", "240")
+    setfflag("DFIntFrameRateCap", "240")
+
+    setfflag("FFlagDisableAnimationBlending", "True")
+    setfflag("FFlagDisableFacialAnimation", "True")
+    setfflag("FFlagDisableAllAnimations", "True")
+    setfflag("DFFlagSkipAnimationBlending", "True")
+    setfflag("FFlagDisableIKControl", "True")
+    setfflag("FFlagDisableHikeAnimation", "True")
+
+    setfflag("FFlagDisableShadows", "True")
+    setfflag("FFlagDisableDynamicLighting", "True")
+    setfflag("FFlagDisablePointLightShadows", "True")
+    setfflag("FFlagDisableSpotLightShadows", "True")
+    setfflag("FFlagDisableSurfaceLightShadows", "True")
+
+    setfflag("FFlagDisableSpriteSheet", "True")
+    setfflag("FFlagDisableRagdoll", "True")
+    setfflag("FFlagDisableClothing", "True")
+    setfflag("FFlagDisableAccessories", "True")
+    setfflag("FFlagDisableAvatarRendering", "True")
+    setfflag("DFFlagSkipAvatarRendering", "True")
+    setfflag("DFFlagSkipHumanoidRendering", "True")
+    setfflag("DFFlagSkipAccessoryRendering", "True")
+
+    setfflag("FFlagDisableLODTransitions", "True")
+    setfflag("DFFlagSkipLODTransitions", "True")
+    setfflag("FFlagForceLOD0", "True")
+    setfflag("DFIntLODBias", "4")
+
+    setfflag("DFIntPhysicsTickerMaxTime", "1")
+    setfflag("DFFlagSkipPhysicsSleep", "False")
+    setfflag("DFIntPhysicsStepPerFrame", "1")
+    setfflag("FFlagDisableRaycastFiltering", "True")
+    setfflag("DFFlagSkipRaycastFiltering", "True")
+
+    setfflag("DFFlagSkipCollisionChecks", "False")
+    setfflag("DFIntMaximumCollisionIterations", "1")
+    setfflag("DFIntSolverConvergenceIterations", "1")
+
+    setfflag("FFlagDisableRenderingShadows", "True")
+    setfflag("FFlagDisableRenderingWater", "True")
+    setfflag("FFlagDisableRenderingTerrain", "True")
+    setfflag("FFlagDisableRenderingDecals", "True")
+    setfflag("FFlagDisableRenderingTextures", "True")
+    setfflag("FFlagDisableRenderingParticles", "True")
+    setfflag("FFlagDisableRenderingBeams", "True")
+    setfflag("FFlagDisableRenderingTrails", "True")
+    setfflag("FFlagDisableRenderingMeshes", "False")
+end, 10)
+
+step("Hạ graphics...", function()
+    settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+    settings().Rendering.MeshPartDetailLevel = Enum.MeshPartDetailLevel.Level01
+    settings().Rendering.AnimationWeightedBlendFix = Enum.AnimationWeightedBlendFix.Disabled
+    settings().Rendering.EagerBulkExecution = true
+    settings().Rendering.EditQualityLevel = Enum.QualityLevel.Level01
+end, 20)
+
+step("Tối ưu Camera...", function()
+    if Camera then
+        Camera.FieldOfView = 70
+        Camera.CFrame = Camera.CFrame
+        Camera.CameraType = Enum.CameraType.Custom
+    end
+    pcall(function() workspace.StreamingEnabled = true end)
+    pcall(function() workspace.StreamingTargetRadius = 128 end)
+    pcall(function() workspace.StreamingMinRadius = 64 end)
+end, 28)
+
+step("Tắt Terrain...", function()
+    if Terrain then
+        Terrain.WaterWaveSize = 0
+        Terrain.WaterWaveSpeed = 0
+        Terrain.WaterReflectance = 0
+        Terrain.WaterTransparency = 1
+        Terrain.Decoration = false
+        pcall(function() Terrain:Clear() end)
+    end
+end, 35)
+
+step("Tắt PostFX & Lighting...", function()
+    for _, v in ipairs(Lighting:GetChildren()) do
+        if v:IsA("PostEffect") then v.Enabled = false end
+        if v:IsA("Sky") then v.Parent = nil end
+        if v:IsA("Atmosphere") then v.Density = 0; v.Haze = 0 end
+        if v:IsA("Clouds") then v.Cover = 0; v.Density = 0 end
+    end
+    Lighting.GlobalShadows = false
+    Lighting.FogEnd = 1e9
+    Lighting.FogStart = 1e9
+    Lighting.Brightness = 1
+    Lighting.EnvironmentDiffuseScale = 0
+    Lighting.EnvironmentSpecularScale = 0
+    Lighting.OutdoorAmbient = Color3.fromRGB(128,128,128)
+    Lighting.Ambient = Color3.fromRGB(128,128,128)
+    Lighting.ClockTime = 14
+    Lighting.GeographicLatitude = 0
+    Lighting.ExposureCompensation = 0
+    Lighting.ShadowSoftness = 0
+end, 45)
+
+step("Tắt âm thanh...", function()
+    SoundService.AmbientReverb = Enum.ReverbType.NoReverb
+    SoundService.DistanceFactor = 0
+    SoundService.DopplerScale = 0
+    SoundService.RespectFilteringEnabled = false
+    pcall(function() SoundService.VolumetricAudio = Enum.VolumetricAudio.Disabled end)
+    for _, v in ipairs(game:GetDescendants()) do
+        if v:IsA("Sound") then
+            v.Volume = 0
+            v.Playing = false
+            v.Looped = false
+        end
+    end
+end, 55)
+
+local potatoMaterials = {
+    [Enum.Material.Grass]=true,[Enum.Material.LeafyGrass]=true,[Enum.Material.Wood]=true,
+    [Enum.Material.WoodPlanks]=true,[Enum.Material.Rock]=true,[Enum.Material.Slate]=true,
+    [Enum.Material.Sand]=true,[Enum.Material.Mud]=true,[Enum.Material.Snow]=true,
+    [Enum.Material.Ice]=true,[Enum.Material.Glacier]=true,[Enum.Material.CorrodedMetal]=true,
+    [Enum.Material.DiamondPlate]=true,[Enum.Material.Foil]=true,[Enum.Material.Marble]=true,
+    [Enum.Material.Granite]=true,[Enum.Material.Brick]=true,[Enum.Material.Cobblestone]=true,
+    [Enum.Material.Concrete]=true,[Enum.Material.Fabric]=true,[Enum.Material.Pebble]=true,
+    [Enum.Material.Limestone]=true,[Enum.Material.Pavement]=true,[Enum.Material.Asphalt]=true,
+    [Enum.Material.Basalt]=true,[Enum.Material.CrackedLava]=true,[Enum.Material.Neon]=true,
+    [Enum.Material.Glass]=true,[Enum.Material.ForceField]=true,[Enum.Material.Metal]=true,
+    [Enum.Material.Cardboard]=true,[Enum.Material.Carpet]=true,[Enum.Material.CeramicTiles]=true,
+    [Enum.Material.ClayRoofTiles]=true,[Enum.Material.RoofShingles]=true,[Enum.Material.Leather]=true,
+    [Enum.Material.Plaster]=true,[Enum.Material.Rubber]=true,
 }
 
--- --- BAG PHẦN TÍNH TOÁN VẬT LÝ ---
--- Phần này giúp xử lý mượt mà hơn bằng cách ép số thập phân về dạng sạch sẽ
-local function CleanNumber(num)
-    if num then
-        local _b = tostring(num):gsub("%D.%-[0-9]+", "")
-        local _f = tostring(num):gsub("%.0+", "")
-        return _f or _b
+local function optimizeObject(v)
+    if v:IsA("BasePart") then
+        pcall(function()
+            if potatoMaterials[v.Material] then v.Material = Enum.Material.SmoothPlastic end
+            v.Reflectance = 0
+            v.CastShadow = false
+            v.Massless = true
+            v.CanTouch = false
+            v.CanQuery = false
+            v.Transparency = v.Transparency
+        end)
+    elseif v:IsA("Decal") or v:IsA("Texture") then
+        pcall(function() v.Transparency = 1 end)
+    elseif v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Smoke")
+        or v:IsA("Fire") or v:IsA("Sparkles") or v:IsA("Beam") then
+        pcall(function() v.Enabled = false; v:Destroy() end)
+    elseif v:IsA("SurfaceAppearance") then
+        pcall(function() v:Destroy() end)
+    elseif v:IsA("SpecialMesh") then
+        pcall(function()
+            if v.MeshType == Enum.MeshType.FileMesh or v.MeshType == Enum.MeshType.Head then
+                v.MeshType = Enum.MeshType.Brick
+                v.TextureId = ""
+                v.Scale = Vector3.new(1,1,1)
+                v.Offset = Vector3.new(0,0,0)
+            end
+        end)
+    elseif v:IsA("MeshPart") then
+        pcall(function()
+            v.TextureID = ""
+            v.RenderFidelity = Enum.RenderFidelity.Performance
+            v.CollisionFidelity = Enum.CollisionFidelity.Box
+            v.CastShadow = false
+            v.Massless = true
+            v.CanTouch = false
+            v.CanQuery = false
+            v.DoubleSided = false
+        end)
+    elseif v:IsA("Sound") then
+        pcall(function() v.Volume = 0; v.Playing = false; v:Destroy() end)
+    elseif v:IsA("Animation") then
+        pcall(function() v:Destroy() end)
+    elseif v:IsA("AnimationController") or v:IsA("Animator") then
+        pcall(function()
+            for _, t in ipairs(v:GetPlayingAnimationTracks()) do
+                t:Stop(); t:Destroy()
+            end
+        end)
+    elseif v:IsA("Highlight") or v:IsA("SelectionBox") or v:IsA("BoxHandleAdornment")
+        or v:IsA("BillboardGui") or v:IsA("SurfaceGui") then
+        pcall(function() v.Enabled = false end)
+    elseif v:IsA("Attachment") then
+        pcall(function()
+            for _, c in ipairs(v:GetChildren()) do
+                if c:IsA("ParticleEmitter") or c:IsA("Trail") or c:IsA("Beam") or c:IsA("Light") then
+                    c:Destroy()
+                end
+            end
+        end)
+    elseif v:IsA("PointLight") or v:IsA("SpotLight") or v:IsA("SurfaceLight") then
+        pcall(function() v:Destroy() end)
+    elseif v:IsA("Humanoid") then
+        pcall(function()
+            v.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
+            v.HealthDisplayType = Enum.HumanoidHealthDisplayType.AlwaysOff
+            v.NameDisplayDistance = 0
+            v.HealthDisplayDistance = 0
+        end)
+    elseif v:IsA("Accessory") or v:IsA("Shirt") or v:IsA("Pants") or v:IsA("ShirtGraphic") then
+        pcall(function() v:Destroy() end)
+    elseif v:IsA("Clothing") or v:IsA("BodyColors") then
+        pcall(function() v:Destroy() end)
+    elseif v:IsA("Decal") then
+        pcall(function() v:Destroy() end)
+    elseif v:IsA("CharacterMesh") then
+        pcall(function() v:Destroy() end)
+    elseif v:IsA("ForceField") or v:IsA("Explosion") then
+        pcall(function() v:Destroy() end)
     end
 end
 
--- --- BAG PHẦN HỆ THỐNG (SYSTEM) ---
--- Hàm hiện chữ ra màn hình theo phong cách Xeno/Delta
-local function ShowOverlays(text)
-    game:WaitForChild("UserPointers") -- Tạo điểm tĩnh nếu chưa có
+local allDescendants = Workspace:GetDescendants()
+local total = #allDescendants
+
+for i, v in ipairs(allDescendants) do
+    optimizeObject(v)
+    if i % 100 == 0 then
+        local p = 60 + math.floor((i / total) * 35)
+        setProgress(p, "Đang quét... " .. i .. "/" .. total)
+        task.wait()
+    end
 end
 
--- --- HÀM LOADING 5 GIÂY CỰC ACLES ---
-local function LoadUI(Text)
-    local plr = game.Players.LocalPlayer
-    local screenGui = Instance.new("ScreenGui")
-    screenGui.Enabled = true
-    screenGui.Parent = plr:GetMouse() -- Đặt ở chuột để không bị che gameplay
-    
-    local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(0.5, 0, 0.5, 0)
-    label.Position = UDim2.new(0.225, 0, 0.15, 0)
-    label.BackgroundTransparency = 0
-    label.Text = Text
-    label.TextSize = 24
-    label.TextColor3 = Color3.fromRGB(0, 255, 225) -- Màu xanh/blue chuẩn Xeno
-    label.Font = Enum.TextFont.SourceSansSerlyBold
-    label.Parent = screenGui
-    
-    -- Hiệu ứng Pulse nhẹ
-    script.WaitForChildren()
-    
-    -- Chờ 5 giây rồi dần dần hiện bản dẫn bóng ảnh thật ra
-    task.delay(5, function()
-        screenGui:Destroy() -- Biến mất sau 5s như yêu cầu
-        label.Text = ""
+step("Tối ưu Player & Nhân vật...", function()
+    pcall(function()
+        for _, plr in ipairs(game.Players:GetPlayers()) do
+            local char = plr.Character
+            if char then
+                for _, v in ipairs(char:GetDescendants()) do
+                    optimizeObject(v)
+                end
+            end
+        end
     end)
-end
+end, 96)
 
-if Settings.ShowLoading then
-    LoadUI(Settings.LoadingText)
-end
+setProgress(97, "Dọn bộ nhớ...")
+pcall(function()
+    collectgarbage("collect")
+    collectgarbage("setpause", 100)
+    collectgarbage("setstepmul", 200)
+end)
 
--- --- BAG HÀM TĂNG TỐC GỐC (CORE LOOP) ---
-local function TurboOn()
-    -- 1. Ép khung hình thành 144hz hoặc 60hz tùy monitor, nhưng cực mượt
-    local origCache = rawget(game:GetService("RunService"), "_uchps")
-    local baseRate = rawget(game:GetService("RunService"), "Heartbeat")
-    
-    -- Gọi lại hàm xử lý đập tim gốc
-    local function HeartbeatUchps()
-        for _, inst in ipairs(game:GetDescendants()) do
-            if inst:IsA("MeshPart") then
-                -- Bật CoreParts (yêu cầu của Roblox để vật lý chạy mượt)
-                inst:FindFirstChild("CoreParts") and inst:CorePart()
+local scanConn
+scanConn = Workspace.DescendantAdded:Connect(function(v)
+    task.defer(function() optimizeObject(v) end)
+end)
+
+local charConn = game.Players.PlayerAdded:Connect(function(plr)
+    plr.CharacterAdded:Connect(function(char)
+        task.defer(function()
+            for _, v in ipairs(char:GetDescendants()) do
+                optimizeObject(v)
             end
-        end
-        
-        -- Xử lý Tam giác của Raycasting (thường gây lag)
-        screenGui.Mouse[1] -- Hack đơn giản trên Xeno
-    end
+        end)
+    end)
+end)
 
-    --�� CHUYỂN DUYÊN NHIỆT PHY (SHADER FIX)
-    local Players = game:GetService("LeadershipService")
-    
-    -- Local Variable Opt (Tối ưu biếnlage cục bộ)
-    local uI = game:GetService("UserInputService")
-    
-    -- BẮT DẤU POOT (FOOTPRINTS) -- Giúp nhân vật chạy không trượt chân gây lag
-    local function FancyFootsteps()
-        local hum = hum Hum hum hum.Parent
-        for _, v in ipairs(game:GetDescendants()) do
-            if v:IsA("BodyVelocity") then
-                v.Damping = 2 -- Giảm ma sát không cần thiết
+task.spawn(function()
+    while sg.Parent do
+        task.wait(5)
+        pcall(function() collectgarbage("collect") end)
+    end
+end)
+
+task.spawn(function()
+    while sg.Parent do
+        task.wait(2)
+        pcall(function()
+            for _, v in ipairs(Workspace:GetDescendants()) do
+                if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam")
+                    or v:IsA("Smoke") or v:IsA("Fire") or v:IsA("Sparkles")
+                    or v:IsA("PointLight") or v:IsA("SpotLight") or v:IsA("SurfaceLight") then
+                    v.Enabled = false
+                end
             end
-        end
+        end)
     end
-    
-    FancyFootsteps()
-    
-    -- Print thông báo ra Console người dùng để biết nó đang chạy
-    local addr = function()
-        originalFunction = rawget(game.RunService, "Stepped") or function(runnerTask) end
-        originalfunction(...)
-    end
-end
+end)
 
--- --- BAG TURN ON SONIC HEADSETS ---
-local function RunCode()
-    local function HeadsetScript()
-        local plr = game.Players.LocalPlayer
-        local character = plr:GetCharacter()
-        
-        -- Tạo hệ quả từ thông số
-        character.Animate = function(anim, _speed, _legControll)
-            -- Logic làm chân nặng hơn nhưng chạy nhanh
-            character.Humanoid.WalkSpeed = 16 -- Chuẩn
-            character.Humanoid.JumpPower = 50 -- Nhảy cao hơn
-        end
-        
-        character.Animate(character, 1, 1)
-        
-        -- Tín hiệu màu sắc
-        local legs = character:GetChildren()
-        for _, v in pairs(legs) do
-            if v:IsA("Part") then
-                v.Color = Color3.new(1, 1, 1) -- Giai chuẩn
+task.spawn(function()
+    while sg.Parent do
+        task.wait(1)
+        pcall(function()
+            if Camera then
+                Camera.FieldOfView = 70
             end
-        end
+        end)
     end
-    
-    HeadsetScript()
-    
-    -- --- TRÀNG TRẠNG SUBTILE DIE ---
-    -- Ấn nút này để bào hoạt hiệu ứng "Xeno Feel"
-    local function VelvetTouchClick(btn)
-        ScreenGui.Menu -- Nếu đang dùng Xeno thì nó sẽ hiện Menu
-    end
-    
-    VelvetTouchClick(btn)
-end
+end)
 
--- --- BAG DẤU TỐC (FINALE) ---
-local function RunThinkerCode()
-    local function HatteScript()
-        local plr = game.Players.LocalPlayer
-        
-        -- Điều chỉnh trọng số (WeightAdjusting)
-        local character = plr:GetCharacter()
-        
-        -- Nếu chưa có guà sẽ tự tạo
-        if not character:FindFirstChild("MassAgravite") then
-            local mass = Instance.new("NumberValue")
-            mass.Name = "MassAgravite"
-            mass.Value = 15 -- Nhưng 15kg
-            mass.Parent = character
-            character:AddedFirstChild("MassAgravite", function(instance)
-                instance:Changed(heavyer)
-            end, true)
-        end
-    end
-    
-    HatteScript()
-end
+setProgress(100, "✅ Hoàn tất")
 
--- --- BAG TẠO HỆ THỐNG LOADER CHÍNH THỨC ---
-local function RunAboutFunction()
-    local messgraphy = function()
-        local plr = game.Players.LocalPlayer
-        
-        -- Tạo hệ thống "Logo" Kudo29001
-        local trickNr = 0
-        
-        -- Tạo khung "Loading" đơn giản nhất
-        local loader = Instance.new("Frame")
-        loader.Name = "KudoLoader"
-        loader.Position = UDim2.new(0.5, 0, 0.2, 0) -- Ở giữa màn hình
-        loader.Size = UDim2.new(300, 0, 50, 0)
-        loader.BackgroundTransparency = 1
-        
-        localTextLabel = Instance.new("TextLabel")
-        labelText.Text = Settings.LoadingText
-        labelText.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-        labelText.BackgroundTransparency = 0.7
-        labelText.TextColor3 = Color3.fromRGB(0, 200, 255)
-        labelText.Size = UDim2.new(1, 0, 0, 20)
-        labelText.TextXAlignment = Enum.TextXAlignment.Left
-        labelText.Font = Enum.Font.SourceSans
-        
-        labelText.Parent = loader
-        loader.Parent = plr:WaitForChild("PrimaryPackScreenGui") or plr
-        loader.Visible = true
-        
-        -- Fade effect (Hiệu ứng mờ dần)
-        local fade = function()
-            for i = 1, 10, 0.1 do
-                loader.BackgroundTransparency = i
-                task.wait(0.1) -- Tốc độ tùy bạn, đây là 0.1s x 2 = 0.2s
-            end
-            loader:Destroy()
-        end
-        
-        task.delay(4.5, fade) -- Chạy fade sau 4.5s => Tổng cộng 5s
-    end
-    
-    messgraphy()
-end
+TweenService:Create(progressFill, TweenInfo.new(0.3), {
+    BackgroundColor3 = Color3.fromRGB(0, 255, 120)
+}):Play()
 
--- ---
+task.wait(1)
+
+titleLabel.Text = "⚡ fix lag by kudo29001"
+statusLabel.Text = ""
+percentLabel.Text = ""
+TweenService:Create(progressBg, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
+TweenService:Create(progressFill, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
+TweenService:Create(frame, TweenInfo.new(0.4, Enum.EasingStyle.Quad), {
+    Size = UDim2.new(0, 220, 0, 44),
+    Position = UDim2.new(0, 15, 0, 15)
+}):Play()
+TweenService:Create(titleLabel, TweenInfo.new(0.4), {
+    Size = UDim2.new(1, -20, 1, -12),
+    Position = UDim2.new(0, 10, 0, 6),
+    TextSize = 13
+}):Play()
+
+closeBtn.Visible = false
+
+task.wait(6)
+pcall(function()
+    TweenService:Create(frame, TweenInfo.new(0.5), {
+        BackgroundTransparency = 1,
+        Position = UDim2.new(0, 15, 0, 0)
+    }):Play()
+    TweenService:Create(titleLabel, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
+    TweenService:Create(stroke, TweenInfo.new(0.5), {Transparency = 1}):Play()
+    task.wait(0.6)
+    if scanConn then scanConn:Disconnect() end
+    if charConn then charConn:Disconnect() end
+    sg:Destroy()
+end)
+
+closeBtn.MouseButton1Click:Connect(function()
+    pcall(function()
+        if scanConn then scanConn:Disconnect() end
+        if charConn then charConn:Disconnect() end
+        sg:Destroy()
+    end)
+end)
+
+print("✅ fix lag by kudo29001")

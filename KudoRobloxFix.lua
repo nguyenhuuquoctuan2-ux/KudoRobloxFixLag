@@ -90,7 +90,7 @@ closeBtn.Parent = main
 
 local function setProgress(percent, text)
     percent = math.clamp(percent, 0, 100)
-    TweenService:Create(progressFill, TweenInfo.new(0.15, Enum.EasingStyle.Quad), {
+    TweenService:Create(progressFill, TweenInfo.new(0.1, Enum.EasingStyle.Quad), {
         Size = UDim2.new(percent / 100, 0, 1, 0)
     }):Play()
     percentLabel.Text = math.floor(percent) .. "%"
@@ -100,7 +100,7 @@ end
 local function step(text, fn, percent)
     setProgress(percent, text)
     pcall(fn)
-    task.wait(0.05)
+    task.wait(0.02)
 end
 
 step("Áp dụng FastFlags...", function()
@@ -381,13 +381,7 @@ step("Tối ưu Player...", function()
             end
         end
     end)
-end, 96)
-
-setProgress(97, "Dọn bộ nhớ...")
-task.spawn(function()
-    pcall(function() collectgarbage("collect") end)
-end)
-task.wait(0.3)
+end, 97)
 
 local scanConn
 scanConn = Workspace.DescendantAdded:Connect(function(v)
@@ -396,12 +390,11 @@ end)
 
 task.spawn(function()
     while sg.Parent do
-        task.wait(10)
+        task.wait(15)
         pcall(function() collectgarbage("collect") end)
     end
 end)
 
--- ===== FPS COUNTER RIÊNG =====
 local fpsGui = Instance.new("ScreenGui")
 fpsGui.Name = "KudoFPS"
 fpsGui.ResetOnSpawn = false

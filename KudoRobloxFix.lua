@@ -208,14 +208,32 @@ pcall(function()
     Lighting.ShadowSoftness = 0
 end)
 
+-- ==================== NƯỚC / TERRAIN POTATO ====================
+-- Nước thành dải màu xanh đặc, không sóng, không phản chiếu
 pcall(function()
     if Terrain then
         Terrain.WaterWaveSize = 0
         Terrain.WaterWaveSpeed = 0
         Terrain.WaterReflectance = 0
-        Terrain.WaterTransparency = 0.4
-        Terrain.WaterColor = Color3.fromRGB(60, 130, 220)
+        Terrain.WaterTransparency = 0
+        Terrain.WaterColor = Color3.fromRGB(70, 140, 230)
         Terrain.Decoration = false
+    end
+end)
+
+-- Vòng lặp giữ nước luôn potato
+task.spawn(function()
+    while playerGui.Parent do
+        task.wait(3)
+        pcall(function()
+            if Terrain then
+                if Terrain.WaterWaveSize ~= 0 then Terrain.WaterWaveSize = 0 end
+                if Terrain.WaterWaveSpeed ~= 0 then Terrain.WaterWaveSpeed = 0 end
+                if Terrain.WaterReflectance ~= 0 then Terrain.WaterReflectance = 0 end
+                if Terrain.WaterTransparency ~= 0 then Terrain.WaterTransparency = 0 end
+                if Terrain.Decoration then Terrain.Decoration = false end
+            end
+        end)
     end
 end)
 
@@ -354,11 +372,52 @@ local scanConn = Workspace.DescendantAdded:Connect(function(v)
     end)
 end)
 
--- ==================== CULLING ĐỆ QUY QUA GetDescendants ====================
--- 20 studs cho mọi part không thuộc nhân vật
--- Dùng task.spawn mỗi 0.15s thay vì Heartbeat để không làm nặng frame
-local CULL_DIST_SQ = 20 * 20
+-- ==================== VÒNG LẶP DỌN MỌI THỨ ====================
+-- Quét toàn bộ cây phân cấp mỗi 2 giây: part mới, decal, texture, surfaceappearance, particle
+task.spawn(function()
+    while playerGui.Parent do
+        task.wait(2)
+        pcall(function()
+            for _, v in ipairs(Workspace:GetDescendants()) do
+                local cn = v.ClassName
+                if not isName(v) then
+                    if isChar(v) then
+                        -- Với nhân vật chỉ giữ Head Decal
+                        if cn == "Decal" or cn == "Texture" then
+                            local parent = v.Parent
+                            if parent and parent.Name ~= "Head" then
+                                if v.Transparency ~= 1 then v.Transparency = 1 end
+                            end
+                        elseif cn == "SurfaceAppearance" then
+                            v:Destroy()
+                        end
+                    else
+                        -- Với môi trường: destroy tận gốc hiệu ứng và texture
+                        if cn == "ParticleEmitter" or cn == "Trail" or cn == "Beam"
+                            or cn == "Smoke" or cn == "Fire" or cn == "Sparkles"
+                            or cn == "PointLight" or cn == "SpotLight" or cn == "SurfaceLight"
+                            or cn == "SurfaceAppearance" or cn == "Decal" or cn == "Texture"
+                            or cn == "Highlight" or cn == "SelectionBox" or cn == "BoxHandleAdornment" then
+                            v:Destroy()
+                        elseif cn == "Part" or cn == "MeshPart" or cn == "UnionOperation" 
+                            or cn == "WedgePart" or cn == "TrussPart" or cn == "CornerWedgePart" 
+                            or cn == "SpawnLocation" then
+                            if v.Material ~= Enum.Material.SmoothPlastic then
+                                v.Material = Enum.Material.SmoothPlastic
+                            end
+                            if v.Color ~= POTATO_COLOR then
+                                v.Color = POTATO_COLOR
+                            end
+                        end
+                    end
+                end
+            end
+        end)
+    end
+end)
 
+-- ==================== CULLING ĐỆ QUY ====================
+local CULL_DIST_SQ = 20 * 20
 local culled = {}
 
 task.spawn(function()
@@ -511,23 +570,6 @@ task.spawn(function()
     while statsGui.Parent do
         task.wait(15)
         pcall(function() collectgarbage("collect") end)
-    end
-end)
-
-task.spawn(function()
-    while statsGui.Parent do
-        task.wait(2)
-        pcall(function()
-            for _, v in ipairs(Workspace:GetDescendants()) do
-                if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam")
-                    or v:IsA("Smoke") or v:IsA("Fire") or v:IsA("Sparkles")
-                    or v:IsA("PointLight") or v:IsA("SpotLight") or v:IsA("SurfaceLight") then
-                    if not isName(v) and not isChar(v) then
-                        v:Destroy()
-                    end
-                end
-            end
-        end)
     end
 end)
 

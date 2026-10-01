@@ -61,9 +61,8 @@ task.delay(6, function()
     end)
 end)
 
--- ==================== FFLAG POTATO CỰC ĐOAN ====================
+-- ==================== FFLAG ====================
 pcall(function()
-    -- FPS unlimited
     setfflag("DFIntTaskSchedulerTargetFps", "9999")
     setfflag("DFIntFrameRateCap", "9999")
     setfflag("DFIntMaxFrameRate", "9999")
@@ -75,8 +74,6 @@ pcall(function()
     setfflag("FFlagRenderThrottleDisable", "True")
     setfflag("DFIntMaxFramesInFlight", "1")
     setfflag("FFlagDisableFrameLimiter", "True")
-
-    -- Texture / material: tắt hoàn toàn
     setfflag("DFIntDebugFRMQualityLevelOverride", "1")
     setfflag("DFIntTextureQualityOverride", "0")
     setfflag("DFFlagTextureQualityOverrideEnabled", "True")
@@ -94,8 +91,6 @@ pcall(function()
     setfflag("FFlagDisableMetalnessMap", "True")
     setfflag("FFlagDisableEmissiveMap", "True")
     setfflag("FFlagDisableReflectionMap", "True")
-
-    -- PostFX tắt hết
     setfflag("DFFlagDisableSSAO", "True")
     setfflag("FFlagDisableSSAO", "True")
     setfflag("FFlagDisablePostFx", "True")
@@ -106,8 +101,6 @@ pcall(function()
     setfflag("FFlagDisableAntiAliasing", "True")
     setfflag("FFlagDisableMotionBlur", "True")
     setfflag("FFlagDisableAtmosphericScattering", "True")
-
-    -- Shadow
     setfflag("FFlagRenderShadowIntensity", "0")
     setfflag("FFlagRenderShadowIntensityOverride", "True")
     setfflag("DFFlagDisableRenderShadowMap", "True")
@@ -116,8 +109,6 @@ pcall(function()
     setfflag("FFlagDisablePointLightShadows", "True")
     setfflag("FFlagDisableSpotLightShadows", "True")
     setfflag("FFlagDisableSurfaceLightShadows", "True")
-
-    -- Sky / atmo / terrain / water
     setfflag("FFlagDebugSkyGray", "True")
     setfflag("FFlagDisableAtmosphere", "True")
     setfflag("FFlagDisableSky", "True")
@@ -131,8 +122,6 @@ pcall(function()
     setfflag("FIntFRMMinGrassDistance", "0")
     setfflag("FIntGrassMovementReducedMotionFactor", "0")
     setfflag("FFlagDisableTerrainWaterReflections", "True")
-
-    -- LOD cực đoan
     setfflag("DFIntCSGLevelOfDetailSwitchingDistance", "0")
     setfflag("DFIntCSGLevelOfDetailSwitchingDistanceL12", "0")
     setfflag("DFIntCSGLevelOfDetailSwitchingDistanceL23", "0")
@@ -142,14 +131,10 @@ pcall(function()
     setfflag("DFIntLODBias", "8")
     setfflag("DFFlagForceLODLevel", "0")
     setfflag("DFIntRenderFidelity", "0")
-
-    -- Lighting voxel
     setfflag("DFFlagDebugRenderForceTechnologyVoxel", "True")
     setfflag("FFlagDebugPauseVoxelizer", "True")
     setfflag("DFFlagSkipHighResolutionEnvironment", "True")
     setfflag("FFlagRenderDisableForwardLights", "True")
-
-    -- Physics
     setfflag("DFIntSolverSpringDamping", "0")
     setfflag("DFIntPhysicsSendRate", "1")
     setfflag("DFIntMaxSimultaneousPhysicsJobs", "1")
@@ -160,8 +145,6 @@ pcall(function()
     setfflag("FFlagDisableRaycastFiltering", "True")
     setfflag("DFFlagSkipRaycastFiltering", "True")
     setfflag("DFIntAdaptivePhysicsStepping", "1")
-
-    -- Render optimize
     setfflag("DFIntFrameBufferPoolSize", "1")
     setfflag("DFIntRenderMeshMaxBones", "1")
     setfflag("DFIntDebugEngineOptimizationLevel", "3")
@@ -181,23 +164,14 @@ pcall(function()
     setfflag("FFlagDisableMultiSample", "True")
     setfflag("FFlagDisableHDR", "True")
     setfflag("FFlagDisableToneMapping", "True")
-
-    -- Animation
     setfflag("FFlagDisableAnimationBlending", "True")
     setfflag("DFFlagSkipAnimationBlending", "True")
     setfflag("FFlagDisableFacialAnimation", "True")
-    setfflag("FFlagDisableAllAnimations", "False")
-
-    -- GC
     setfflag("DFFlagGCEnableIncremental", "True")
     setfflag("DFIntGCIncrementalPause", "0")
     setfflag("DFIntGCIncrementalStepMul", "2000")
-
-    -- Network
     setfflag("DFIntConnectionMTUSize", "1400")
     setfflag("DFIntS2PhysicsSenderRate", "1")
-
-    -- Graphics API
     setfflag("FFlagDebugGraphicsDisableDirect3D11", "True")
     setfflag("FFlagDebugGraphicsPreferOpenGL", "True")
 end)
@@ -281,7 +255,21 @@ local function isName(v)
     return v:IsA("BillboardGui") or v:IsA("TextLabel") or v:IsA("TextButton") or v:IsA("Humanoid")
 end
 
--- ==================== BULK DESTROY ====================
+-- ==================== HÀM POTATO HOÁ BASEPART ====================
+-- Đổi material sang SmoothPlastic, màu xám đơn điệu
+local POTATO_COLOR = Color3.fromRGB(110, 110, 110)
+
+local function potatoPart(part)
+    pcall(function()
+        part.Material = Enum.Material.SmoothPlastic
+        part.Color = POTATO_COLOR
+        part.Reflectance = 0
+        part.Transparency = 0
+        part.CastShadow = false
+    end)
+end
+
+-- ==================== BULK XỬ LÝ ====================
 local killTypes = {
     ParticleEmitter = true, Trail = true, Smoke = true, Fire = true,
     Sparkles = true, Beam = true, Highlight = true, SelectionBox = true,
@@ -297,7 +285,15 @@ local total = #descendants
 for i = 1, total do
     local v = descendants[i]
     local cn = v.ClassName
-    if killTypes[cn] then
+
+    if cn == "Part" or cn == "MeshPart" or cn == "UnionOperation" or cn == "WedgePart"
+        or cn == "TrussPart" or cn == "CornerWedgePart" or cn == "SpawnLocation" then
+        if isChar(v) then
+            potatoPart(v)
+        else
+            potatoPart(v)
+        end
+    elseif killTypes[cn] then
         if not isName(v) then
             if isChar(v) then
                 if cn == "Decal" or cn == "Texture" then
@@ -323,7 +319,7 @@ for i = 1, total do
     if i % 500 == 0 then task.wait() end
 end
 
--- Đầu nhân vật mặc định
+-- Đầu nhân vật về mặc định
 local function resetHead(character)
     if not character then return end
     local head = character:FindFirstChild("Head")
@@ -346,11 +342,15 @@ for _, plr in ipairs(game.Players:GetPlayers()) do
     end)
 end
 
+-- ==================== LẮNG NGHE OBJECT MỚI ====================
 local scanConn = Workspace.DescendantAdded:Connect(function(v)
     task.defer(function()
         pcall(function()
             local cn = v.ClassName
-            if killTypes[cn] then
+            if cn == "Part" or cn == "MeshPart" or cn == "UnionOperation" or cn == "WedgePart"
+                or cn == "TrussPart" or cn == "CornerWedgePart" or cn == "SpawnLocation" then
+                potatoPart(v)
+            elseif killTypes[cn] then
                 if not isName(v) then
                     if isChar(v) then
                         if cn == "Decal" or cn == "Texture" then
@@ -370,7 +370,30 @@ local scanConn = Workspace.DescendantAdded:Connect(function(v)
     end)
 end)
 
--- ==================== DISTANCE CULLING (12 studs) ====================
+-- ==================== VÒNG LẶP POTATO PART MỚI ====================
+task.spawn(function()
+    while statsGui and statsGui.Parent do
+        task.wait(2)
+        pcall(function()
+            for _, top in ipairs(Workspace:GetChildren()) do
+                if not isChar(top) then
+                    for _, v in ipairs(top:GetDescendants()) do
+                        if v:IsA("BasePart") then
+                            if v.Material ~= Enum.Material.SmoothPlastic then
+                                v.Material = Enum.Material.SmoothPlastic
+                            end
+                            if v.Color ~= POTATO_COLOR then
+                                v.Color = POTATO_COLOR
+                            end
+                        end
+                    end
+                end
+            end
+        end)
+    end
+end)
+
+-- ==================== DISTANCE CULLING ====================
 local CULL_DIST = 12
 local CULL_DIST_SQ = CULL_DIST * CULL_DIST
 
@@ -432,7 +455,7 @@ local cullConn = RunService.Heartbeat:Connect(function()
     end)
 end)
 
--- ==================== UI FPS + PING (GỌN HƠN) ====================
+-- ==================== UI FPS + PING ====================
 local statsGui = Instance.new("ScreenGui")
 statsGui.Name = "KudoStats"
 statsGui.ResetOnSpawn = false

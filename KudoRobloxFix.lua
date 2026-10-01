@@ -90,9 +90,7 @@ closeBtn.Parent = main
 
 local function setProgress(percent, text)
     percent = math.clamp(percent, 0, 100)
-    TweenService:Create(progressFill, TweenInfo.new(0.1, Enum.EasingStyle.Quad), {
-        Size = UDim2.new(percent / 100, 0, 1, 0)
-    }):Play()
+    progressFill.Size = UDim2.new(percent / 100, 0, 1, 0)
     percentLabel.Text = math.floor(percent) .. "%"
     if text then statusLabel.Text = text end
 end
@@ -356,32 +354,32 @@ end
 
 local allDescendants = Workspace:GetDescendants()
 local total = #allDescendants
+local batch = math.max(1, math.floor(total / 30))
 
 for i, v in ipairs(allDescendants) do
     optimizeObject(v)
-    if i % 200 == 0 then
-        local p = 65 + math.floor((i / total) * 30)
+    if i % batch == 0 then
+        local p = 60 + math.floor((i / total) * 30)
         setProgress(p, "Đang quét... " .. i .. "/" .. total)
         task.wait()
     end
 end
 
-step("Tối ưu Player...", function()
-    pcall(function()
-        for _, plr in ipairs(game.Players:GetPlayers()) do
-            local char = plr.Character
-            if char then
-                for _, v in ipairs(char:GetDescendants()) do
-                    if v:IsA("BasePart") then
-                        pcall(function()
-                            v.Reflectance = 0
-                        end)
-                    end
+setProgress(96, "Tối ưu Player...")
+pcall(function()
+    for _, plr in ipairs(game.Players:GetPlayers()) do
+        local char = plr.Character
+        if char then
+            for _, v in ipairs(char:GetDescendants()) do
+                if v:IsA("BasePart") then
+                    pcall(function() v.Reflectance = 0 end)
                 end
             end
         end
-    end)
-end, 97)
+    end
+end)
+
+setProgress(100, "✅ Hoàn tất")
 
 local scanConn
 scanConn = Workspace.DescendantAdded:Connect(function(v)
@@ -434,14 +432,13 @@ task.spawn(function()
     end
 end)
 
-setProgress(100, "✅ Hoàn tất")
-task.wait(0.6)
+task.wait(0.5)
 
 titleLabel.Text = "⚡ fix lag by kudo29001"
 statusLabel.Text = ""
 percentLabel.Text = ""
-TweenService:Create(progressBg, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
-TweenService:Create(progressFill, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
+progressBg.Visible = false
+progressFill.Visible = false
 TweenService:Create(main, TweenInfo.new(0.4, Enum.EasingStyle.Quad), {
     Size = UDim2.new(0, 220, 0, 44),
     Position = UDim2.new(0, 15, 0, 15)

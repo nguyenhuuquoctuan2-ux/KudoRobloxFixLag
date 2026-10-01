@@ -90,9 +90,7 @@ closeBtn.Parent = main
 
 local function setProgress(percent, text)
     percent = math.clamp(percent, 0, 100)
-    TweenService:Create(progressFill, TweenInfo.new(0.15, Enum.EasingStyle.Quad), {
-        Size = UDim2.new(percent / 100, 0, 1, 0)
-    }):Play()
+    progressFill.Size = UDim2.new(percent / 100, 0, 1, 0)
     percentLabel.Text = math.floor(percent) .. "%"
     if text then statusLabel.Text = text end
 end
@@ -393,11 +391,10 @@ step("Tối ưu Player...", function()
 end, 94)
 
 setProgress(97, "Dọn bộ nhớ...")
-pcall(function()
-    collectgarbage("collect")
-    collectgarbage("setpause", 100)
-    collectgarbage("setstepmul", 200)
+task.spawn(function()
+    pcall(function() collectgarbage("collect") end)
 end)
+task.wait(0.1)
 
 local scanConn
 scanConn = Workspace.DescendantAdded:Connect(function(v)
@@ -531,17 +528,11 @@ end)
 setProgress(100, "✅ Hoàn tất")
 task.wait(0.6)
 
-TweenService:Create(progressFill, TweenInfo.new(0.3), {
-    BackgroundColor3 = Color3.fromRGB(0, 255, 120)
-}):Play()
-
-task.wait(0.5)
-
 titleLabel.Text = "⚡ fix lag by kudo29001"
 statusLabel.Text = ""
 percentLabel.Text = ""
-TweenService:Create(progressBg, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
-TweenService:Create(progressFill, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
+progressBg.Visible = false
+progressFill.Visible = false
 TweenService:Create(main, TweenInfo.new(0.4, Enum.EasingStyle.Quad), {
     Size = UDim2.new(0, 220, 0, 44),
     Position = UDim2.new(0, 15, 0, 15)

@@ -109,9 +109,6 @@ pcall(function()
     setfflag("FFlagDisableAtmosphere", "True")
     setfflag("FFlagDisableSky", "True")
     setfflag("FFlagDisableFog", "True")
-    setfflag("FFlagDisableWater", "True")
-    setfflag("FFlagDisableTerrain", "True")
-    setfflag("DFFlagDisableTerrainTextures", "True")
     setfflag("FFlagDisableTerrainDecoration", "True")
     setfflag("FIntFRMMaxGrassDistance", "0")
     setfflag("FIntFRMMinGrassDistance", "0")
@@ -208,8 +205,8 @@ pcall(function()
     Lighting.ShadowSoftness = 0
 end)
 
--- ==================== NƯỚC / TERRAIN POTATO ====================
--- Nước thành dải màu xanh đặc, không sóng, không phản chiếu
+-- ==================== TERRAIN / NƯỚC ====================
+-- Giữ terrain hiển thị bình thường, chỉ làm nước phẳng
 pcall(function()
     if Terrain then
         Terrain.WaterWaveSize = 0
@@ -221,7 +218,6 @@ pcall(function()
     end
 end)
 
--- Vòng lặp giữ nước luôn potato
 task.spawn(function()
     while playerGui.Parent do
         task.wait(3)
@@ -268,10 +264,13 @@ local POTATO_COLOR = Color3.fromRGB(110, 110, 110)
 
 local function potatoPart(part)
     pcall(function()
+        -- Không ép transparency = 0 cho part trong suốt (kính, nước dạng part)
+        if part.Transparency < 0.5 then
+            part.Transparency = 0
+        end
         part.Material = Enum.Material.SmoothPlastic
         part.Color = POTATO_COLOR
         part.Reflectance = 0
-        part.Transparency = 0
         part.CastShadow = false
     end)
 end
@@ -372,8 +371,7 @@ local scanConn = Workspace.DescendantAdded:Connect(function(v)
     end)
 end)
 
--- ==================== VÒNG LẶP DỌN MỌI THỨ ====================
--- Quét toàn bộ cây phân cấp mỗi 2 giây: part mới, decal, texture, surfaceappearance, particle
+-- ==================== VÒNG LẶP DỌN ====================
 task.spawn(function()
     while playerGui.Parent do
         task.wait(2)
@@ -382,7 +380,6 @@ task.spawn(function()
                 local cn = v.ClassName
                 if not isName(v) then
                     if isChar(v) then
-                        -- Với nhân vật chỉ giữ Head Decal
                         if cn == "Decal" or cn == "Texture" then
                             local parent = v.Parent
                             if parent and parent.Name ~= "Head" then
@@ -392,7 +389,6 @@ task.spawn(function()
                             v:Destroy()
                         end
                     else
-                        -- Với môi trường: destroy tận gốc hiệu ứng và texture
                         if cn == "ParticleEmitter" or cn == "Trail" or cn == "Beam"
                             or cn == "Smoke" or cn == "Fire" or cn == "Sparkles"
                             or cn == "PointLight" or cn == "SpotLight" or cn == "SurfaceLight"
@@ -416,8 +412,8 @@ task.spawn(function()
     end
 end)
 
--- ==================== CULLING ĐỆ QUY ====================
-local CULL_DIST_SQ = 20 * 20
+-- ==================== CULLING (nới lên 40 studs, không cull part thấp) ====================
+local CULL_DIST_SQ = 40 * 40
 local culled = {}
 
 task.spawn(function()
@@ -430,22 +426,33 @@ task.spawn(function()
             for _, v in ipairs(Workspace:GetDescendants()) do
                 if v:IsA("BasePart") then
                     if not isChar(v) then
+                        -- Không cull part thấp hơn chân người chơi 3 studs (mặt đất)
                         local pos = v.Position
-                        local dx = pos.X - camPos.X
-                        local dy = pos.Y - camPos.Y
-                        local dz = pos.Z - camPos.Z
-                        local distSq = dx*dx + dy*dy + dz*dz
-                        local shouldHide = distSq > CULL_DIST_SQ
-
-                        if shouldHide then
-                            if not culled[v] then
-                                culled[v] = true
-                                pcall(function() v.LocalTransparencyModifier = 1 end)
-                            end
-                        else
+                        local isGround = (pos.Y < camPos.Y - 3)
+                        
+                        if isGround then
+                            -- Mặt đất luôn hiển thị
                             if culled[v] then
                                 culled[v] = false
                                 pcall(function() v.LocalTransparencyModifier = 0 end)
+                            end
+                        else
+                            local dx = pos.X - camPos.X
+                            local dy = pos.Y - camPos.Y
+                            local dz = pos.Z - camPos.Z
+                            local distSq = dx*dx + dy*dy + dz*dz
+                            local shouldHide = distSq > CULL_DIST_SQ
+
+                            if shouldHide then
+                                if not culled[v] then
+                                    culled[v] = true
+                                    pcall(function() v.LocalTransparencyModifier = 1 end)
+                                end
+                            else
+                                if culled[v] then
+                                    culled[v] = false
+                                    pcall(function() v.LocalTransparencyModifier = 0 end)
+                                end
                             end
                         end
                     end

@@ -90,20 +90,25 @@ closeBtn.Parent = main
 
 local function setProgress(percent, text)
     percent = math.clamp(percent, 0, 100)
-    TweenService:Create(progressFill, TweenInfo.new(0.15, Enum.EasingStyle.Quad), {
-        Size = UDim2.new(percent / 100, 0, 1, 0)
-    }):Play()
+    progressFill.Size = UDim2.new(percent / 100, 0, 1, 0)
     percentLabel.Text = math.floor(percent) .. "%"
     if text then statusLabel.Text = text end
 end
 
-local function step(text, fn, percent)
-    setProgress(percent, text)
-    pcall(fn)
-    task.wait(0.05)
-end
-
-step("Áp dụng FastFlags...", function()
+-- ==================== 1. FFLAG (chạy trước tiên, nhanh) ====================
+setProgress(20, "Áp dụng FastFlags...")
+pcall(function()
+    setfflag("DFIntTaskSchedulerTargetFps", "9999")
+    setfflag("DFIntFrameRateCap", "9999")
+    setfflag("DFIntMaxFrameRate", "9999")
+    setfflag("DFIntMinFrameRate", "1")
+    setfflag("FFlagDisableVSync", "True")
+    setfflag("DFIntFrameRateCapOverride", "9999")
+    setfflag("DFIntRenderThrottleEnabled", "0")
+    setfflag("DFIntRenderThrottleMs", "0")
+    setfflag("FFlagRenderThrottleDisable", "True")
+    setfflag("DFIntMaxFramesInFlight", "1")
+    setfflag("FFlagDisableFrameLimiter", "True")
     setfflag("DFIntDebugFRMQualityLevelOverride", "1")
     setfflag("DFIntTextureQualityOverride", "0")
     setfflag("DFFlagTextureQualityOverrideEnabled", "True")
@@ -117,7 +122,6 @@ step("Áp dụng FastFlags...", function()
     setfflag("FFlagDisableSunRays", "True")
     setfflag("FFlagDisableColorCorrection", "True")
     setfflag("FFlagDisableAntiAliasing", "True")
-    setfflag("FFlagDisableVSync", "True")
     setfflag("FFlagDisableMotionBlur", "True")
     setfflag("FFlagRenderShadowIntensity", "0")
     setfflag("FFlagRenderShadowIntensityOverride", "True")
@@ -153,13 +157,9 @@ step("Áp dụng FastFlags...", function()
     setfflag("DFIntPhysicsStepPerFrame", "1")
     setfflag("DFIntMaximumCollisionIterations", "1")
     setfflag("DFIntSolverConvergenceIterations", "1")
-    setfflag("DFIntTaskSchedulerTargetFps", "240")
-    setfflag("DFIntFrameRateCap", "240")
-    setfflag("DFIntMinFrameRate", "30")
-    setfflag("DFIntMaxFrameRate", "240")
     setfflag("DFFlagGCEnableIncremental", "True")
-    setfflag("DFIntGCIncrementalPause", "1")
-    setfflag("DFIntGCIncrementalStepMul", "500")
+    setfflag("DFIntGCIncrementalPause", "0")
+    setfflag("DFIntGCIncrementalStepMul", "1000")
     setfflag("DFIntFrameBufferPoolSize", "1")
     setfflag("DFIntRenderMeshMaxBones", "1")
     setfflag("DFIntDebugEngineOptimizationLevel", "3")
@@ -170,93 +170,70 @@ step("Áp dụng FastFlags...", function()
     setfflag("DFFlagSkipAnimationBlending", "True")
     setfflag("FFlagDisableFacialAnimation", "True")
     setfflag("DFIntConnectionMTUSize", "1400")
-end, 15)
+end)
 
-step("Hạ graphics...", function()
-    settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
-    settings().Rendering.MeshPartDetailLevel = Enum.MeshPartDetailLevel.Level01
-    settings().Rendering.AnimationWeightedBlendFix = Enum.AnimationWeightedBlendFix.Disabled
-    settings().Rendering.EagerBulkExecution = true
-end, 25)
+-- ==================== 2. CẤU HÌNH ENGINE (chạy song song) ====================
+task.spawn(function()
+    pcall(function()
+        settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+        settings().Rendering.MeshPartDetailLevel = Enum.MeshPartDetailLevel.Level01
+        settings().Rendering.AnimationWeightedBlendFix = Enum.AnimationWeightedBlendFix.Disabled
+        settings().Rendering.EagerBulkExecution = true
+    end)
+end)
 
-step("Tối ưu Camera...", function()
-    if Camera then
-        Camera.FieldOfView = 70
-        Camera.CameraType = Enum.CameraType.Custom
-    end
-    pcall(function() Workspace.StreamingEnabled = true end)
-    pcall(function() Workspace.StreamingTargetRadius = 128 end)
-    pcall(function() Workspace.StreamingMinRadius = 64 end)
-    pcall(function() Workspace.StreamOutBehavior = Enum.StreamOutBehavior.Opportunistic end)
-end, 35)
-
-step("Tắt Terrain...", function()
-    if Terrain then
-        Terrain.WaterWaveSize = 0
-        Terrain.WaterWaveSpeed = 0
-        Terrain.WaterReflectance = 0
-        Terrain.WaterTransparency = 1
-        Terrain.Decoration = false
-    end
-end, 45)
-
-step("Tắt PostFX & Lighting...", function()
-    for _, v in ipairs(Lighting:GetChildren()) do
-        if v:IsA("PostEffect") then v.Enabled = false end
-        if v:IsA("Sky") then v.Parent = nil end
-        if v:IsA("Atmosphere") then v.Density = 0; v.Haze = 0 end
-        if v:IsA("Clouds") then v.Cover = 0; v.Density = 0 end
-    end
-    Lighting.GlobalShadows = false
-    Lighting.FogEnd = 1e9
-    Lighting.FogStart = 1e9
-    Lighting.Brightness = 1
-    Lighting.EnvironmentDiffuseScale = 0
-    Lighting.EnvironmentSpecularScale = 0
-    Lighting.OutdoorAmbient = Color3.fromRGB(128,128,128)
-    Lighting.Ambient = Color3.fromRGB(128,128,128)
-    Lighting.ClockTime = 14
-    Lighting.ExposureCompensation = 0
-    Lighting.ShadowSoftness = 0
-end, 55)
-
-step("Tắt âm thanh...", function()
-    local SoundService = game:GetService("SoundService")
-    SoundService.AmbientReverb = Enum.ReverbType.NoReverb
-    SoundService.DistanceFactor = 0
-    SoundService.DopplerScale = 0
-    pcall(function() SoundService.VolumetricAudio = Enum.VolumetricAudio.Disabled end)
-    for _, v in ipairs(game:GetDescendants()) do
-        if v:IsA("Sound") then
-            v.Volume = 0
-            v.Playing = false
-            v.Looped = false
+task.spawn(function()
+    pcall(function()
+        if Camera then
+            Camera.FieldOfView = 70
+            Camera.CameraType = Enum.CameraType.Custom
         end
-    end
-end, 60)
+        Workspace.StreamingEnabled = true
+        Workspace.StreamingTargetRadius = 128
+        Workspace.StreamingMinRadius = 64
+    end)
+end)
 
-local potatoMaterials = {
-    [Enum.Material.Grass]=true,[Enum.Material.LeafyGrass]=true,[Enum.Material.Wood]=true,
-    [Enum.Material.WoodPlanks]=true,[Enum.Material.Rock]=true,[Enum.Material.Slate]=true,
-    [Enum.Material.Sand]=true,[Enum.Material.Mud]=true,[Enum.Material.Snow]=true,
-    [Enum.Material.Ice]=true,[Enum.Material.Glacier]=true,[Enum.Material.CorrodedMetal]=true,
-    [Enum.Material.DiamondPlate]=true,[Enum.Material.Foil]=true,[Enum.Material.Marble]=true,
-    [Enum.Material.Granite]=true,[Enum.Material.Brick]=true,[Enum.Material.Cobblestone]=true,
-    [Enum.Material.Concrete]=true,[Enum.Material.Fabric]=true,[Enum.Material.Pebble]=true,
-    [Enum.Material.Limestone]=true,[Enum.Material.Pavement]=true,[Enum.Material.Asphalt]=true,
-    [Enum.Material.Basalt]=true,[Enum.Material.CrackedLava]=true,[Enum.Material.Neon]=true,
-    [Enum.Material.Glass]=true,[Enum.Material.ForceField]=true,[Enum.Material.Metal]=true,
-    [Enum.Material.Cardboard]=true,[Enum.Material.Carpet]=true,[Enum.Material.CeramicTiles]=true,
-    [Enum.Material.ClayRoofTiles]=true,[Enum.Material.RoofShingles]=true,[Enum.Material.Leather]=true,
-    [Enum.Material.Plaster]=true,[Enum.Material.Rubber]=true,
-}
+task.spawn(function()
+    pcall(function()
+        if Terrain then
+            Terrain.WaterWaveSize = 0
+            Terrain.WaterWaveSpeed = 0
+            Terrain.WaterReflectance = 0
+            Terrain.WaterTransparency = 1
+            Terrain.Decoration = false
+        end
+    end)
+end)
 
--- Cache nhân vật
+task.spawn(function()
+    pcall(function()
+        for _, v in ipairs(Lighting:GetChildren()) do
+            if v:IsA("PostEffect") then v.Enabled = false end
+            if v:IsA("Sky") then v.Parent = nil end
+            if v:IsA("Atmosphere") then v.Density = 0; v.Haze = 0 end
+            if v:IsA("Clouds") then v.Cover = 0; v.Density = 0 end
+        end
+        Lighting.GlobalShadows = false
+        Lighting.FogEnd = 1e9
+        Lighting.FogStart = 1e9
+        Lighting.Brightness = 2
+        Lighting.EnvironmentDiffuseScale = 0
+        Lighting.EnvironmentSpecularScale = 0
+        Lighting.OutdoorAmbient = Color3.fromRGB(180,180,180)
+        Lighting.Ambient = Color3.fromRGB(180,180,180)
+        Lighting.ClockTime = 14
+        Lighting.ExposureCompensation = 0
+        Lighting.ShadowSoftness = 0
+    end)
+end)
+
+setProgress(40, "Đang chuẩn bị quét...")
+
+-- ==================== 3. CACHE NHÂN VẬT ====================
 local charModels = {}
-local charConns = {}
 local function watchPlayer(plr)
-    if charConns[plr] then charConns[plr]:Disconnect() end
-    charConns[plr] = plr.CharacterAdded:Connect(function(c)
+    plr.CharacterAdded:Connect(function(c)
         charModels[c] = true
     end)
     if plr.Character then
@@ -269,10 +246,6 @@ for _, plr in ipairs(game.Players:GetPlayers()) do
 end
 game.Players.PlayerAdded:Connect(watchPlayer)
 game.Players.PlayerRemoving:Connect(function(plr)
-    if charConns[plr] then
-        charConns[plr]:Disconnect()
-        charConns[plr] = nil
-    end
     if plr.Character then
         charModels[plr.Character] = nil
     end
@@ -289,42 +262,57 @@ local function isCharacterDescendant(v)
     return false
 end
 
--- Bảo vệ tên người chơi + âm thanh
 local function isNameTag(v)
     if v:IsA("BillboardGui") then return true end
-    if v:IsA("TextLabel") or v:IsA("TextButton") or v:IsA("TextScreenGui") then return true end
+    if v:IsA("TextLabel") or v:IsA("TextButton") then return true end
     if v:IsA("Humanoid") then return true end
-    if v:IsA("Accessory") then return true end
-    if v:IsA("Shirt") or v:IsA("Pants") or v:IsA("ShirtGraphic") then return true end
-    if v:IsA("CharacterMesh") then return true end
-    if v:IsA("BodyColors") then return true end
-    if v:IsA("Sound") then return true end
     return false
 end
 
+-- ==================== 4. HÀM TỐI ƯU 1 OBJECT ====================
 local function optimizeObject(v)
     if isNameTag(v) then return end
-    if isCharacterDescendant(v) then return end
+
+    if isCharacterDescendant(v) then
+        if v:IsA("BasePart") then
+            pcall(function()
+                v.Material = Enum.Material.SmoothPlastic
+                v.Reflectance = 0
+                v.CastShadow = false
+            end)
+        elseif v:IsA("Decal") or v:IsA("Texture") then
+            pcall(function() v.Transparency = 1 end)
+        elseif v:IsA("Accessory") then
+            pcall(function() v:Destroy() end)
+        elseif v:IsA("SurfaceAppearance") then
+            pcall(function() v:Destroy() end)
+        elseif v:IsA("SpecialMesh") then
+            pcall(function()
+                if v.MeshType == Enum.MeshType.FileMesh or v.MeshType == Enum.MeshType.Head then
+                    v.TextureId = ""
+                end
+            end)
+        end
+        return
+    end
 
     if v:IsA("BasePart") then
         pcall(function()
-            if potatoMaterials[v.Material] then v.Material = Enum.Material.SmoothPlastic end
+            v.Material = Enum.Material.SmoothPlastic
             v.Reflectance = 0
             v.CastShadow = false
-            v.Massless = true
         end)
-    elseif v:IsA("Decal") then
-        pcall(function() v.Transparency = 1 end)
-    elseif v:IsA("Texture") then
+    elseif v:IsA("Decal") or v:IsA("Texture") then
         pcall(function() v.Transparency = 1 end)
     elseif v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Smoke")
         or v:IsA("Fire") or v:IsA("Sparkles") or v:IsA("Beam") then
-        pcall(function() v.Enabled = false end)
+        pcall(function() v:Destroy() end)
     elseif v:IsA("SurfaceAppearance") then
         pcall(function() v:Destroy() end)
     elseif v:IsA("SpecialMesh") then
         pcall(function()
             if v.MeshType == Enum.MeshType.FileMesh or v.MeshType == Enum.MeshType.Head then
+                v.MeshType = Enum.MeshType.Brick
                 v.TextureId = ""
             end
         end)
@@ -332,12 +320,14 @@ local function optimizeObject(v)
         pcall(function()
             v.TextureID = ""
             v.RenderFidelity = Enum.RenderFidelity.Performance
-            v.CollisionFidelity = Enum.CollisionFidelity.Box
             v.CastShadow = false
-            v.Massless = true
         end)
+    elseif v:IsA("Sound") then
+        pcall(function() v:Destroy() end)
+    elseif v:IsA("Animation") then
+        pcall(function() v:Destroy() end)
     elseif v:IsA("Highlight") or v:IsA("SelectionBox") or v:IsA("BoxHandleAdornment") then
-        pcall(function() v.Enabled = false end)
+        pcall(function() v:Destroy() end)
     elseif v:IsA("Attachment") then
         pcall(function()
             for _, c in ipairs(v:GetChildren()) do
@@ -348,87 +338,37 @@ local function optimizeObject(v)
         end)
     elseif v:IsA("PointLight") or v:IsA("SpotLight") or v:IsA("SurfaceLight") then
         pcall(function() v:Destroy() end)
+    elseif v:IsA("ForceField") or v:IsA("Explosion") then
+        pcall(function() v:Destroy() end)
     end
 end
 
-local allDescendants = Workspace:GetDescendants()
-local total = #allDescendants
+-- ==================== 5. QUÉT CHIA ĐỢT SIÊU NHANH ====================
+local descendants = Workspace:GetDescendants()
+local total = #descendants
+local batchSize = math.max(1, math.floor(total / 10))  -- chỉ 10 lần cập nhật progress
 
-for i, v in ipairs(allDescendants) do
+for i, v in ipairs(descendants) do
     optimizeObject(v)
-    if i % 200 == 0 then
-        local p = 65 + math.floor((i / total) * 25)
-        setProgress(p, "Đang quét... " .. i .. "/" .. total)
+    if i % batchSize == 0 then
+        setProgress(40 + math.floor((i / total) * 55), "Đang quét " .. i .. "/" .. total)
         task.wait()
     end
 end
 
-step("Tối ưu Player...", function()
-    pcall(function()
-        for _, plr in ipairs(game.Players:GetPlayers()) do
-            local char = plr.Character
-            if char then
-                for _, v in ipairs(char:GetDescendants()) do
-                    if v:IsA("BasePart") then
-                        pcall(function()
-                            v.Reflectance = 0
-                            v.Massless = true
-                        end)
-                    elseif v:IsA("Decal") then
-                        pcall(function() v.Transparency = 1 end)
-                    end
-                end
-            end
-        end
-    end)
-end, 94)
+setProgress(97, "Hoàn thiện...")
 
-setProgress(97, "Dọn bộ nhớ...")
-pcall(function()
-    collectgarbage("collect")
-    collectgarbage("setpause", 100)
-    collectgarbage("setstepmul", 200)
-end)
-
-local scanConn
-scanConn = Workspace.DescendantAdded:Connect(function(v)
+-- ==================== 6. KẾT NỐI CHO OBJECT MỚI ====================
+local scanConn = Workspace.DescendantAdded:Connect(function(v)
     task.defer(function() optimizeObject(v) end)
 end)
 
+-- ==================== 7. VÒNG LẶP NGẦM ====================
 task.spawn(function()
     while sg.Parent do
-        task.wait(10)
+        task.wait(15)
         pcall(function() collectgarbage("collect") end)
     end
-end)
-
--- ===== CAMERA CULLING =====
-local cullConn
-cullConn = RunService.Heartbeat:Connect(function()
-    pcall(function()
-        if not Camera then return end
-        local camPos = Camera.CFrame.Position
-        local camLook = Camera.CFrame.LookVector
-        for _, v in ipairs(Workspace:GetChildren()) do
-            if v:IsA("Model") or v:IsA("BasePart") then
-                if not isCharacterDescendant(v) then
-                    if v:IsA("BasePart") then
-                        local dist = (v.Position - camPos).Magnitude
-                        if dist > 500 then
-                            v.LocalTransparencyModifier = 1
-                        else
-                            local toPart = (v.Position - camPos).Unit
-                            if camLook:Dot(toPart) < -0.3 then
-                                v.LocalTransparencyModifier = 1
-                            else
-                                v.LocalTransparencyModifier = 0
-                            end
-                        end
-                    end
-                end
-            end
-        end
-    end)
 end)
 
 task.spawn(function()
@@ -437,10 +377,9 @@ task.spawn(function()
         pcall(function()
             for _, v in ipairs(Workspace:GetDescendants()) do
                 if (v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam")
-                    or v:IsA("Smoke") or v:IsA("Fire") or v:IsA("Sparkles")
-                    or v:IsA("PointLight") or v:IsA("SpotLight") or v:IsA("SurfaceLight")) then
-                    if not isCharacterDescendant(v) then
-                        v.Enabled = false
+                    or v:IsA("Smoke") or v:IsA("Fire") or v:IsA("Sparkles")) then
+                    if not isCharacterDescendant(v) and not isNameTag(v) then
+                        v:Destroy()
                     end
                 end
             end
@@ -448,41 +387,30 @@ task.spawn(function()
     end
 end)
 
-task.spawn(function()
-    while sg.Parent do
-        task.wait(1)
-        pcall(function()
-            if Camera then Camera.FieldOfView = 70 end
-        end)
-    end
-end)
-
--- ===== TẮT HUMANOID STATE MACHINE =====
-task.spawn(function()
-    task.wait(1)
+local cullConn = RunService.Heartbeat:Connect(function()
     pcall(function()
-        for _, plr in ipairs(game.Players:GetPlayers()) do
-            local char = plr.Character
-            if char then
-                local hum = char:FindFirstChildOfClass("Humanoid")
-                if hum then
-                    hum:SetStateEnabled(Enum.HumanoidStateType.Climbing, false)
-                    hum:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
-                    hum:SetStateEnabled(Enum.HumanoidStateType.Flying, false)
-                    hum:SetStateEnabled(Enum.HumanoidStateType.Freefall, false)
-                    hum:SetStateEnabled(Enum.HumanoidStateType.Landed, false)
-                    hum:SetStateEnabled(Enum.HumanoidStateType.PlatformStanding, false)
-                    hum:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
-                    hum:SetStateEnabled(Enum.HumanoidStateType.Seated, false)
-                    hum:SetStateEnabled(Enum.HumanoidStateType.StrafingNoPhysics, false)
-                    hum:SetStateEnabled(Enum.HumanoidStateType.Swimming, false)
+        if not Camera then return end
+        local camPos = Camera.CFrame.Position
+        local camLook = Camera.CFrame.LookVector
+        for _, v in ipairs(Workspace:GetChildren()) do
+            if v:IsA("BasePart") and not isCharacterDescendant(v) then
+                local dist = (v.Position - camPos).Magnitude
+                if dist > 300 then
+                    v.LocalTransparencyModifier = 1
+                else
+                    local toPart = (v.Position - camPos).Unit
+                    if camLook:Dot(toPart) < -0.1 then
+                        v.LocalTransparencyModifier = 1
+                    else
+                        v.LocalTransparencyModifier = 0
+                    end
                 end
             end
         end
     end)
 end)
 
--- ===== FPS COUNTER RIÊNG =====
+-- ==================== 8. FPS COUNTER ====================
 local fpsGui = Instance.new("ScreenGui")
 fpsGui.Name = "KudoFPS"
 fpsGui.ResetOnSpawn = false
@@ -490,12 +418,12 @@ fpsGui.IgnoreGuiInset = true
 fpsGui.Parent = playerGui
 
 local fpsBox = Instance.new("TextLabel")
-fpsBox.Size = UDim2.new(0, 150, 0, 26)
-fpsBox.Position = UDim2.new(1, -160, 1, -34)
+fpsBox.Size = UDim2.new(0, 120, 0, 24)
+fpsBox.Position = UDim2.new(1, -130, 1, -30)
 fpsBox.BackgroundTransparency = 1
-fpsBox.Text = "FPS: -- | ∞"
-fpsBox.Font = Enum.Font.GothamBold
-fpsBox.TextSize = 13
+fpsBox.Text = "FPS: --"
+fpsBox.Font = Enum.Font.Times
+fpsBox.TextSize = 15
 fpsBox.TextColor3 = Color3.fromRGB(0, 255, 120)
 fpsBox.TextXAlignment = Enum.TextXAlignment.Right
 fpsBox.Parent = fpsGui
@@ -517,30 +445,25 @@ task.spawn(function()
         else
             color = Color3.fromRGB(255, 80, 80)
         end
-        fpsBox.Text = "FPS: " .. fps .. " | ∞"
+        fpsBox.Text = "FPS: " .. fps
         fpsBox.TextColor3 = color
     end
 end)
 
+-- ==================== 9. KẾT THÚC ====================
 setProgress(100, "✅ Hoàn tất")
-task.wait(0.6)
-
-TweenService:Create(progressFill, TweenInfo.new(0.3), {
-    BackgroundColor3 = Color3.fromRGB(0, 255, 120)
-}):Play()
-
-task.wait(0.5)
+task.wait(0.4)
 
 titleLabel.Text = "⚡ fix lag by kudo29001"
 statusLabel.Text = ""
 percentLabel.Text = ""
-TweenService:Create(progressBg, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
-TweenService:Create(progressFill, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
-TweenService:Create(main, TweenInfo.new(0.4, Enum.EasingStyle.Quad), {
+progressBg.Visible = false
+progressFill.Visible = false
+TweenService:Create(main, TweenInfo.new(0.3, Enum.EasingStyle.Quad), {
     Size = UDim2.new(0, 220, 0, 44),
     Position = UDim2.new(0, 15, 0, 15)
 }):Play()
-TweenService:Create(titleLabel, TweenInfo.new(0.4), {
+TweenService:Create(titleLabel, TweenInfo.new(0.3), {
     Size = UDim2.new(1, -20, 1, -12),
     Position = UDim2.new(0, 10, 0, 6),
     TextSize = 13
@@ -548,15 +471,15 @@ TweenService:Create(titleLabel, TweenInfo.new(0.4), {
 
 closeBtn.Visible = false
 
-task.wait(4)
+task.wait(3)
 pcall(function()
-    TweenService:Create(main, TweenInfo.new(0.5), {
+    TweenService:Create(main, TweenInfo.new(0.4), {
         BackgroundTransparency = 1,
         Position = UDim2.new(0, 15, 0, 0)
     }):Play()
-    TweenService:Create(titleLabel, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
-    TweenService:Create(stroke, TweenInfo.new(0.5), {Transparency = 1}):Play()
-    task.wait(0.6)
+    TweenService:Create(titleLabel, TweenInfo.new(0.4), {TextTransparency = 1}):Play()
+    TweenService:Create(stroke, TweenInfo.new(0.4), {Transparency = 1}):Play()
+    task.wait(0.5)
     if scanConn then scanConn:Disconnect() end
     if cullConn then cullConn:Disconnect() end
     sg:Destroy()

@@ -104,7 +104,6 @@ local function step(text, fn, percent)
 end
 
 step("Áp dụng FastFlags...", function()
-    -- UNLIMITED FPS
     setfflag("DFIntTaskSchedulerTargetFps", "9999")
     setfflag("DFIntFrameRateCap", "9999")
     setfflag("DFIntMaxFrameRate", "9999")
@@ -119,7 +118,6 @@ step("Áp dụng FastFlags...", function()
     setfflag("DFIntTripleBufferingEnabled", "0")
     setfflag("FFlagDisableFrameLimiter", "True")
 
-    -- GRAPHICS POTATO
     setfflag("DFIntDebugFRMQualityLevelOverride", "1")
     setfflag("DFIntTextureQualityOverride", "0")
     setfflag("DFFlagTextureQualityOverrideEnabled", "True")
@@ -135,13 +133,11 @@ step("Áp dụng FastFlags...", function()
     setfflag("FFlagDisableAntiAliasing", "True")
     setfflag("FFlagDisableMotionBlur", "True")
 
-    -- SHADOW
     setfflag("FFlagRenderShadowIntensity", "0")
     setfflag("FFlagRenderShadowIntensityOverride", "True")
     setfflag("DFFlagDisableRenderShadowMap", "True")
     setfflag("FFlagDisableShadows", "True")
 
-    -- SKY / ATMOSPHERE
     setfflag("FFlagDebugSkyGray", "True")
     setfflag("FFlagDisableAtmosphere", "True")
     setfflag("FFlagDisableSky", "True")
@@ -149,14 +145,12 @@ step("Áp dụng FastFlags...", function()
     setfflag("FFlagDisableFog", "True")
     setfflag("FFlagDisableWater", "True")
 
-    -- TERRAIN
     setfflag("FFlagDisableTerrain", "True")
     setfflag("DFFlagDisableTerrainTextures", "True")
     setfflag("FFlagDisableTerrainDecoration", "True")
     setfflag("FIntFRMMaxGrassDistance", "0")
     setfflag("FIntFRMMinGrassDistance", "0")
 
-    -- LOD
     setfflag("DFIntCSGLevelOfDetailSwitchingDistance", "0")
     setfflag("DFIntCSGLevelOfDetailSwitchingDistanceL12", "0")
     setfflag("DFIntCSGLevelOfDetailSwitchingDistanceL23", "0")
@@ -165,7 +159,6 @@ step("Áp dụng FastFlags...", function()
     setfflag("FFlagForceLOD0", "True")
     setfflag("DFIntLODBias", "4")
 
-    -- LIGHTING
     setfflag("FFlagDisableDynamicLighting", "True")
     setfflag("FFlagDisablePointLightShadows", "True")
     setfflag("FFlagDisableSpotLightShadows", "True")
@@ -173,7 +166,6 @@ step("Áp dụng FastFlags...", function()
     setfflag("DFFlagDebugRenderForceTechnologyVoxel", "True")
     setfflag("FFlagDebugPauseVoxelizer", "True")
 
-    -- PHYSICS
     setfflag("DFIntSolverSpringDamping", "0")
     setfflag("DFIntPhysicsSendRate", "1")
     setfflag("DFIntMaxSimultaneousPhysicsJobs", "1")
@@ -184,12 +176,10 @@ step("Áp dụng FastFlags...", function()
     setfflag("FFlagDisableRaycastFiltering", "True")
     setfflag("DFFlagSkipRaycastFiltering", "True")
 
-    -- GC
     setfflag("DFFlagGCEnableIncremental", "True")
     setfflag("DFIntGCIncrementalPause", "0")
     setfflag("DFIntGCIncrementalStepMul", "1000")
 
-    -- RENDER OPTIMIZE
     setfflag("DFIntFrameBufferPoolSize", "1")
     setfflag("DFIntRenderMeshMaxBones", "1")
     setfflag("DFIntDebugEngineOptimizationLevel", "3")
@@ -198,12 +188,10 @@ step("Áp dụng FastFlags...", function()
     setfflag("DFFlagTextureCompositorEnabled", "False")
     setfflag("DFFlagDisableGPUOcclusion", "False")
 
-    -- ANIMATION
     setfflag("FFlagDisableAnimationBlending", "True")
     setfflag("DFFlagSkipAnimationBlending", "True")
     setfflag("FFlagDisableFacialAnimation", "True")
 
-    -- NETWORK
     setfflag("DFIntConnectionMTUSize", "1400")
 end, 20)
 
@@ -271,7 +259,6 @@ local potatoMaterials = {
     [Enum.Material.Plaster]=true,[Enum.Material.Rubber]=true,
 }
 
--- Cache nhân vật
 local charModels = {}
 local charConns = {}
 local function watchPlayer(plr)
@@ -309,7 +296,6 @@ local function isCharacterDescendant(v)
     return false
 end
 
--- Bảo vệ tên người chơi + âm thanh
 local function isNameTag(v)
     if v:IsA("BillboardGui") then return true end
     if v:IsA("TextLabel") or v:IsA("TextButton") or v:IsA("TextScreenGui") then return true end
@@ -319,6 +305,9 @@ local function isNameTag(v)
     if v:IsA("CharacterMesh") then return true end
     if v:IsA("BodyColors") then return true end
     if v:IsA("Sound") then return true end
+    if v:IsA("Animator") or v:IsA("AnimationController") then return true end
+    if v:IsA("Animation") then return true end
+    if v:IsA("KeyframeSequence") or v:IsA("Keyframe") or v:IsA("Pose") then return true end
     return false
 end
 
@@ -422,7 +411,6 @@ task.spawn(function()
     end
 end)
 
--- ===== CAMERA CULLING =====
 local cullConn
 cullConn = RunService.Heartbeat:Connect(function()
     pcall(function()
@@ -477,7 +465,6 @@ task.spawn(function()
     end
 end)
 
--- ===== TẮT HUMANOID STATE MACHINE =====
 task.spawn(function()
     task.wait(1)
     pcall(function()
@@ -493,8 +480,6 @@ task.spawn(function()
                     hum:SetStateEnabled(Enum.HumanoidStateType.Landed, false)
                     hum:SetStateEnabled(Enum.HumanoidStateType.PlatformStanding, false)
                     hum:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
-                    hum:SetStateEnabled(Enum.HumanoidStateType.Running, true)
-                    hum:SetStateEnabled(Enum.HumanoidStateType.RunningNoPhysics, true)
                     hum:SetStateEnabled(Enum.HumanoidStateType.Seated, false)
                     hum:SetStateEnabled(Enum.HumanoidStateType.StrafingNoPhysics, false)
                     hum:SetStateEnabled(Enum.HumanoidStateType.Swimming, false)
@@ -504,7 +489,6 @@ task.spawn(function()
     end)
 end)
 
--- ===== FPS COUNTER RIÊNG =====
 local fpsGui = Instance.new("ScreenGui")
 fpsGui.Name = "KudoFPS"
 fpsGui.ResetOnSpawn = false
@@ -515,9 +499,9 @@ local fpsBox = Instance.new("TextLabel")
 fpsBox.Size = UDim2.new(0, 150, 0, 26)
 fpsBox.Position = UDim2.new(1, -160, 1, -34)
 fpsBox.BackgroundTransparency = 1
-fpsBox.Text = "FPS: -- | ∞"
-fpsBox.Font = Enum.Font.GothamBold
-fpsBox.TextSize = 13
+fpsBox.Text = "FPS: --"
+fpsBox.Font = Enum.Font.Times
+fpsBox.TextSize = 15
 fpsBox.TextColor3 = Color3.fromRGB(0, 255, 120)
 fpsBox.TextXAlignment = Enum.TextXAlignment.Right
 fpsBox.Parent = fpsGui
@@ -539,7 +523,7 @@ task.spawn(function()
         else
             color = Color3.fromRGB(255, 80, 80)
         end
-        fpsBox.Text = "FPS: " .. fps .. " | ∞"
+        fpsBox.Text = "FPS: " .. fps
         fpsBox.TextColor3 = color
     end
 end)

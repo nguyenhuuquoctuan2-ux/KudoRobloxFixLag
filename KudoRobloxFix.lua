@@ -89,18 +89,6 @@ closeBtn.BorderSizePixel = 0
 Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 5)
 closeBtn.Parent = main
 
-local fpsLabel = Instance.new("TextLabel")
-fpsLabel.Name = "FPS"
-fpsLabel.Size = UDim2.new(0, 120, 0, 26)
-fpsLabel.Position = UDim2.new(1, -130, 1, -34)
-fpsLabel.BackgroundTransparency = 1
-fpsLabel.Text = "FPS: --"
-fpsLabel.Font = Enum.Font.GothamBold
-fpsLabel.TextSize = 13
-fpsLabel.TextColor3 = Color3.fromRGB(0, 255, 120)
-fpsLabel.TextXAlignment = Enum.TextXAlignment.Right
-fpsLabel.Parent = sg
-
 local function setProgress(percent, text)
     percent = math.clamp(percent, 0, 100)
     TweenService:Create(progressFill, TweenInfo.new(0.15, Enum.EasingStyle.Quad), {
@@ -116,9 +104,7 @@ local function step(text, fn, percent)
     task.wait(0.02)
 end
 
--- ===== FFLAG GỌN NHẸ (chỉ những cái có tác dụng thật) =====
 step("Áp dụng FastFlags...", function()
-    -- GRAPHICS
     setfflag("DFIntDebugFRMQualityLevelOverride", "1")
     setfflag("DFIntTextureQualityOverride", "0")
     setfflag("DFFlagTextureQualityOverrideEnabled", "True")
@@ -134,29 +120,21 @@ step("Áp dụng FastFlags...", function()
     setfflag("FFlagDisableAntiAliasing", "True")
     setfflag("FFlagDisableVSync", "True")
     setfflag("FFlagDisableMotionBlur", "True")
-
-    -- SHADOW
     setfflag("FFlagRenderShadowIntensity", "0")
     setfflag("FFlagRenderShadowIntensityOverride", "True")
     setfflag("DFFlagDisableRenderShadowMap", "True")
     setfflag("FFlagDisableShadows", "True")
-
-    -- SKY/ATMOSPHERE
     setfflag("FFlagDebugSkyGray", "True")
     setfflag("FFlagDisableAtmosphere", "True")
     setfflag("FFlagDisableSky", "True")
     setfflag("FFlagDisableSkybox", "True")
     setfflag("FFlagDisableFog", "True")
     setfflag("FFlagDisableWater", "True")
-
-    -- TERRAIN
     setfflag("FFlagDisableTerrain", "True")
     setfflag("DFFlagDisableTerrainTextures", "True")
     setfflag("FFlagDisableTerrainDecoration", "True")
     setfflag("FIntFRMMaxGrassDistance", "0")
     setfflag("FIntFRMMinGrassDistance", "0")
-
-    -- LOD
     setfflag("DFIntCSGLevelOfDetailSwitchingDistance", "0")
     setfflag("DFIntCSGLevelOfDetailSwitchingDistanceL12", "0")
     setfflag("DFIntCSGLevelOfDetailSwitchingDistanceL23", "0")
@@ -164,24 +142,18 @@ step("Áp dụng FastFlags...", function()
     setfflag("FFlagDisableLODTransitions", "True")
     setfflag("FFlagForceLOD0", "True")
     setfflag("DFIntLODBias", "4")
-
-    -- LIGHTING
     setfflag("FFlagDisableDynamicLighting", "True")
     setfflag("FFlagDisablePointLightShadows", "True")
     setfflag("FFlagDisableSpotLightShadows", "True")
     setfflag("FFlagDisableSurfaceLightShadows", "True")
     setfflag("DFFlagDebugRenderForceTechnologyVoxel", "True")
     setfflag("FFlagDebugPauseVoxelizer", "True")
-
-    -- PHYSICS
     setfflag("DFIntSolverSpringDamping", "0")
     setfflag("DFIntPhysicsSendRate", "1")
     setfflag("DFIntMaxSimultaneousPhysicsJobs", "1")
     setfflag("DFIntPhysicsStepPerFrame", "1")
     setfflag("DFIntMaximumCollisionIterations", "1")
     setfflag("DFIntSolverConvergenceIterations", "1")
-
-    -- FPS / GC
     setfflag("DFIntTaskSchedulerTargetFps", "240")
     setfflag("DFIntFrameRateCap", "240")
     setfflag("DFIntMinFrameRate", "30")
@@ -189,23 +161,16 @@ step("Áp dụng FastFlags...", function()
     setfflag("DFFlagGCEnableIncremental", "True")
     setfflag("DFIntGCIncrementalPause", "1")
     setfflag("DFIntGCIncrementalStepMul", "500")
-
-    -- RENDER OPTIMIZE
     setfflag("DFIntFrameBufferPoolSize", "1")
     setfflag("DFIntRenderMeshMaxBones", "1")
     setfflag("DFIntDebugEngineOptimizationLevel", "3")
     setfflag("DFFlagForceTextureLOD", "True")
     setfflag("DFFlagTextureCompositorEnable", "False")
     setfflag("DFFlagTextureCompositorEnabled", "False")
-
-    -- ANIMATION (chỉ tắt blend, giữ animation chạy)
     setfflag("FFlagDisableAnimationBlending", "True")
     setfflag("DFFlagSkipAnimationBlending", "True")
     setfflag("FFlagDisableFacialAnimation", "True")
-
-    -- NETWORK
     setfflag("DFIntConnectionMTUSize", "1400")
-    setfflag("DFIntS2PhysicsSenderRate", "1")
 end, 15)
 
 step("Hạ graphics...", function()
@@ -285,6 +250,7 @@ local potatoMaterials = {
     [Enum.Material.Plaster]=true,[Enum.Material.Rubber]=true,
 }
 
+-- Cache nhân vật
 local charModels = {}
 local function refreshCharModels()
     charModels = {}
@@ -296,12 +262,26 @@ local function refreshCharModels()
 end
 refreshCharModels()
 
-game.Players.PlayerAdded:Connect(function(plr)
-    plr.CharacterAdded:Connect(function(c)
+local charConns = {}
+local function watchPlayer(plr)
+    if charConns[plr] then charConns[plr]:Disconnect() end
+    charConns[plr] = plr.CharacterAdded:Connect(function(c)
         charModels[c] = true
     end)
-end)
+    if plr.Character then
+        charModels[plr.Character] = true
+    end
+end
+
+for _, plr in ipairs(game.Players:GetPlayers()) do
+    watchPlayer(plr)
+end
+game.Players.PlayerAdded:Connect(watchPlayer)
 game.Players.PlayerRemoving:Connect(function(plr)
+    if charConns[plr] then
+        charConns[plr]:Disconnect()
+        charConns[plr] = nil
+    end
     if plr.Character then
         charModels[plr.Character] = nil
     end
@@ -318,21 +298,21 @@ local function isCharacterDescendant(v)
     return false
 end
 
-local function isProtected(v)
-    if v:IsA("Decal") then return true end
-    if v:IsA("Shirt") or v:IsA("Pants") or v:IsA("ShirtGraphic") then return true end
+-- Bảo vệ DUY NHẤT tên người chơi
+local function isNameTag(v)
     if v:IsA("BillboardGui") then return true end
     if v:IsA("TextLabel") or v:IsA("TextButton") or v:IsA("TextScreenGui") then return true end
+    if v:IsA("Humanoid") then return true end
     if v:IsA("Accessory") then return true end
+    if v:IsA("Shirt") or v:IsA("Pants") or v:IsA("ShirtGraphic") then return true end
     if v:IsA("CharacterMesh") then return true end
     if v:IsA("BodyColors") then return true end
-    if v:IsA("Humanoid") then return true end
-    if isCharacterDescendant(v) then return true end
     return false
 end
 
 local function optimizeObject(v)
-    if isProtected(v) then return end
+    if isNameTag(v) then return end
+    if isCharacterDescendant(v) then return end
 
     if v:IsA("BasePart") then
         pcall(function()
@@ -341,6 +321,8 @@ local function optimizeObject(v)
             v.CastShadow = false
             v.Massless = true
         end)
+    elseif v:IsA("Decal") then
+        pcall(function() v.Transparency = 1 end)
     elseif v:IsA("Texture") then
         pcall(function() v.Transparency = 1 end)
     elseif v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Smoke")
@@ -402,6 +384,8 @@ step("Tối ưu Player...", function()
                             v.Reflectance = 0
                             v.Massless = true
                         end)
+                    elseif v:IsA("Decal") then
+                        pcall(function() v.Transparency = 1 end)
                     end
                 end
             end
@@ -428,7 +412,7 @@ task.spawn(function()
     end
 end)
 
--- ===== FPS COUNTER CHẠY MÃI MÃI (không bị destroy khi GUI ẩn) =====
+-- ===== FPS COUNTER RIÊNG (không bị destroy) =====
 local fpsGui = Instance.new("ScreenGui")
 fpsGui.Name = "KudoFPS"
 fpsGui.ResetOnSpawn = false
@@ -507,9 +491,7 @@ pcall(function()
 end)
 
 closeBtn.MouseButton1Click:Connect(function()
-    pcall(function()
-        sg:Destroy()
-    end)
+    pcall(function() sg:Destroy() end)
 end)
 
 print("✅ fix lag by kudo29001")

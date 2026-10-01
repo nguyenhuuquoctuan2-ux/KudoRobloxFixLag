@@ -4,7 +4,6 @@ local Lighting = game:GetService("Lighting")
 local Workspace = game:GetService("Workspace")
 local TweenService = game:GetService("TweenService")
 local SoundService = game:GetService("SoundService")
-local RunService = game:GetService("RunService")
 local Terrain = Workspace:FindFirstChildOfClass("Terrain")
 local Camera = Workspace.CurrentCamera
 
@@ -176,9 +175,7 @@ step("Áp dụng FastFlags...", function()
     setfflag("FFlagDisableAtmosphericScattering", "True")
 
     setfflag("FFlagRenderSkipTerrain", "True")
-    setfflag("FFlagRenderSkipParts", "False")
     setfflag("DFFlagRenderSkipMaterialTextures", "True")
-    setfflag("DFFlagRenderSkipTransparency", "False")
     setfflag("FFlagRenderSkipLighting", "True")
     setfflag("FFlagRenderSkipSpecular", "True")
     setfflag("FFlagRenderSkipNormal", "True")
@@ -211,12 +208,6 @@ step("Áp dụng FastFlags...", function()
 
     setfflag("FFlagDisableSpriteSheet", "True")
     setfflag("FFlagDisableRagdoll", "True")
-    setfflag("FFlagDisableClothing", "True")
-    setfflag("FFlagDisableAccessories", "True")
-    setfflag("FFlagDisableAvatarRendering", "True")
-    setfflag("DFFlagSkipAvatarRendering", "True")
-    setfflag("DFFlagSkipHumanoidRendering", "True")
-    setfflag("DFFlagSkipAccessoryRendering", "True")
 
     setfflag("FFlagDisableLODTransitions", "True")
     setfflag("DFFlagSkipLODTransitions", "True")
@@ -224,12 +215,10 @@ step("Áp dụng FastFlags...", function()
     setfflag("DFIntLODBias", "4")
 
     setfflag("DFIntPhysicsTickerMaxTime", "1")
-    setfflag("DFFlagSkipPhysicsSleep", "False")
     setfflag("DFIntPhysicsStepPerFrame", "1")
     setfflag("FFlagDisableRaycastFiltering", "True")
     setfflag("DFFlagSkipRaycastFiltering", "True")
 
-    setfflag("DFFlagSkipCollisionChecks", "False")
     setfflag("DFIntMaximumCollisionIterations", "1")
     setfflag("DFIntSolverConvergenceIterations", "1")
 
@@ -241,7 +230,6 @@ step("Áp dụng FastFlags...", function()
     setfflag("FFlagDisableRenderingParticles", "True")
     setfflag("FFlagDisableRenderingBeams", "True")
     setfflag("FFlagDisableRenderingTrails", "True")
-    setfflag("FFlagDisableRenderingMeshes", "False")
 end, 10)
 
 step("Hạ graphics...", function()
@@ -255,7 +243,6 @@ end, 20)
 step("Tối ưu Camera...", function()
     if Camera then
         Camera.FieldOfView = 70
-        Camera.CFrame = Camera.CFrame
         Camera.CameraType = Enum.CameraType.Custom
     end
     pcall(function() workspace.StreamingEnabled = true end)
@@ -326,24 +313,46 @@ local potatoMaterials = {
     [Enum.Material.Plaster]=true,[Enum.Material.Rubber]=true,
 }
 
+local function isCharacterPart(v)
+    pcall(function()
+        local char = player.Character
+        if char and v:IsDescendantOf(char) then return true end
+        for _, plr in ipairs(game.Players:GetPlayers()) do
+            if plr.Character and v:IsDescendantOf(plr.Character) then return true end
+        end
+    end)
+    return false
+end
+
 local function optimizeObject(v)
+    local inChar = isCharacterPart(v)
+
     if v:IsA("BasePart") then
         pcall(function()
-            if potatoMaterials[v.Material] then v.Material = Enum.Material.SmoothPlastic end
-            v.Reflectance = 0
-            v.CastShadow = false
+            if potatoMaterials[v.Material] and not inChar then
+                v.Material = Enum.Material.SmoothPlastic
+            end
+            if not inChar then
+                v.Reflectance = 0
+                v.CastShadow = false
+            end
             v.Massless = true
             v.CanTouch = false
             v.CanQuery = false
-            v.Transparency = v.Transparency
         end)
     elseif v:IsA("Decal") or v:IsA("Texture") then
-        pcall(function() v.Transparency = 1 end)
+        if not inChar then
+            pcall(function() v.Transparency = 1 end)
+        end
     elseif v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Smoke")
         or v:IsA("Fire") or v:IsA("Sparkles") or v:IsA("Beam") then
-        pcall(function() v.Enabled = false; v:Destroy() end)
+        if not inChar then
+            pcall(function() v.Enabled = false; v:Destroy() end)
+        end
     elseif v:IsA("SurfaceAppearance") then
-        pcall(function() v:Destroy() end)
+        if not inChar then
+            pcall(function() v:Destroy() end)
+        end
     elseif v:IsA("SpecialMesh") then
         pcall(function()
             if v.MeshType == Enum.MeshType.FileMesh or v.MeshType == Enum.MeshType.Head then
@@ -355,7 +364,9 @@ local function optimizeObject(v)
         end)
     elseif v:IsA("MeshPart") then
         pcall(function()
-            v.TextureID = ""
+            if not inChar then
+                v.TextureID = ""
+            end
             v.RenderFidelity = Enum.RenderFidelity.Performance
             v.CollisionFidelity = Enum.CollisionFidelity.Box
             v.CastShadow = false
@@ -394,16 +405,14 @@ local function optimizeObject(v)
             v.NameDisplayDistance = 0
             v.HealthDisplayDistance = 0
         end)
-    elseif v:IsA("Accessory") or v:IsA("Shirt") or v:IsA("Pants") or v:IsA("ShirtGraphic") then
-        pcall(function() v:Destroy() end)
-    elseif v:IsA("Clothing") or v:IsA("BodyColors") then
-        pcall(function() v:Destroy() end)
-    elseif v:IsA("Decal") then
-        pcall(function() v:Destroy() end)
+    elseif v:IsA("Accessory") or v:IsA("ForceField") or v:IsA("Explosion") then
+        if not inChar then
+            pcall(function() v:Destroy() end)
+        end
     elseif v:IsA("CharacterMesh") then
-        pcall(function() v:Destroy() end)
-    elseif v:IsA("ForceField") or v:IsA("Explosion") then
-        pcall(function() v:Destroy() end)
+        if not inChar then
+            pcall(function() v:Destroy() end)
+        end
     end
 end
 
@@ -466,10 +475,12 @@ task.spawn(function()
         task.wait(2)
         pcall(function()
             for _, v in ipairs(Workspace:GetDescendants()) do
-                if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam")
+                if (v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam")
                     or v:IsA("Smoke") or v:IsA("Fire") or v:IsA("Sparkles")
-                    or v:IsA("PointLight") or v:IsA("SpotLight") or v:IsA("SurfaceLight") then
-                    v.Enabled = false
+                    or v:IsA("PointLight") or v:IsA("SpotLight") or v:IsA("SurfaceLight")) then
+                    if not isCharacterPart(v) then
+                        v.Enabled = false
+                    end
                 end
             end
         end)

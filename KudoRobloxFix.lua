@@ -90,7 +90,9 @@ closeBtn.Parent = main
 
 local function setProgress(percent, text)
     percent = math.clamp(percent, 0, 100)
-    progressFill.Size = UDim2.new(percent / 100, 0, 1, 0)
+    TweenService:Create(progressFill, TweenInfo.new(0.15, Enum.EasingStyle.Quad), {
+        Size = UDim2.new(percent / 100, 0, 1, 0)
+    }):Play()
     percentLabel.Text = math.floor(percent) .. "%"
     if text then statusLabel.Text = text end
 end
@@ -170,9 +172,6 @@ step("Áp dụng FastFlags...", function()
     setfflag("DFIntPhysicsStepPerFrame", "1")
     setfflag("DFIntMaximumCollisionIterations", "1")
     setfflag("DFIntSolverConvergenceIterations", "1")
-    setfflag("DFIntPhysicsTickerMaxTime", "1")
-    setfflag("FFlagDisableRaycastFiltering", "True")
-    setfflag("DFFlagSkipRaycastFiltering", "True")
 
     setfflag("DFFlagGCEnableIncremental", "True")
     setfflag("DFIntGCIncrementalPause", "0")
@@ -205,10 +204,6 @@ step("Tối ưu Camera...", function()
         Camera.FieldOfView = 70
         Camera.CameraType = Enum.CameraType.Custom
     end
-    pcall(function() Workspace.StreamingEnabled = true end)
-    pcall(function() Workspace.StreamingTargetRadius = 128 end)
-    pcall(function() Workspace.StreamingMinRadius = 64 end)
-    pcall(function() Workspace.StreamOutBehavior = Enum.StreamOutBehavior.Opportunistic end)
 end, 40)
 
 step("Tắt Terrain...", function()
@@ -318,7 +313,6 @@ local function optimizeObject(v)
             if potatoMaterials[v.Material] then v.Material = Enum.Material.SmoothPlastic end
             v.Reflectance = 0
             v.CastShadow = false
-            v.Massless = true
         end)
     elseif v:IsA("Decal") then
         pcall(function() v.Transparency = 1 end)
@@ -339,9 +333,7 @@ local function optimizeObject(v)
         pcall(function()
             v.TextureID = ""
             v.RenderFidelity = Enum.RenderFidelity.Performance
-            v.CollisionFidelity = Enum.CollisionFidelity.Box
             v.CastShadow = false
-            v.Massless = true
         end)
     elseif v:IsA("Highlight") or v:IsA("SelectionBox") or v:IsA("BoxHandleAdornment") then
         pcall(function() v.Enabled = false end)
@@ -364,37 +356,11 @@ local total = #allDescendants
 for i, v in ipairs(allDescendants) do
     optimizeObject(v)
     if i % 200 == 0 then
-        local p = 65 + math.floor((i / total) * 25)
+        local p = 65 + math.floor((i / total) * 30)
         setProgress(p, "Đang quét... " .. i .. "/" .. total)
         task.wait()
     end
 end
-
-step("Tối ưu Player...", function()
-    pcall(function()
-        for _, plr in ipairs(game.Players:GetPlayers()) do
-            local char = plr.Character
-            if char then
-                for _, v in ipairs(char:GetDescendants()) do
-                    if v:IsA("BasePart") then
-                        pcall(function()
-                            v.Reflectance = 0
-                            v.Massless = true
-                        end)
-                    elseif v:IsA("Decal") then
-                        pcall(function() v.Transparency = 1 end)
-                    end
-                end
-            end
-        end
-    end)
-end, 94)
-
-setProgress(97, "Dọn bộ nhớ...")
-task.spawn(function()
-    pcall(function() collectgarbage("collect") end)
-end)
-task.wait(0.1)
 
 local scanConn
 scanConn = Workspace.DescendantAdded:Connect(function(v)
@@ -403,7 +369,7 @@ end)
 
 task.spawn(function()
     while sg.Parent do
-        task.wait(10)
+        task.wait(15)
         pcall(function() collectgarbage("collect") end)
     end
 end)
@@ -415,19 +381,17 @@ cullConn = RunService.Heartbeat:Connect(function()
         local camPos = Camera.CFrame.Position
         local camLook = Camera.CFrame.LookVector
         for _, v in ipairs(Workspace:GetChildren()) do
-            if v:IsA("Model") or v:IsA("BasePart") then
+            if v:IsA("BasePart") then
                 if not isCharacterDescendant(v) then
-                    if v:IsA("BasePart") then
-                        local dist = (v.Position - camPos).Magnitude
-                        if dist > 500 then
+                    local dist = (v.Position - camPos).Magnitude
+                    if dist > 500 then
+                        v.LocalTransparencyModifier = 1
+                    else
+                        local toPart = (v.Position - camPos).Unit
+                        if camLook:Dot(toPart) < -0.3 then
                             v.LocalTransparencyModifier = 1
                         else
-                            local toPart = (v.Position - camPos).Unit
-                            if camLook:Dot(toPart) < -0.3 then
-                                v.LocalTransparencyModifier = 1
-                            else
-                                v.LocalTransparencyModifier = 0
-                            end
+                            v.LocalTransparencyModifier = 0
                         end
                     end
                 end
@@ -438,12 +402,11 @@ end)
 
 task.spawn(function()
     while sg.Parent do
-        task.wait(2)
+        task.wait(3)
         pcall(function()
             for _, v in ipairs(Workspace:GetDescendants()) do
                 if (v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam")
-                    or v:IsA("Smoke") or v:IsA("Fire") or v:IsA("Sparkles")
-                    or v:IsA("PointLight") or v:IsA("SpotLight") or v:IsA("SurfaceLight")) then
+                    or v:IsA("Smoke") or v:IsA("Fire") or v:IsA("Sparkles")) then
                     if not isCharacterDescendant(v) then
                         v.Enabled = false
                     end
@@ -451,39 +414,6 @@ task.spawn(function()
             end
         end)
     end
-end)
-
-task.spawn(function()
-    while sg.Parent do
-        task.wait(1)
-        pcall(function()
-            if Camera then Camera.FieldOfView = 70 end
-        end)
-    end
-end)
-
-task.spawn(function()
-    task.wait(1)
-    pcall(function()
-        for _, plr in ipairs(game.Players:GetPlayers()) do
-            local char = plr.Character
-            if char then
-                local hum = char:FindFirstChildOfClass("Humanoid")
-                if hum then
-                    hum:SetStateEnabled(Enum.HumanoidStateType.Climbing, false)
-                    hum:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
-                    hum:SetStateEnabled(Enum.HumanoidStateType.Flying, false)
-                    hum:SetStateEnabled(Enum.HumanoidStateType.Freefall, false)
-                    hum:SetStateEnabled(Enum.HumanoidStateType.Landed, false)
-                    hum:SetStateEnabled(Enum.HumanoidStateType.PlatformStanding, false)
-                    hum:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
-                    hum:SetStateEnabled(Enum.HumanoidStateType.Seated, false)
-                    hum:SetStateEnabled(Enum.HumanoidStateType.StrafingNoPhysics, false)
-                    hum:SetStateEnabled(Enum.HumanoidStateType.Swimming, false)
-                end
-            end
-        end
-    end)
 end)
 
 local fpsGui = Instance.new("ScreenGui")
@@ -526,13 +456,14 @@ task.spawn(function()
 end)
 
 setProgress(100, "✅ Hoàn tất")
-task.wait(0.6)
+
+task.wait(1)
 
 titleLabel.Text = "⚡ fix lag by kudo29001"
 statusLabel.Text = ""
 percentLabel.Text = ""
-progressBg.Visible = false
-progressFill.Visible = false
+TweenService:Create(progressBg, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
+TweenService:Create(progressFill, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
 TweenService:Create(main, TweenInfo.new(0.4, Enum.EasingStyle.Quad), {
     Size = UDim2.new(0, 220, 0, 44),
     Position = UDim2.new(0, 15, 0, 15)

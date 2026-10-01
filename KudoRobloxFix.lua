@@ -28,63 +28,63 @@ Instance.new("UICorner", main).CornerRadius = UDim.new(0, 14)
 local mainStroke = Instance.new("UIStroke")
 mainStroke.Color = Color3.fromRGB(0, 220, 100)
 mainStroke.Thickness = 1.5
-mainStroke.Transparency = 1
+mainStroke.Transparency = 0.35
 mainStroke.Parent = main
 
 local titleLabel = Instance.new("TextLabel")
-titleLabel.Size = UDim2.new(1, -20, 0, 26)
-titleLabel.Position = UDim2.new(0, 10, 0, 22)
+titleLabel.Size = UDim2.new(1, -20, 0, 24)
+titleLabel.Position = UDim2.new(0, 10, 0, 18)
 titleLabel.BackgroundTransparency = 1
 titleLabel.Text = "⚡ FIX LAG"
 titleLabel.Font = Enum.Font.GothamBold
 titleLabel.TextSize = 17
 titleLabel.TextColor3 = Color3.fromRGB(0, 255, 120)
 titleLabel.TextXAlignment = Enum.TextXAlignment.Center
-titleLabel.TextTransparency = 1
+titleLabel.TextTransparency = 0
 titleLabel.Parent = main
 
 local subLabel = Instance.new("TextLabel")
-subLabel.Size = UDim2.new(1, -20, 0, 16)
-subLabel.Position = UDim2.new(0, 10, 0, 50)
+subLabel.Size = UDim2.new(1, -20, 0, 14)
+subLabel.Position = UDim2.new(0, 10, 0, 44)
 subLabel.BackgroundTransparency = 1
 subLabel.Text = "by kudo29001"
 subLabel.Font = Enum.Font.Gotham
 subLabel.TextSize = 10
 subLabel.TextColor3 = Color3.fromRGB(150, 150, 160)
 subLabel.TextXAlignment = Enum.TextXAlignment.Center
-subLabel.TextTransparency = 1
+subLabel.TextTransparency = 0
 subLabel.Parent = main
 
 local percentLabel = Instance.new("TextLabel")
-percentLabel.Size = UDim2.new(1, -20, 0, 20)
-percentLabel.Position = UDim2.new(0, 10, 0, 78)
+percentLabel.Size = UDim2.new(1, -20, 0, 22)
+percentLabel.Position = UDim2.new(0, 10, 0, 68)
 percentLabel.BackgroundTransparency = 1
 percentLabel.Text = "0%"
 percentLabel.Font = Enum.Font.GothamBold
-percentLabel.TextSize = 15
+percentLabel.TextSize = 16
 percentLabel.TextColor3 = Color3.fromRGB(0, 255, 120)
 percentLabel.TextXAlignment = Enum.TextXAlignment.Center
-percentLabel.TextTransparency = 1
+percentLabel.TextTransparency = 0
 percentLabel.Parent = main
 
 local statusLabel = Instance.new("TextLabel")
 statusLabel.Size = UDim2.new(1, -30, 0, 16)
-statusLabel.Position = UDim2.new(0, 15, 0, 102)
+statusLabel.Position = UDim2.new(0, 15, 0, 94)
 statusLabel.BackgroundTransparency = 1
 statusLabel.Text = "Đang khởi tạo..."
 statusLabel.Font = Enum.Font.Gotham
 statusLabel.TextSize = 10
 statusLabel.TextColor3 = Color3.fromRGB(200, 200, 210)
 statusLabel.TextXAlignment = Enum.TextXAlignment.Center
-statusLabel.TextTransparency = 1
+statusLabel.TextTransparency = 0
 statusLabel.Parent = main
 
 local progressBg = Instance.new("Frame")
 progressBg.Size = UDim2.new(1, -50, 0, 7)
-progressBg.Position = UDim2.new(0, 25, 0, 130)
+progressBg.Position = UDim2.new(0, 25, 0, 120)
 progressBg.BackgroundColor3 = Color3.fromRGB(30, 30, 38)
 progressBg.BorderSizePixel = 0
-progressBg.BackgroundTransparency = 1
+progressBg.BackgroundTransparency = 0
 progressBg.Parent = main
 Instance.new("UICorner", progressBg).CornerRadius = UDim.new(0, 4)
 
@@ -104,8 +104,8 @@ closeBtn.Font = Enum.Font.GothamBold
 closeBtn.TextSize = 12
 closeBtn.TextColor3 = Color3.new(1, 1, 1)
 closeBtn.BorderSizePixel = 0
-closeBtn.BackgroundTransparency = 1
-closeBtn.TextTransparency = 1
+closeBtn.BackgroundTransparency = 0
+closeBtn.TextTransparency = 0
 closeBtn.Parent = main
 Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 6)
 
@@ -120,8 +120,6 @@ fpsLabel.TextSize = 13
 fpsLabel.TextColor3 = Color3.fromRGB(0, 255, 120)
 fpsLabel.TextXAlignment = Enum.TextXAlignment.Right
 fpsLabel.Parent = sg
-
-local done = false
 
 local function setProgress(percent, text)
     percent = math.clamp(percent, 0, 100)
@@ -270,9 +268,9 @@ step("Tối ưu Camera...", function()
         Camera.FieldOfView = 70
         Camera.CameraType = Enum.CameraType.Custom
     end
-    pcall(function() workspace.StreamingEnabled = true end)
-    pcall(function() workspace.StreamingTargetRadius = 128 end)
-    pcall(function() workspace.StreamingMinRadius = 64 end)
+    pcall(function() Workspace.StreamingEnabled = true end)
+    pcall(function() Workspace.StreamingTargetRadius = 128 end)
+    pcall(function() Workspace.StreamingMinRadius = 64 end)
 end, 30)
 
 step("Tắt Terrain...", function()
@@ -338,13 +336,31 @@ local potatoMaterials = {
     [Enum.Material.Plaster]=true,[Enum.Material.Rubber]=true,
 }
 
+local charModels = {}
+local function refreshCharModels()
+    charModels = {}
+    for _, plr in ipairs(game.Players:GetPlayers()) do
+        if plr.Character then
+            charModels[plr.Character] = true
+        end
+    end
+end
+refreshCharModels()
+game.Players.PlayerAdded:Connect(function(plr)
+    plr.CharacterAdded:Connect(function(c)
+        charModels[c] = true
+    end)
+end)
+game.Players.PlayerRemoving:Connect(function(plr)
+    if plr.Character then
+        charModels[plr.Character] = nil
+    end
+end)
+
 local function isCharacterDescendant(v)
     local current = v
     while current do
-        if current:IsA("Model") then
-            local hum = current:FindFirstChildOfClass("Humanoid")
-            if hum then return true end
-        end
+        if charModels[current] then return true end
         if current:IsA("Accessory") then return true end
         if current:IsA("Tool") then return true end
         current = current.Parent
@@ -361,13 +377,6 @@ local function isClothingOrName(v)
     if v:IsA("CharacterMesh") then return true end
     if v:IsA("BodyColors") then return true end
     if v:IsA("Humanoid") then return true end
-    if v:IsA("SurfaceAppearance") then
-        local parent = v.Parent
-        if parent and isCharacterDescendant(parent) then return true end
-    end
-    if v:IsA("MeshPart") or v:IsA("SpecialMesh") or v:IsA("BasePart") then
-        if isCharacterDescendant(v) then return true end
-    end
     return false
 end
 
@@ -429,8 +438,7 @@ local function optimizeObject(v)
                 t:Stop(); t:Destroy()
             end
         end)
-    elseif v:IsA("Highlight") or v:IsA("SelectionBox") or v:IsA("BoxHandleAdornment")
-        or v:IsA("BillboardGui") or v:IsA("SurfaceGui") then
+    elseif v:IsA("Highlight") or v:IsA("SelectionBox") or v:IsA("BoxHandleAdornment") then
         pcall(function() v.Enabled = false end)
     elseif v:IsA("Attachment") then
         pcall(function()
@@ -482,16 +490,6 @@ end)
 local scanConn
 scanConn = Workspace.DescendantAdded:Connect(function(v)
     task.defer(function() optimizeObject(v) end)
-end)
-
-local charConn = game.Players.PlayerAdded:Connect(function(plr)
-    plr.CharacterAdded:Connect(function(char)
-        task.defer(function()
-            for _, v in ipairs(char:GetDescendants()) do
-                optimizeObject(v)
-            end
-        end)
-    end)
 end)
 
 task.spawn(function()
@@ -549,72 +547,36 @@ task.spawn(function()
     end
 end)
 
+-- ========== HOÀN TẤT ==========
 setProgress(100, "✅ Hoàn tất")
 task.wait(0.6)
 
-TweenService:Create(mainStroke, TweenInfo.new(0.5), {Transparency = 0.35}):Play()
-TweenService:Create(main, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-    Size = UDim2.new(0, 260, 0, 130)
-}):Play()
-TweenService:Create(titleLabel, TweenInfo.new(0.4), {TextTransparency = 0}):Play()
-TweenService:Create(subLabel, TweenInfo.new(0.4), {TextTransparency = 0}):Play()
-TweenService:Create(percentLabel, TweenInfo.new(0.4), {TextTransparency = 0}):Play()
-TweenService:Create(statusLabel, TweenInfo.new(0.4), {TextTransparency = 0}):Play()
-TweenService:Create(progressBg, TweenInfo.new(0.4), {BackgroundTransparency = 0}):Play()
-TweenService:Create(closeBtn, TweenInfo.new(0.4), {BackgroundTransparency = 0, TextTransparency = 0}):Play()
-
-task.wait(0.5)
-
 titleLabel.Text = "⚡ fix lag by kudo29001"
 statusLabel.Text = "Đã áp dụng"
-percentLabel.Text = "100%"
 progressFill.BackgroundColor3 = Color3.fromRGB(0, 255, 120)
 
 task.wait(6)
 
-done = true
-
 pcall(function()
-    TweenService:Create(main, TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+    if scanConn then scanConn:Disconnect() end
+    TweenService:Create(main, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
         Size = UDim2.new(0, 0, 0, 0),
         BackgroundTransparency = 1
     }):Play()
-    TweenService:Create(titleLabel, TweenInfo.new(0.4), {TextTransparency = 1}):Play()
-    TweenService:Create(subLabel, TweenInfo.new(0.4), {TextTransparency = 1}):Play()
-    TweenService:Create(percentLabel, TweenInfo.new(0.4), {TextTransparency = 1}):Play()
-    TweenService:Create(statusLabel, TweenInfo.new(0.4), {TextTransparency = 1}):Play()
-    TweenService:Create(progressBg, TweenInfo.new(0.4), {BackgroundTransparency = 1}):Play()
-    TweenService:Create(progressFill, TweenInfo.new(0.4), {BackgroundTransparency = 1}):Play()
-    TweenService:Create(closeBtn, TweenInfo.new(0.4), {BackgroundTransparency = 1, TextTransparency = 1}):Play()
     TweenService:Create(mainStroke, TweenInfo.new(0.5), {Transparency = 1}):Play()
-    task.wait(0.7)
-    if scanConn then scanConn:Disconnect() end
-    if charConn then charConn:Disconnect() end
+    task.wait(0.6)
     main:Destroy()
 end)
 
 closeBtn.MouseButton1Click:Connect(function()
-    if done then return end
-    done = true
     pcall(function()
         if scanConn then scanConn:Disconnect() end
-        if charConn then charConn:Disconnect() end
         sg:Destroy()
     end)
 end)
 
--- ===== KHỞI TẠO ANIMATION MỞ =====
 TweenService:Create(main, TweenInfo.new(0.5, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
-    Size = UDim2.new(0, 300, 0, 190)
+    Size = UDim2.new(0, 300, 0, 160)
 }):Play()
-task.wait(0.15)
-TweenService:Create(titleLabel, TweenInfo.new(0.35), {TextTransparency = 0}):Play()
-TweenService:Create(subLabel, TweenInfo.new(0.35), {TextTransparency = 0}):Play()
-task.wait(0.1)
-TweenService:Create(percentLabel, TweenInfo.new(0.35), {TextTransparency = 0}):Play()
-TweenService:Create(statusLabel, TweenInfo.new(0.35), {TextTransparency = 0}):Play()
-task.wait(0.1)
-TweenService:Create(progressBg, TweenInfo.new(0.35), {BackgroundTransparency = 0}):Play()
-TweenService:Create(closeBtn, TweenInfo.new(0.35), {BackgroundTransparency = 0, TextTransparency = 0}):Play()
 
 print("✅ fix lag by kudo29001")

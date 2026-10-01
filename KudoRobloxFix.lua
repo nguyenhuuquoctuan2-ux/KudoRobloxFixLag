@@ -15,13 +15,12 @@ sg.IgnoreGuiInset = true
 sg.Parent = playerGui
 
 local main = Instance.new("Frame")
-main.Size = UDim2.new(0, 0, 0, 0)
+main.Size = UDim2.new(0, 300, 0, 160)
 main.AnchorPoint = Vector2.new(0.5, 0.5)
 main.Position = UDim2.new(0.5, 0, 0.5, 0)
 main.BackgroundColor3 = Color3.fromRGB(12, 12, 18)
 main.BackgroundTransparency = 0.05
 main.BorderSizePixel = 0
-main.ClipsDescendants = true
 main.Parent = sg
 Instance.new("UICorner", main).CornerRadius = UDim.new(0, 14)
 
@@ -40,7 +39,6 @@ titleLabel.Font = Enum.Font.GothamBold
 titleLabel.TextSize = 17
 titleLabel.TextColor3 = Color3.fromRGB(0, 255, 120)
 titleLabel.TextXAlignment = Enum.TextXAlignment.Center
-titleLabel.TextTransparency = 0
 titleLabel.Parent = main
 
 local subLabel = Instance.new("TextLabel")
@@ -52,7 +50,6 @@ subLabel.Font = Enum.Font.Gotham
 subLabel.TextSize = 10
 subLabel.TextColor3 = Color3.fromRGB(150, 150, 160)
 subLabel.TextXAlignment = Enum.TextXAlignment.Center
-subLabel.TextTransparency = 0
 subLabel.Parent = main
 
 local percentLabel = Instance.new("TextLabel")
@@ -64,7 +61,6 @@ percentLabel.Font = Enum.Font.GothamBold
 percentLabel.TextSize = 16
 percentLabel.TextColor3 = Color3.fromRGB(0, 255, 120)
 percentLabel.TextXAlignment = Enum.TextXAlignment.Center
-percentLabel.TextTransparency = 0
 percentLabel.Parent = main
 
 local statusLabel = Instance.new("TextLabel")
@@ -76,7 +72,6 @@ statusLabel.Font = Enum.Font.Gotham
 statusLabel.TextSize = 10
 statusLabel.TextColor3 = Color3.fromRGB(200, 200, 210)
 statusLabel.TextXAlignment = Enum.TextXAlignment.Center
-statusLabel.TextTransparency = 0
 statusLabel.Parent = main
 
 local progressBg = Instance.new("Frame")
@@ -84,7 +79,6 @@ progressBg.Size = UDim2.new(1, -50, 0, 7)
 progressBg.Position = UDim2.new(0, 25, 0, 120)
 progressBg.BackgroundColor3 = Color3.fromRGB(30, 30, 38)
 progressBg.BorderSizePixel = 0
-progressBg.BackgroundTransparency = 0
 progressBg.Parent = main
 Instance.new("UICorner", progressBg).CornerRadius = UDim.new(0, 4)
 
@@ -104,8 +98,6 @@ closeBtn.Font = Enum.Font.GothamBold
 closeBtn.TextSize = 12
 closeBtn.TextColor3 = Color3.new(1, 1, 1)
 closeBtn.BorderSizePixel = 0
-closeBtn.BackgroundTransparency = 0
-closeBtn.TextTransparency = 0
 closeBtn.Parent = main
 Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 6)
 
@@ -121,9 +113,44 @@ fpsLabel.TextColor3 = Color3.fromRGB(0, 255, 120)
 fpsLabel.TextXAlignment = Enum.TextXAlignment.Right
 fpsLabel.Parent = sg
 
+main.Size = UDim2.new(0, 0, 0, 0)
+main.BackgroundTransparency = 1
+mainStroke.Transparency = 1
+titleLabel.TextTransparency = 1
+subLabel.TextTransparency = 1
+percentLabel.TextTransparency = 1
+statusLabel.TextTransparency = 1
+progressBg.BackgroundTransparency = 1
+progressFill.BackgroundTransparency = 1
+closeBtn.BackgroundTransparency = 1
+closeBtn.TextTransparency = 1
+
+task.spawn(function()
+    TweenService:Create(main, TweenInfo.new(0.45, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+        Size = UDim2.new(0, 300, 0, 160),
+        BackgroundTransparency = 0.05
+    }):Play()
+    task.wait(0.15)
+    TweenService:Create(titleLabel, TweenInfo.new(0.3), {TextTransparency = 0}):Play()
+    TweenService:Create(subLabel, TweenInfo.new(0.3), {TextTransparency = 0}):Play()
+    TweenService:Create(mainStroke, TweenInfo.new(0.3), {Transparency = 0.35}):Play()
+    task.wait(0.1)
+    TweenService:Create(percentLabel, TweenInfo.new(0.3), {TextTransparency = 0}):Play()
+    TweenService:Create(statusLabel, TweenInfo.new(0.3), {TextTransparency = 0}):Play()
+    task.wait(0.1)
+    TweenService:Create(progressBg, TweenInfo.new(0.3), {BackgroundTransparency = 0}):Play()
+    TweenService:Create(progressFill, TweenInfo.new(0.3), {BackgroundTransparency = 0}):Play()
+    TweenService:Create(closeBtn, TweenInfo.new(0.3), {
+        BackgroundTransparency = 0,
+        TextTransparency = 0
+    }):Play()
+end)
+
 local function setProgress(percent, text)
     percent = math.clamp(percent, 0, 100)
-    progressFill.Size = UDim2.new(percent / 100, 0, 1, 0)
+    TweenService:Create(progressFill, TweenInfo.new(0.15, Enum.EasingStyle.Quad), {
+        Size = UDim2.new(percent / 100, 0, 1, 0)
+    }):Play()
     percentLabel.Text = math.floor(percent) .. "%"
     if text then statusLabel.Text = text end
 end
@@ -134,7 +161,6 @@ local function step(text, fn, percent)
     task.wait(0.05)
 end
 
--- ========== FFLAGS ==========
 step("Áp dụng FastFlags...", function()
     setfflag("DFIntDebugFRMQualityLevelOverride", "1")
     setfflag("DFIntTextureQualityOverride", "0")
@@ -224,7 +250,6 @@ step("Áp dụng FastFlags...", function()
     setfflag("DFIntFrameRateCap", "240")
     setfflag("FFlagDisableAnimationBlending", "True")
     setfflag("FFlagDisableFacialAnimation", "True")
-    setfflag("FFlagDisableAllAnimations", "True")
     setfflag("DFFlagSkipAnimationBlending", "True")
     setfflag("FFlagDisableIKControl", "True")
     setfflag("FFlagDisableHikeAnimation", "True")
@@ -346,12 +371,14 @@ local function refreshCharModels()
     end
 end
 refreshCharModels()
-game.Players.PlayerAdded:Connect(function(plr)
+
+local playerAddConn = game.Players.PlayerAdded:Connect(function(plr)
     plr.CharacterAdded:Connect(function(c)
         charModels[c] = true
     end)
 end)
-game.Players.PlayerRemoving:Connect(function(plr)
+
+local playerRemoveConn = game.Players.PlayerRemoving:Connect(function(plr)
     if plr.Character then
         charModels[plr.Character] = nil
     end
@@ -368,29 +395,21 @@ local function isCharacterDescendant(v)
     return false
 end
 
-local function isClothingOrName(v)
-    if v:IsA("Decal") or v:IsA("Texture") then return true end
+local function isProtected(v)
+    if v:IsA("Decal") then return true end
     if v:IsA("Shirt") or v:IsA("Pants") or v:IsA("ShirtGraphic") then return true end
     if v:IsA("BillboardGui") then return true end
-    if v:IsA("TextLabel") or v:IsA("TextButton") then return true end
+    if v:IsA("TextLabel") or v:IsA("TextButton") or v:IsA("TextScreenGui") then return true end
     if v:IsA("Accessory") then return true end
     if v:IsA("CharacterMesh") then return true end
     if v:IsA("BodyColors") then return true end
     if v:IsA("Humanoid") then return true end
+    if isCharacterDescendant(v) then return true end
     return false
 end
 
 local function optimizeObject(v)
-    if isClothingOrName(v) then return end
-    if isCharacterDescendant(v) then
-        if v:IsA("BasePart") then
-            pcall(function()
-                v.Reflectance = 0
-                v.Massless = true
-            end)
-        end
-        return
-    end
+    if isProtected(v) then return end
 
     if v:IsA("BasePart") then
         pcall(function()
@@ -401,7 +420,7 @@ local function optimizeObject(v)
             v.CanTouch = false
             v.CanQuery = false
         end)
-    elseif v:IsA("Decal") or v:IsA("Texture") then
+    elseif v:IsA("Texture") then
         pcall(function() v.Transparency = 1 end)
     elseif v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Smoke")
         or v:IsA("Fire") or v:IsA("Sparkles") or v:IsA("Beam") then
@@ -473,7 +492,12 @@ step("Tối ưu Player...", function()
             local char = plr.Character
             if char then
                 for _, v in ipairs(char:GetDescendants()) do
-                    optimizeObject(v)
+                    if v:IsA("BasePart") then
+                        pcall(function()
+                            v.Reflectance = 0
+                            v.Massless = true
+                        end)
+                    end
                 end
             end
         end
@@ -547,36 +571,36 @@ task.spawn(function()
     end
 end)
 
--- ========== HOÀN TẤT ==========
 setProgress(100, "✅ Hoàn tất")
 task.wait(0.6)
 
-titleLabel.Text = "⚡ fix lag by kudo29001"
+TweenService:Create(titleLabel, TweenInfo.new(0.3), {
+    Text = "⚡ fix lag by kudo29001"
+}):Play()
 statusLabel.Text = "Đã áp dụng"
-progressFill.BackgroundColor3 = Color3.fromRGB(0, 255, 120)
 
 task.wait(6)
 
 pcall(function()
     if scanConn then scanConn:Disconnect() end
+    if playerAddConn then playerAddConn:Disconnect() end
+    if playerRemoveConn then playerRemoveConn:Disconnect() end
     TweenService:Create(main, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
         Size = UDim2.new(0, 0, 0, 0),
         BackgroundTransparency = 1
     }):Play()
     TweenService:Create(mainStroke, TweenInfo.new(0.5), {Transparency = 1}):Play()
     task.wait(0.6)
-    main:Destroy()
+    sg:Destroy()
 end)
 
 closeBtn.MouseButton1Click:Connect(function()
     pcall(function()
         if scanConn then scanConn:Disconnect() end
+        if playerAddConn then playerAddConn:Disconnect() end
+        if playerRemoveConn then playerRemoveConn:Disconnect() end
         sg:Destroy()
     end)
 end)
-
-TweenService:Create(main, TweenInfo.new(0.5, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
-    Size = UDim2.new(0, 300, 0, 160)
-}):Play()
 
 print("✅ fix lag by kudo29001")

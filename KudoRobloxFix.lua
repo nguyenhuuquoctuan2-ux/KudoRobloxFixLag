@@ -268,11 +268,9 @@ local scanConn = Workspace.DescendantAdded:Connect(function(v)
     end)
 end)
 
--- ==================== DISTANCE CULLING (khoảng cách gần hơn) ====================
--- Ngưỡng: 120 studs. Xa hơn → ẩn hoàn toàn.
-local CULL_DIST = 120
+-- ==================== DISTANCE CULLING (60 studs) ====================
+local CULL_DIST = 60
 
-local originalTransparency = {}
 local culledState = {}
 
 local function setPartVisible(part, visible)
@@ -280,9 +278,6 @@ local function setPartVisible(part, visible)
         pcall(function() part.LocalTransparencyModifier = 0 end)
         culledState[part] = false
     else
-        if originalTransparency[part] == nil then
-            originalTransparency[part] = part.Transparency
-        end
         pcall(function() part.LocalTransparencyModifier = 1 end)
         culledState[part] = true
     end
@@ -332,7 +327,7 @@ local cullConn = RunService.Heartbeat:Connect(function()
     end)
 end)
 
--- ==================== FPS + PING COUNTER ĐƠN GIẢN ====================
+-- ==================== FPS + PING COUNTER ====================
 local statsGui = Instance.new("ScreenGui")
 statsGui.Name = "KudoStats"
 statsGui.ResetOnSpawn = false
@@ -340,8 +335,8 @@ statsGui.IgnoreGuiInset = true
 statsGui.Parent = playerGui
 
 local fpsLabel = Instance.new("TextLabel")
-fpsLabel.Size = UDim2.new(0, 140, 0, 22)
-fpsLabel.Position = UDim2.new(1, -150, 1, -52)
+fpsLabel.Size = UDim2.new(0, 200, 0, 24)
+fpsLabel.Position = UDim2.new(1, -210, 1, -54)
 fpsLabel.BackgroundTransparency = 1
 fpsLabel.Text = "FPS: --"
 fpsLabel.Font = Enum.Font.Times
@@ -351,8 +346,8 @@ fpsLabel.TextXAlignment = Enum.TextXAlignment.Right
 fpsLabel.Parent = statsGui
 
 local pingLabel = Instance.new("TextLabel")
-pingLabel.Size = UDim2.new(0, 140, 0, 22)
-pingLabel.Position = UDim2.new(1, -150, 1, -28)
+pingLabel.Size = UDim2.new(0, 200, 0, 24)
+pingLabel.Position = UDim2.new(1, -210, 1, -30)
 pingLabel.BackgroundTransparency = 1
 pingLabel.Text = "Ping: --"
 pingLabel.Font = Enum.Font.Times
@@ -378,7 +373,6 @@ task.spawn(function()
     end
 end)
 
--- GC ngầm
 task.spawn(function()
     while statsGui.Parent do
         task.wait(20)
@@ -386,7 +380,6 @@ task.spawn(function()
     end
 end)
 
--- Dẹp particle mới
 task.spawn(function()
     while statsGui.Parent do
         task.wait(3)

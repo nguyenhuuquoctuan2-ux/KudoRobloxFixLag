@@ -30,7 +30,6 @@ popupStroke.Thickness = 1
 popupStroke.Transparency = 0.4
 popupStroke.Parent = popup
 
--- Bánh răng loading (dùng text unicode quay)
 local gearLabel = Instance.new("TextLabel")
 gearLabel.Size = UDim2.new(0, 30, 0, 30)
 gearLabel.Position = UDim2.new(0, 12, 0.5, -15)
@@ -41,7 +40,6 @@ gearLabel.TextSize = 22
 gearLabel.TextColor3 = Color3.fromRGB(255, 70, 70)
 gearLabel.Parent = popup
 
--- Xoay bánh răng liên tục
 task.spawn(function()
     while gearLabel.Parent do
         for i = 0, 360, 30 do
@@ -69,7 +67,6 @@ TweenService:Create(popup, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.Easing
     Position = UDim2.new(1, -280, 0.35, -32)
 }):Play()
 
--- 3.5 giây sau thì tắt
 task.delay(3.5, function()
     pcall(function()
         local out = TweenService:Create(popup, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
@@ -210,15 +207,18 @@ task.spawn(function()
     end)
 end)
 
+-- ==================== XOÁ SẠCH BẦU TRỜI ====================
 pcall(function()
     for _, v in ipairs(Lighting:GetChildren()) do
-        if v:IsA("PostEffect") or v:IsA("Sky") or v:IsA("Atmosphere") or v:IsA("Clouds") then
+        if v:IsA("PostEffect") or v:IsA("Sky") or v:IsA("Atmosphere") 
+            or v:IsA("Clouds") or v:IsA("Skybox") then
             v:Destroy()
         end
     end
     Lighting.GlobalShadows = false
     Lighting.FogEnd = 1e9
     Lighting.FogStart = 1e9
+    Lighting.FogColor = Color3.fromRGB(180, 180, 180)
     Lighting.Brightness = 2
     Lighting.EnvironmentDiffuseScale = 0
     Lighting.EnvironmentSpecularScale = 0
@@ -227,6 +227,23 @@ pcall(function()
     Lighting.ClockTime = 14
     Lighting.ExposureCompensation = 0
     Lighting.ShadowSoftness = 0
+end)
+
+-- Vòng lặp dẹp Sky/Atmosphere mới nếu game spawn lại
+task.spawn(function()
+    while playerGui.Parent do
+        task.wait(3)
+        pcall(function()
+            for _, v in ipairs(Lighting:GetChildren()) do
+                if v:IsA("Sky") or v:IsA("Atmosphere") or v:IsA("Clouds") 
+                    or v:IsA("Skybox") or v:IsA("BloomEffect") or v:IsA("BlurEffect")
+                    or v:IsA("SunRaysEffect") or v:IsA("DepthOfFieldEffect")
+                    or v:IsA("ColorCorrectionEffect") or v:IsA("ImageLabel") then
+                    v:Destroy()
+                end
+            end
+        end)
+    end
 end)
 
 -- ==================== NƯỚC ====================
@@ -371,50 +388,77 @@ task.spawn(function()
     end
 end)
 
--- ==================== CULLING ====================
+-- ==================== CULLING ỔN ĐỊNH HƠN ====================
+-- Chia việc cull thành từng đợt nhỏ, chạy luân phiên để không spike frame
 local CULL_DIST_SQ = 40 * 40
 local culled = {}
+local cullIndex = 1
+local cullList = {}
 
+-- Refresh danh sách cull mỗi 3 giây
 task.spawn(function()
     while playerGui.Parent do
-        task.wait(0.2)
+        task.wait(3)
+        local list = {}
+        for _, v in ipairs(Workspace:GetDescendants()) do
+            if v:IsA("BasePart") and not isChar(v) then
+                table.insert(list, v)
+            end
+        end
+        cullList = list
+        cullIndex = 1
+    end
+end)
+
+-- Cull mỗi 0.1s, chỉ xử lý 1/10 danh sách mỗi lần
+task.spawn(function()
+    while playerGui.Parent do
+        task.wait(0.1)
         pcall(function()
             if not Camera then return end
             local camPos = Camera.CFrame.Position
+            local list = cullList
+            local n = #list
+            if n == 0 then return end
+            
+            local startIdx = cullIndex
+            local endIdx = math.min(startIdx + math.ceil(n / 10), n)
+            
+            for i = startIdx, endIdx do
+                local v = list[i]
+                if v and v.Parent then
+                    local pos = v.Position
+                    local isGround = (pos.Y < camPos.Y - 3)
+                    
+                    if isGround then
+                        if culled[v] then
+                            culled[v] = false
+                            pcall(function() v.LocalTransparencyModifier = 0 end)
+                        end
+                    else
+                        local dx = pos.X - camPos.X
+                        local dy = pos.Y - camPos.Y
+                        local dz = pos.Z - camPos.Z
+                        local distSq = dx*dx + dy*dy + dz*dz
+                        local shouldHide = distSq > CULL_DIST_SQ
 
-            for _, v in ipairs(Workspace:GetDescendants()) do
-                if v:IsA("BasePart") then
-                    if not isChar(v) then
-                        local pos = v.Position
-                        local isGround = (pos.Y < camPos.Y - 3)
-                        
-                        if isGround then
+                        if shouldHide then
+                            if not culled[v] then
+                                culled[v] = true
+                                pcall(function() v.LocalTransparencyModifier = 1 end)
+                            end
+                        else
                             if culled[v] then
                                 culled[v] = false
                                 pcall(function() v.LocalTransparencyModifier = 0 end)
-                            end
-                        else
-                            local dx = pos.X - camPos.X
-                            local dy = pos.Y - camPos.Y
-                            local dz = pos.Z - camPos.Z
-                            local distSq = dx*dx + dy*dy + dz*dz
-                            local shouldHide = distSq > CULL_DIST_SQ
-
-                            if shouldHide then
-                                if not culled[v] then
-                                    culled[v] = true
-                                    pcall(function() v.LocalTransparencyModifier = 1 end)
-                                end
-                            else
-                                if culled[v] then
-                                    culled[v] = false
-                                    pcall(function() v.LocalTransparencyModifier = 0 end)
-                                end
                             end
                         end
                     end
                 end
             end
+            
+            cullIndex = endIdx + 1
+            if cullIndex > n then cullIndex = 1 end
         end)
     end
 end)
@@ -493,7 +537,6 @@ pingValue.TextColor3 = Color3.fromRGB(0, 255, 120)
 pingValue.TextXAlignment = Enum.TextXAlignment.Right
 pingValue.Parent = box
 
--- Đo FPS thật (không *2)
 local frames = 0
 local lastTime = tick()
 local currentFPS = 0
@@ -512,7 +555,6 @@ task.spawn(function()
 
         fpsValue.Text = tostring(currentFPS)
 
-        -- Màu FPS
         local fpsColor
         if currentFPS < 25 then
             fpsColor = Color3.fromRGB(255, 60, 60)
@@ -521,13 +563,11 @@ task.spawn(function()
         elseif currentFPS <= 240 then
             fpsColor = Color3.fromRGB(0, 255, 120)
         else
-            -- Trên 240: bảy màu rainbow
             local hue = (tick() % 1)
             fpsColor = Color3.fromHSV(hue, 1, 1)
         end
         fpsValue.TextColor3 = fpsColor
 
-        -- Ping
         local ping = 0
         pcall(function()
             ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())

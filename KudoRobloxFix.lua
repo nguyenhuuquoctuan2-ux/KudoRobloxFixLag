@@ -90,7 +90,9 @@ closeBtn.Parent = main
 
 local function setProgress(percent, text)
     percent = math.clamp(percent, 0, 100)
-    progressFill.Size = UDim2.new(percent / 100, 0, 1, 0)
+    TweenService:Create(progressFill, TweenInfo.new(0.15, Enum.EasingStyle.Quad), {
+        Size = UDim2.new(percent / 100, 0, 1, 0)
+    }):Play()
     percentLabel.Text = math.floor(percent) .. "%"
     if text then statusLabel.Text = text end
 end
@@ -98,7 +100,7 @@ end
 local function step(text, fn, percent)
     setProgress(percent, text)
     pcall(fn)
-    task.wait(0.02)
+    task.wait(0.05)
 end
 
 step("Áp dụng FastFlags...", function()
@@ -248,49 +250,11 @@ local potatoMaterials = {
     [Enum.Material.Plaster]=true,[Enum.Material.Rubber]=true,
 }
 
-local charModels = {}
-local function refreshCharModels()
-    charModels = {}
-    for _, plr in ipairs(game.Players:GetPlayers()) do
-        if plr.Character then
-            charModels[plr.Character] = true
-        end
-    end
-end
-refreshCharModels()
-
-game.Players.PlayerAdded:Connect(function(plr)
-    plr.CharacterAdded:Connect(function(c)
-        charModels[c] = true
-    end)
-end)
-game.Players.PlayerRemoving:Connect(function(plr)
-    if plr.Character then
-        charModels[plr.Character] = nil
-    end
-end)
-
-local function isCharacterDescendant(v)
-    local current = v
-    while current do
-        if charModels[current] then return true end
-        if current:IsA("Accessory") then return true end
-        if current:IsA("Tool") then return true end
-        current = current.Parent
-    end
-    return false
-end
-
 local function isProtected(v)
-    if v:IsA("Decal") then return true end
-    if v:IsA("Shirt") or v:IsA("Pants") or v:IsA("ShirtGraphic") then return true end
     if v:IsA("BillboardGui") then return true end
     if v:IsA("TextLabel") or v:IsA("TextButton") or v:IsA("TextScreenGui") then return true end
-    if v:IsA("Accessory") then return true end
-    if v:IsA("CharacterMesh") then return true end
-    if v:IsA("BodyColors") then return true end
     if v:IsA("Humanoid") then return true end
-    if isCharacterDescendant(v) then return true end
+    if v:IsA("Accessory") then return true end
     return false
 end
 
@@ -303,7 +267,7 @@ local function optimizeObject(v)
             v.Reflectance = 0
             v.CastShadow = false
         end)
-    elseif v:IsA("Texture") then
+    elseif v:IsA("Decal") or v:IsA("Texture") then
         pcall(function() v.Transparency = 1 end)
     elseif v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Smoke")
         or v:IsA("Fire") or v:IsA("Sparkles") or v:IsA("Beam") then
@@ -329,12 +293,6 @@ local function optimizeObject(v)
         pcall(function() v.Volume = 0; v.Playing = false; v:Destroy() end)
     elseif v:IsA("Animation") then
         pcall(function() v:Destroy() end)
-    elseif v:IsA("AnimationController") or v:IsA("Animator") then
-        pcall(function()
-            for _, t in ipairs(v:GetPlayingAnimationTracks()) do
-                t:Stop(); t:Destroy()
-            end
-        end)
     elseif v:IsA("Highlight") or v:IsA("SelectionBox") or v:IsA("BoxHandleAdornment") then
         pcall(function() v.Enabled = false end)
     elseif v:IsA("Attachment") then
@@ -352,20 +310,20 @@ local function optimizeObject(v)
     end
 end
 
+-- Quét toàn bộ Workspace
 local allDescendants = Workspace:GetDescendants()
 local total = #allDescendants
-local batch = math.max(1, math.floor(total / 30))
 
 for i, v in ipairs(allDescendants) do
     optimizeObject(v)
-    if i % batch == 0 then
-        local p = 60 + math.floor((i / total) * 30)
+    if i % 100 == 0 then
+        local p = 65 + math.floor((i / total) * 28)
         setProgress(p, "Đang quét... " .. i .. "/" .. total)
         task.wait()
     end
 end
 
-setProgress(96, "Tối ưu Player...")
+setProgress(95, "Tối ưu Player...")
 pcall(function()
     for _, plr in ipairs(game.Players:GetPlayers()) do
         local char = plr.Character
@@ -380,6 +338,7 @@ pcall(function()
 end)
 
 setProgress(100, "✅ Hoàn tất")
+task.wait(0.5)
 
 local scanConn
 scanConn = Workspace.DescendantAdded:Connect(function(v)
@@ -393,6 +352,7 @@ task.spawn(function()
     end
 end)
 
+-- FPS counter
 local fpsGui = Instance.new("ScreenGui")
 fpsGui.Name = "KudoFPS"
 fpsGui.ResetOnSpawn = false
@@ -432,13 +392,11 @@ task.spawn(function()
     end
 end)
 
-task.wait(0.5)
-
 titleLabel.Text = "⚡ fix lag by kudo29001"
 statusLabel.Text = ""
 percentLabel.Text = ""
-progressBg.Visible = false
-progressFill.Visible = false
+TweenService:Create(progressBg, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
+TweenService:Create(progressFill, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
 TweenService:Create(main, TweenInfo.new(0.4, Enum.EasingStyle.Quad), {
     Size = UDim2.new(0, 220, 0, 44),
     Position = UDim2.new(0, 15, 0, 15)

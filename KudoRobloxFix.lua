@@ -15,91 +15,79 @@ sg.IgnoreGuiInset = true
 sg.Parent = playerGui
 
 local main = Instance.new("Frame")
-main.Size = UDim2.new(0, 300, 0, 160)
-main.AnchorPoint = Vector2.new(0.5, 0.5)
-main.Position = UDim2.new(0.5, 0, 0.5, 0)
-main.BackgroundColor3 = Color3.fromRGB(12, 12, 18)
+main.Size = UDim2.new(0, 280, 0, 110)
+main.Position = UDim2.new(0.5, -140, 0.5, -55)
+main.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
 main.BackgroundTransparency = 0.05
 main.BorderSizePixel = 0
 main.Parent = sg
-Instance.new("UICorner", main).CornerRadius = UDim.new(0, 14)
+Instance.new("UICorner", main).CornerRadius = UDim.new(0, 12)
 
-local mainStroke = Instance.new("UIStroke")
-mainStroke.Color = Color3.fromRGB(0, 220, 100)
-mainStroke.Thickness = 1.5
-mainStroke.Transparency = 0.35
-mainStroke.Parent = main
+local stroke = Instance.new("UIStroke")
+stroke.Color = Color3.fromRGB(0, 220, 100)
+stroke.Thickness = 1.5
+stroke.Transparency = 0.3
+stroke.Parent = main
 
 local titleLabel = Instance.new("TextLabel")
-titleLabel.Size = UDim2.new(1, -20, 0, 24)
-titleLabel.Position = UDim2.new(0, 10, 0, 18)
+titleLabel.Size = UDim2.new(1, -20, 0, 26)
+titleLabel.Position = UDim2.new(0, 10, 0, 10)
 titleLabel.BackgroundTransparency = 1
 titleLabel.Text = "⚡ FIX LAG"
 titleLabel.Font = Enum.Font.GothamBold
-titleLabel.TextSize = 17
+titleLabel.TextSize = 14
 titleLabel.TextColor3 = Color3.fromRGB(0, 255, 120)
 titleLabel.TextXAlignment = Enum.TextXAlignment.Center
 titleLabel.Parent = main
 
-local subLabel = Instance.new("TextLabel")
-subLabel.Size = UDim2.new(1, -20, 0, 14)
-subLabel.Position = UDim2.new(0, 10, 0, 44)
-subLabel.BackgroundTransparency = 1
-subLabel.Text = "by kudo29001"
-subLabel.Font = Enum.Font.Gotham
-subLabel.TextSize = 10
-subLabel.TextColor3 = Color3.fromRGB(150, 150, 160)
-subLabel.TextXAlignment = Enum.TextXAlignment.Center
-subLabel.Parent = main
-
-local percentLabel = Instance.new("TextLabel")
-percentLabel.Size = UDim2.new(1, -20, 0, 22)
-percentLabel.Position = UDim2.new(0, 10, 0, 68)
-percentLabel.BackgroundTransparency = 1
-percentLabel.Text = "0%"
-percentLabel.Font = Enum.Font.GothamBold
-percentLabel.TextSize = 16
-percentLabel.TextColor3 = Color3.fromRGB(0, 255, 120)
-percentLabel.TextXAlignment = Enum.TextXAlignment.Center
-percentLabel.Parent = main
-
 local statusLabel = Instance.new("TextLabel")
-statusLabel.Size = UDim2.new(1, -30, 0, 16)
-statusLabel.Position = UDim2.new(0, 15, 0, 94)
+statusLabel.Size = UDim2.new(1, -20, 0, 18)
+statusLabel.Position = UDim2.new(0, 10, 0, 38)
 statusLabel.BackgroundTransparency = 1
 statusLabel.Text = "Đang khởi tạo..."
 statusLabel.Font = Enum.Font.Gotham
 statusLabel.TextSize = 10
-statusLabel.TextColor3 = Color3.fromRGB(200, 200, 210)
+statusLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
 statusLabel.TextXAlignment = Enum.TextXAlignment.Center
 statusLabel.Parent = main
 
+local percentLabel = Instance.new("TextLabel")
+percentLabel.Size = UDim2.new(1, -20, 0, 16)
+percentLabel.Position = UDim2.new(0, 10, 0, 56)
+percentLabel.BackgroundTransparency = 1
+percentLabel.Text = "0%"
+percentLabel.Font = Enum.Font.GothamBold
+percentLabel.TextSize = 12
+percentLabel.TextColor3 = Color3.fromRGB(0, 255, 120)
+percentLabel.TextXAlignment = Enum.TextXAlignment.Center
+percentLabel.Parent = main
+
 local progressBg = Instance.new("Frame")
-progressBg.Size = UDim2.new(1, -50, 0, 7)
-progressBg.Position = UDim2.new(0, 25, 0, 120)
-progressBg.BackgroundColor3 = Color3.fromRGB(30, 30, 38)
+progressBg.Size = UDim2.new(1, -40, 0, 6)
+progressBg.Position = UDim2.new(0, 20, 0, 78)
+progressBg.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
 progressBg.BorderSizePixel = 0
 progressBg.Parent = main
-Instance.new("UICorner", progressBg).CornerRadius = UDim.new(0, 4)
+Instance.new("UICorner", progressBg).CornerRadius = UDim.new(0, 3)
 
 local progressFill = Instance.new("Frame")
 progressFill.Size = UDim2.new(0, 0, 1, 0)
 progressFill.BackgroundColor3 = Color3.fromRGB(0, 220, 100)
 progressFill.BorderSizePixel = 0
 progressFill.Parent = progressBg
-Instance.new("UICorner", progressFill).CornerRadius = UDim.new(0, 4)
+Instance.new("UICorner", progressFill).CornerRadius = UDim.new(0, 3)
 
 local closeBtn = Instance.new("TextButton")
-closeBtn.Size = UDim2.new(0, 22, 0, 22)
-closeBtn.Position = UDim2.new(1, -30, 0, 8)
+closeBtn.Size = UDim2.new(0, 20, 0, 20)
+closeBtn.Position = UDim2.new(1, -26, 0, 6)
 closeBtn.BackgroundColor3 = Color3.fromRGB(255, 70, 70)
 closeBtn.Text = "✕"
 closeBtn.Font = Enum.Font.GothamBold
-closeBtn.TextSize = 12
+closeBtn.TextSize = 11
 closeBtn.TextColor3 = Color3.new(1, 1, 1)
 closeBtn.BorderSizePixel = 0
+Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 5)
 closeBtn.Parent = main
-Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 6)
 
 local fpsLabel = Instance.new("TextLabel")
 fpsLabel.Name = "FPS"
@@ -112,39 +100,6 @@ fpsLabel.TextSize = 13
 fpsLabel.TextColor3 = Color3.fromRGB(0, 255, 120)
 fpsLabel.TextXAlignment = Enum.TextXAlignment.Right
 fpsLabel.Parent = sg
-
-main.Size = UDim2.new(0, 0, 0, 0)
-main.BackgroundTransparency = 1
-mainStroke.Transparency = 1
-titleLabel.TextTransparency = 1
-subLabel.TextTransparency = 1
-percentLabel.TextTransparency = 1
-statusLabel.TextTransparency = 1
-progressBg.BackgroundTransparency = 1
-progressFill.BackgroundTransparency = 1
-closeBtn.BackgroundTransparency = 1
-closeBtn.TextTransparency = 1
-
-task.spawn(function()
-    TweenService:Create(main, TweenInfo.new(0.45, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-        Size = UDim2.new(0, 300, 0, 160),
-        BackgroundTransparency = 0.05
-    }):Play()
-    task.wait(0.15)
-    TweenService:Create(titleLabel, TweenInfo.new(0.3), {TextTransparency = 0}):Play()
-    TweenService:Create(subLabel, TweenInfo.new(0.3), {TextTransparency = 0}):Play()
-    TweenService:Create(mainStroke, TweenInfo.new(0.3), {Transparency = 0.35}):Play()
-    task.wait(0.1)
-    TweenService:Create(percentLabel, TweenInfo.new(0.3), {TextTransparency = 0}):Play()
-    TweenService:Create(statusLabel, TweenInfo.new(0.3), {TextTransparency = 0}):Play()
-    task.wait(0.1)
-    TweenService:Create(progressBg, TweenInfo.new(0.3), {BackgroundTransparency = 0}):Play()
-    TweenService:Create(progressFill, TweenInfo.new(0.3), {BackgroundTransparency = 0}):Play()
-    TweenService:Create(closeBtn, TweenInfo.new(0.3), {
-        BackgroundTransparency = 0,
-        TextTransparency = 0
-    }):Play()
-end)
 
 local function setProgress(percent, text)
     percent = math.clamp(percent, 0, 100)
@@ -574,23 +529,41 @@ end)
 setProgress(100, "✅ Hoàn tất")
 task.wait(0.6)
 
-TweenService:Create(titleLabel, TweenInfo.new(0.3), {
-    Text = "⚡ fix lag by kudo29001"
+TweenService:Create(progressFill, TweenInfo.new(0.3), {
+    BackgroundColor3 = Color3.fromRGB(0, 255, 120)
 }):Play()
-statusLabel.Text = "Đã áp dụng"
+
+task.wait(1)
+
+titleLabel.Text = "⚡ fix lag by kudo29001"
+statusLabel.Text = ""
+percentLabel.Text = ""
+TweenService:Create(progressBg, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
+TweenService:Create(progressFill, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
+TweenService:Create(main, TweenInfo.new(0.4, Enum.EasingStyle.Quad), {
+    Size = UDim2.new(0, 220, 0, 44),
+    Position = UDim2.new(0, 15, 0, 15)
+}):Play()
+TweenService:Create(titleLabel, TweenInfo.new(0.4), {
+    Size = UDim2.new(1, -20, 1, -12),
+    Position = UDim2.new(0, 10, 0, 6),
+    TextSize = 13
+}):Play()
+
+closeBtn.Visible = false
 
 task.wait(6)
-
 pcall(function()
+    TweenService:Create(main, TweenInfo.new(0.5), {
+        BackgroundTransparency = 1,
+        Position = UDim2.new(0, 15, 0, 0)
+    }):Play()
+    TweenService:Create(titleLabel, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
+    TweenService:Create(stroke, TweenInfo.new(0.5), {Transparency = 1}):Play()
+    task.wait(0.6)
     if scanConn then scanConn:Disconnect() end
     if playerAddConn then playerAddConn:Disconnect() end
     if playerRemoveConn then playerRemoveConn:Disconnect() end
-    TweenService:Create(main, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-        Size = UDim2.new(0, 0, 0, 0),
-        BackgroundTransparency = 1
-    }):Play()
-    TweenService:Create(mainStroke, TweenInfo.new(0.5), {Transparency = 1}):Play()
-    task.wait(0.6)
     sg:Destroy()
 end)
 

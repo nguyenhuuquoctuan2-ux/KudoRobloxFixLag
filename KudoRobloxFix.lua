@@ -135,7 +135,7 @@ pcall(function()
     setfflag("DFIntConnectionMTUSize", "1400")
 end)
 
--- ==================== ENGINE CONFIG SONG SONG ====================
+-- ==================== ENGINE CONFIG ====================
 task.spawn(function()
     pcall(function()
         settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
@@ -239,16 +239,51 @@ for i = 1, total do
             v.CastShadow = false
         end)
     elseif cn == "Decal" or cn == "Texture" then
-        pcall(function() v.Transparency = 1 end)
+        -- Giữ decal mặt cho nhân vật, xoá decal môi trường
+        if isChar(v) then
+            local parent = v.Parent
+            if parent and parent.Name == "Head" then
+                -- Giữ lại khuôn mặt
+            else
+                pcall(function() v.Transparency = 1 end)
+            end
+        else
+            pcall(function() v.Transparency = 1 end)
+        end
     elseif cn == "SpecialMesh" then
         pcall(function()
             if v.MeshType == Enum.MeshType.FileMesh or v.MeshType == Enum.MeshType.Head then
-                v.MeshType = Enum.MeshType.Brick
+                -- Đưa đầu về mặc định
+                v.MeshType = Enum.MeshType.Head
                 v.TextureId = ""
             end
         end)
     end
     if i % 500 == 0 then task.wait() end
+end
+
+-- Đưa đầu nhân vật về mặc định (xoá mesh custom, giữ head shape chuẩn)
+local function resetHead(character)
+    if not character then return end
+    local head = character:FindFirstChild("Head")
+    if not head then return end
+    for _, v in ipairs(head:GetChildren()) do
+        if v:IsA("SpecialMesh") then
+            pcall(function() v:Destroy() end)
+        end
+    end
+    local newMesh = Instance.new("SpecialMesh")
+    newMesh.MeshType = Enum.MeshType.Head
+    newMesh.Parent = head
+end
+
+-- Áp dụng cho nhân vật hiện tại + tương lai
+for _, plr in ipairs(game.Players:GetPlayers()) do
+    if plr.Character then resetHead(plr.Character) end
+    plr.CharacterAdded:Connect(function(c)
+        task.wait(0.5)
+        resetHead(c)
+    end)
 end
 
 local scanConn = Workspace.DescendantAdded:Connect(function(v)
@@ -262,24 +297,32 @@ local scanConn = Workspace.DescendantAdded:Connect(function(v)
                 v.Reflectance = 0
                 v.CastShadow = false
             elseif cn == "Decal" or cn == "Texture" then
-                v.Transparency = 1
+                if isChar(v) then
+                    local parent = v.Parent
+                    if parent and parent.Name ~= "Head" then
+                        v.Transparency = 1
+                    end
+                else
+                    v.Transparency = 1
+                end
             end
         end)
     end)
 end)
 
--- ==================== DISTANCE CULLING (60 studs) ====================
-local CULL_DIST = 60
+-- ==================== DISTANCE CULLING (20 studs) ====================
+local CULL_DIST = 20
+local CULL_DIST_SQ = CULL_DIST * CULL_DIST
 
 local culledState = {}
 
-local function setPartVisible(part, visible)
+local function setVisible(obj, visible)
     if visible then
-        pcall(function() part.LocalTransparencyModifier = 0 end)
-        culledState[part] = false
+        pcall(function() obj.LocalTransparencyModifier = 0 end)
+        culledState[obj] = false
     else
-        pcall(function() part.LocalTransparencyModifier = 1 end)
-        culledState[part] = true
+        pcall(function() obj.LocalTransparencyModifier = 1 end)
+        culledState[obj] = true
     end
 end
 
@@ -297,15 +340,16 @@ local cullConn = RunService.Heartbeat:Connect(function()
                         if prim then pivot = prim.Position end
                     end
                     if pivot then
-                        local dist = (pivot - camPos).Magnitude
-                        local visible = dist <= CULL_DIST
+                        local d = pivot - camPos
+                        local distSq = d.X*d.X + d.Y*d.Y + d.Z*d.Z
+                        local visible = distSq <= CULL_DIST_SQ
                         for _, p in ipairs(top:GetDescendants()) do
                             if p:IsA("BasePart") then
                                 local cur = culledState[p]
                                 if visible and cur ~= false then
-                                    setPartVisible(p, true)
+                                    setVisible(p, true)
                                 elseif not visible and cur ~= true then
-                                    setPartVisible(p, false)
+                                    setVisible(p, false)
                                 end
                             end
                         end
@@ -313,13 +357,14 @@ local cullConn = RunService.Heartbeat:Connect(function()
                 end
             elseif top:IsA("BasePart") then
                 if not isChar(top) then
-                    local dist = (top.Position - camPos).Magnitude
-                    local visible = dist <= CULL_DIST
+                    local d = top.Position - camPos
+                    local distSq = d.X*d.X + d.Y*d.Y + d.Z*d.Z
+                    local visible = distSq <= CULL_DIST_SQ
                     local cur = culledState[top]
                     if visible and cur ~= false then
-                        setPartVisible(top, true)
+                        setVisible(top, true)
                     elseif not visible and cur ~= true then
-                        setPartVisible(top, false)
+                        setVisible(top, false)
                     end
                 end
             end
@@ -327,34 +372,83 @@ local cullConn = RunService.Heartbeat:Connect(function()
     end)
 end)
 
--- ==================== FPS + PING COUNTER ====================
+-- ==================== UI MỚI CHO FPS + PING ====================
 local statsGui = Instance.new("ScreenGui")
 statsGui.Name = "KudoStats"
 statsGui.ResetOnSpawn = false
 statsGui.IgnoreGuiInset = true
 statsGui.Parent = playerGui
 
-local fpsLabel = Instance.new("TextLabel")
-fpsLabel.Size = UDim2.new(0, 200, 0, 24)
-fpsLabel.Position = UDim2.new(1, -210, 1, -54)
-fpsLabel.BackgroundTransparency = 1
-fpsLabel.Text = "FPS: --"
-fpsLabel.Font = Enum.Font.Times
-fpsLabel.TextSize = 18
-fpsLabel.TextColor3 = Color3.fromRGB(255, 80, 80)
-fpsLabel.TextXAlignment = Enum.TextXAlignment.Right
-fpsLabel.Parent = statsGui
+-- Frame chính
+local box = Instance.new("Frame")
+box.Size = UDim2.new(0, 130, 0, 60)
+box.Position = UDim2.new(1, -145, 1, -75)
+box.BackgroundColor3 = Color3.fromRGB(14, 14, 20)
+box.BackgroundTransparency = 0.25
+box.BorderSizePixel = 0
+box.Parent = statsGui
+Instance.new("UICorner", box).CornerRadius = UDim.new(0, 10)
 
-local pingLabel = Instance.new("TextLabel")
-pingLabel.Size = UDim2.new(0, 200, 0, 24)
-pingLabel.Position = UDim2.new(1, -210, 1, -30)
-pingLabel.BackgroundTransparency = 1
-pingLabel.Text = "Ping: --"
-pingLabel.Font = Enum.Font.Times
-pingLabel.TextSize = 18
-pingLabel.TextColor3 = Color3.fromRGB(255, 80, 80)
-pingLabel.TextXAlignment = Enum.TextXAlignment.Right
-pingLabel.Parent = statsGui
+local boxStroke = Instance.new("UIStroke")
+boxStroke.Color = Color3.fromRGB(255, 60, 60)
+boxStroke.Thickness = 1
+boxStroke.Transparency = 0.4
+boxStroke.Parent = box
+
+-- Đường phân cách
+local sep = Instance.new("Frame")
+sep.Size = UDim2.new(1, -20, 0, 1)
+sep.Position = UDim2.new(0, 10, 0, 30)
+sep.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+sep.BackgroundTransparency = 0.6
+sep.BorderSizePixel = 0
+sep.Parent = box
+
+-- FPS
+local fpsTitle = Instance.new("TextLabel")
+fpsTitle.Size = UDim2.new(0, 45, 0, 30)
+fpsTitle.Position = UDim2.new(0, 8, 0, 0)
+fpsTitle.BackgroundTransparency = 1
+fpsTitle.Text = "FPS"
+fpsTitle.Font = Enum.Font.GothamBold
+fpsTitle.TextSize = 11
+fpsTitle.TextColor3 = Color3.fromRGB(200, 200, 200)
+fpsTitle.TextXAlignment = Enum.TextXAlignment.Left
+fpsTitle.Parent = box
+
+local fpsValue = Instance.new("TextLabel")
+fpsValue.Size = UDim2.new(0, 70, 0, 30)
+fpsValue.Position = UDim2.new(1, -78, 0, 0)
+fpsValue.BackgroundTransparency = 1
+fpsValue.Text = "--"
+fpsValue.Font = Enum.Font.GothamBold
+fpsValue.TextSize = 14
+fpsValue.TextColor3 = Color3.fromRGB(255, 80, 80)
+fpsValue.TextXAlignment = Enum.TextXAlignment.Right
+fpsValue.Parent = box
+
+-- Ping
+local pingTitle = Instance.new("TextLabel")
+pingTitle.Size = UDim2.new(0, 45, 0, 30)
+pingTitle.Position = UDim2.new(0, 8, 0, 30)
+pingTitle.BackgroundTransparency = 1
+pingTitle.Text = "PING"
+pingTitle.Font = Enum.Font.GothamBold
+pingTitle.TextSize = 11
+pingTitle.TextColor3 = Color3.fromRGB(200, 200, 200)
+pingTitle.TextXAlignment = Enum.TextXAlignment.Left
+pingTitle.Parent = box
+
+local pingValue = Instance.new("TextLabel")
+pingValue.Size = UDim2.new(0, 70, 0, 30)
+pingValue.Position = UDim2.new(1, -78, 0, 30)
+pingValue.BackgroundTransparency = 1
+pingValue.Text = "--"
+pingValue.Font = Enum.Font.GothamBold
+pingValue.TextSize = 14
+pingValue.TextColor3 = Color3.fromRGB(255, 80, 80)
+pingValue.TextXAlignment = Enum.TextXAlignment.Right
+pingValue.Parent = box
 
 local frames = 0
 task.spawn(function()
@@ -363,13 +457,13 @@ task.spawn(function()
         task.wait(0.5)
         local fps = math.floor(frames * 2 + 0.5)
         frames = 0
-        fpsLabel.Text = "FPS: " .. fps
+        fpsValue.Text = tostring(fps)
 
         local ping = 0
         pcall(function()
             ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
         end)
-        pingLabel.Text = "Ping: " .. ping .. "ms"
+        pingValue.Text = ping .. "ms"
     end
 end)
 

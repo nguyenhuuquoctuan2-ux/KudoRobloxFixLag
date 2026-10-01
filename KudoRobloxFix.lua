@@ -8,7 +8,7 @@ local Terrain = Workspace:FindFirstChildOfClass("Terrain")
 local Camera = Workspace.CurrentCamera
 local Stats = game:GetService("Stats")
 
--- ==================== POPUP THÔNG BÁO 6 GIÂY ====================
+-- ==================== POPUP 6 GIÂY ====================
 local popupGui = Instance.new("ScreenGui")
 popupGui.Name = "KudoPopup"
 popupGui.ResetOnSpawn = false
@@ -16,8 +16,8 @@ popupGui.IgnoreGuiInset = true
 popupGui.Parent = playerGui
 
 local popup = Instance.new("Frame")
-popup.Size = UDim2.new(0, 260, 0, 50)
-popup.Position = UDim2.new(1, 20, 0.35, -25)
+popup.Size = UDim2.new(0, 240, 0, 44)
+popup.Position = UDim2.new(1, 20, 0.35, -22)
 popup.BackgroundColor3 = Color3.fromRGB(14, 14, 20)
 popup.BackgroundTransparency = 0.05
 popup.BorderSizePixel = 0
@@ -41,27 +41,25 @@ popupLabel.TextColor3 = Color3.fromRGB(255, 70, 70)
 popupLabel.TextXAlignment = Enum.TextXAlignment.Center
 popupLabel.Parent = popup
 
--- Slide in từ phải
-TweenService:Create(popup, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-    Position = UDim2.new(1, -280, 0.35, -25)
+TweenService:Create(popup, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+    Position = UDim2.new(1, -260, 0.35, -22)
 }):Play()
 
--- Sau 6s slide out và destroy
 task.delay(6, function()
     pcall(function()
-        local out = TweenService:Create(popup, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-            Position = UDim2.new(1, 20, 0.35, -25),
+        local out = TweenService:Create(popup, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+            Position = UDim2.new(1, 20, 0.35, -22),
             BackgroundTransparency = 1
         })
         out:Play()
-        TweenService:Create(popupLabel, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
-        TweenService:Create(popupStroke, TweenInfo.new(0.5), {Transparency = 1}):Play()
+        TweenService:Create(popupLabel, TweenInfo.new(0.4), {TextTransparency = 1}):Play()
+        TweenService:Create(popupStroke, TweenInfo.new(0.4), {Transparency = 1}):Play()
         out.Completed:Wait()
         popupGui:Destroy()
     end)
 end)
 
--- ==================== FFLAG (max) ====================
+-- ==================== FFLAG MAX ====================
 pcall(function()
     setfflag("DFIntTaskSchedulerTargetFps", "9999")
     setfflag("DFIntFrameRateCap", "9999")
@@ -74,7 +72,6 @@ pcall(function()
     setfflag("FFlagRenderThrottleDisable", "True")
     setfflag("DFIntMaxFramesInFlight", "1")
     setfflag("FFlagDisableFrameLimiter", "True")
-
     setfflag("DFIntDebugFRMQualityLevelOverride", "1")
     setfflag("DFIntTextureQualityOverride", "0")
     setfflag("DFFlagTextureQualityOverrideEnabled", "True")
@@ -160,7 +157,6 @@ task.spawn(function()
     end)
 end)
 
--- Lighting cleanup
 pcall(function()
     for _, v in ipairs(Lighting:GetChildren()) do
         if v:IsA("PostEffect") or v:IsA("Sky") or v:IsA("Atmosphere") or v:IsA("Clouds") then
@@ -180,7 +176,6 @@ pcall(function()
     Lighting.ShadowSoftness = 0
 end)
 
--- Terrain potato (nước = dải xanh phẳng)
 pcall(function()
     if Terrain then
         Terrain.WaterWaveSize = 0
@@ -256,7 +251,6 @@ for i = 1, total do
     if i % 500 == 0 then task.wait() end
 end
 
--- ==================== OBJECT MỚI ====================
 local scanConn = Workspace.DescendantAdded:Connect(function(v)
     task.defer(function()
         pcall(function()
@@ -274,20 +268,15 @@ local scanConn = Workspace.DescendantAdded:Connect(function(v)
     end)
 end)
 
--- ==================== DISTANCE CULLING (xa = xoá ko thấy) ====================
--- Ngưỡng: 250 studs. Xa hơn → ẩn hoàn toàn (Transparency = 1)
--- Lại gần → hiện lại (Transparency = 0 nếu không phải nhân vật)
-local CULL_DIST = 250
+-- ==================== DISTANCE CULLING (khoảng cách gần hơn) ====================
+-- Ngưỡng: 120 studs. Xa hơn → ẩn hoàn toàn.
+local CULL_DIST = 120
 
--- Bảng lưu trạng thái gốc của từng part để khôi phục khi lại gần
 local originalTransparency = {}
 local culledState = {}
 
 local function setPartVisible(part, visible)
     if visible then
-        -- Khôi phục trong suốt gốc (nếu có lưu)
-        local orig = originalTransparency[part]
-        if orig == nil then orig = 0 end
         pcall(function() part.LocalTransparencyModifier = 0 end)
         culledState[part] = false
     else
@@ -305,7 +294,6 @@ local cullConn = RunService.Heartbeat:Connect(function()
         local camPos = Camera.CFrame.Position
         for _, top in ipairs(Workspace:GetChildren()) do
             if top:IsA("Model") then
-                -- Model: kiểm tra theo PrimaryPart hoặc pivot
                 if not isChar(top) then
                     local pivot
                     pcall(function() pivot = top:GetPivot().Position end)
@@ -316,7 +304,6 @@ local cullConn = RunService.Heartbeat:Connect(function()
                     if pivot then
                         local dist = (pivot - camPos).Magnitude
                         local visible = dist <= CULL_DIST
-                        -- Duyệt BasePart trong model
                         for _, p in ipairs(top:GetDescendants()) do
                             if p:IsA("BasePart") then
                                 local cur = culledState[p]
@@ -345,49 +332,34 @@ local cullConn = RunService.Heartbeat:Connect(function()
     end)
 end)
 
--- ==================== FPS + PING COUNTER (đỏ hiện đại) ====================
+-- ==================== FPS + PING COUNTER ĐƠN GIẢN ====================
 local statsGui = Instance.new("ScreenGui")
 statsGui.Name = "KudoStats"
 statsGui.ResetOnSpawn = false
 statsGui.IgnoreGuiInset = true
 statsGui.Parent = playerGui
 
-local statsFrame = Instance.new("Frame")
-statsFrame.Size = UDim2.new(0, 130, 0, 50)
-statsFrame.Position = UDim2.new(1, -140, 1, -60)
-statsFrame.BackgroundColor3 = Color3.fromRGB(14, 14, 20)
-statsFrame.BackgroundTransparency = 0.3
-statsFrame.BorderSizePixel = 0
-statsFrame.Parent = statsGui
-Instance.new("UICorner", statsFrame).CornerRadius = UDim.new(0, 8)
-
-local statsStroke = Instance.new("UIStroke")
-statsStroke.Color = Color3.fromRGB(255, 60, 60)
-statsStroke.Thickness = 1
-statsStroke.Transparency = 0.5
-statsStroke.Parent = statsFrame
-
 local fpsLabel = Instance.new("TextLabel")
-fpsLabel.Size = UDim2.new(1, -10, 0, 22)
-fpsLabel.Position = UDim2.new(0, 5, 0, 3)
+fpsLabel.Size = UDim2.new(0, 140, 0, 22)
+fpsLabel.Position = UDim2.new(1, -150, 1, -52)
 fpsLabel.BackgroundTransparency = 1
 fpsLabel.Text = "FPS: --"
 fpsLabel.Font = Enum.Font.Times
-fpsLabel.TextSize = 16
+fpsLabel.TextSize = 18
 fpsLabel.TextColor3 = Color3.fromRGB(255, 80, 80)
 fpsLabel.TextXAlignment = Enum.TextXAlignment.Right
-fpsLabel.Parent = statsFrame
+fpsLabel.Parent = statsGui
 
 local pingLabel = Instance.new("TextLabel")
-pingLabel.Size = UDim2.new(1, -10, 0, 22)
-pingLabel.Position = UDim2.new(0, 5, 0, 25)
+pingLabel.Size = UDim2.new(0, 140, 0, 22)
+pingLabel.Position = UDim2.new(1, -150, 1, -28)
 pingLabel.BackgroundTransparency = 1
 pingLabel.Text = "Ping: --"
 pingLabel.Font = Enum.Font.Times
-pingLabel.TextSize = 16
+pingLabel.TextSize = 18
 pingLabel.TextColor3 = Color3.fromRGB(255, 80, 80)
 pingLabel.TextXAlignment = Enum.TextXAlignment.Right
-pingLabel.Parent = statsFrame
+pingLabel.Parent = statsGui
 
 local frames = 0
 task.spawn(function()
@@ -396,23 +368,13 @@ task.spawn(function()
         task.wait(0.5)
         local fps = math.floor(frames * 2 + 0.5)
         frames = 0
-        local fpsColor
-        if fps >= 60 then fpsColor = Color3.fromRGB(255, 80, 80)
-        elseif fps >= 30 then fpsColor = Color3.fromRGB(255, 180, 60)
-        else fpsColor = Color3.fromRGB(255, 60, 60) end
         fpsLabel.Text = "FPS: " .. fps
-        fpsLabel.TextColor3 = fpsColor
 
         local ping = 0
         pcall(function()
             ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
         end)
-        local pingColor
-        if ping <= 60 then pingColor = Color3.fromRGB(255, 80, 80)
-        elseif ping <= 150 then pingColor = Color3.fromRGB(255, 180, 60)
-        else pingColor = Color3.fromRGB(255, 40, 40) end
         pingLabel.Text = "Ping: " .. ping .. "ms"
-        pingLabel.TextColor3 = pingColor
     end
 end)
 
@@ -424,7 +386,7 @@ task.spawn(function()
     end
 end)
 
--- Vòng lặp dẹp particle mới (chỉ cấp 1)
+-- Dẹp particle mới
 task.spawn(function()
     while statsGui.Parent do
         task.wait(3)

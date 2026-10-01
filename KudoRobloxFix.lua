@@ -8,7 +8,7 @@ local Terrain = Workspace:FindFirstChildOfClass("Terrain")
 local Camera = Workspace.CurrentCamera
 local Stats = game:GetService("Stats")
 
--- ==================== POPUP ====================
+-- ==================== POPUP + BÁNH RĂNG LOADING ====================
 local popupGui = Instance.new("ScreenGui")
 popupGui.Name = "KudoPopup"
 popupGui.ResetOnSpawn = false
@@ -16,8 +16,8 @@ popupGui.IgnoreGuiInset = true
 popupGui.Parent = playerGui
 
 local popup = Instance.new("Frame")
-popup.Size = UDim2.new(0, 240, 0, 60)
-popup.Position = UDim2.new(1, 20, 0.35, -30)
+popup.Size = UDim2.new(0, 260, 0, 64)
+popup.Position = UDim2.new(1, 20, 0.35, -32)
 popup.BackgroundColor3 = Color3.fromRGB(14, 14, 20)
 popup.BackgroundTransparency = 0.1
 popup.BorderSizePixel = 0
@@ -30,9 +30,31 @@ popupStroke.Thickness = 1
 popupStroke.Transparency = 0.4
 popupStroke.Parent = popup
 
+-- Bánh răng loading (dùng text unicode quay)
+local gearLabel = Instance.new("TextLabel")
+gearLabel.Size = UDim2.new(0, 30, 0, 30)
+gearLabel.Position = UDim2.new(0, 12, 0.5, -15)
+gearLabel.BackgroundTransparency = 1
+gearLabel.Text = "⚙"
+gearLabel.Font = Enum.Font.GothamBold
+gearLabel.TextSize = 22
+gearLabel.TextColor3 = Color3.fromRGB(255, 70, 70)
+gearLabel.Parent = popup
+
+-- Xoay bánh răng liên tục
+task.spawn(function()
+    while gearLabel.Parent do
+        for i = 0, 360, 30 do
+            if not gearLabel.Parent then break end
+            gearLabel.Rotation = i
+            task.wait(0.04)
+        end
+    end
+end)
+
 local popupLabel = Instance.new("TextLabel")
-popupLabel.Size = UDim2.new(1, -20, 1, -12)
-popupLabel.Position = UDim2.new(0, 10, 0, 6)
+popupLabel.Size = UDim2.new(1, -60, 1, -12)
+popupLabel.Position = UDim2.new(0, 48, 0, 6)
 popupLabel.BackgroundTransparency = 1
 popupLabel.Text = "fix lag đang hoạt động ✓\nmade by kudo29001⚡"
 popupLabel.Font = Enum.Font.GothamBold
@@ -44,17 +66,19 @@ popupLabel.TextWrapped = true
 popupLabel.Parent = popup
 
 TweenService:Create(popup, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-    Position = UDim2.new(1, -260, 0.35, -30)
+    Position = UDim2.new(1, -280, 0.35, -32)
 }):Play()
 
-task.delay(6, function()
+-- 3.5 giây sau thì tắt
+task.delay(3.5, function()
     pcall(function()
         local out = TweenService:Create(popup, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-            Position = UDim2.new(1, 20, 0.35, -30),
+            Position = UDim2.new(1, 20, 0.35, -32),
             BackgroundTransparency = 1
         })
         out:Play()
         TweenService:Create(popupLabel, TweenInfo.new(0.4), {TextTransparency = 1}):Play()
+        TweenService:Create(gearLabel, TweenInfo.new(0.4), {TextTransparency = 1}):Play()
         TweenService:Create(popupStroke, TweenInfo.new(0.4), {Transparency = 1}):Play()
         out.Completed:Wait()
         popupGui:Destroy()
@@ -258,18 +282,15 @@ local function isName(v)
     return v:IsA("BillboardGui") or v:IsA("TextLabel") or v:IsA("TextButton") or v:IsA("Humanoid")
 end
 
--- ==================== HÀM POTATO (GIỮ MÀU GỐC, CHỈ ĐƠN GIẢN HOÁ) ====================
--- Chỉ đổi Material phức tạp sang SmoothPlastic, GIỮ NGUYÊN Color gốc
+-- ==================== POTATO PART (GIỮ MÀU GỐC) ====================
 local function potatoPart(part)
     pcall(function()
-        -- Đổi material phức tạp thành SmoothPlastic nhưng giữ màu gốc
         if part.Material ~= Enum.Material.SmoothPlastic 
             and part.Material ~= Enum.Material.Plastic then
             part.Material = Enum.Material.SmoothPlastic
         end
         part.Reflectance = 0
         part.CastShadow = false
-        -- Giữ nguyên part.Color
     end)
 end
 
@@ -289,8 +310,6 @@ local total = #descendants
 for i = 1, total do
     local v = descendants[i]
     local cn = v.ClassName
-    
-    -- BỎ QUA HOÀN TOÀN OBJECT TRONG NHÂN VẬT
     if not isChar(v) then
         if cn == "Part" or cn == "MeshPart" or cn == "UnionOperation" or cn == "WedgePart"
             or cn == "TrussPart" or cn == "CornerWedgePart" or cn == "SpawnLocation" then
@@ -328,9 +347,7 @@ task.spawn(function()
         task.wait(2)
         pcall(function()
             for _, v in ipairs(Workspace:GetDescendants()) do
-                if isChar(v) then
-                    -- Không đụng nhân vật
-                else
+                if not isChar(v) then
                     local cn = v.ClassName
                     if not isName(v) then
                         if cn == "ParticleEmitter" or cn == "Trail" or cn == "Beam"
@@ -342,7 +359,6 @@ task.spawn(function()
                         elseif cn == "Part" or cn == "MeshPart" or cn == "UnionOperation" 
                             or cn == "WedgePart" or cn == "TrussPart" or cn == "CornerWedgePart" 
                             or cn == "SpawnLocation" then
-                            -- Chỉ đổi material, giữ màu gốc
                             if v.Material ~= Enum.Material.SmoothPlastic 
                                 and v.Material ~= Enum.Material.Plastic then
                                 v.Material = Enum.Material.SmoothPlastic
@@ -477,25 +493,41 @@ pingValue.TextColor3 = Color3.fromRGB(0, 255, 120)
 pingValue.TextXAlignment = Enum.TextXAlignment.Right
 pingValue.Parent = box
 
+-- Đo FPS thật (không *2)
 local frames = 0
+local lastTime = tick()
+local currentFPS = 0
+
 task.spawn(function()
-    RunService.RenderStepped:Connect(function() frames = frames + 1 end)
+    RunService.RenderStepped:Connect(function()
+        frames = frames + 1
+    end)
     while statsGui.Parent do
         task.wait(0.5)
-        local fps = math.floor(frames * 2 + 0.5)
+        local now = tick()
+        local dt = now - lastTime
+        lastTime = now
+        currentFPS = math.floor(frames / dt + 0.5)
         frames = 0
-        fpsValue.Text = tostring(fps)
 
+        fpsValue.Text = tostring(currentFPS)
+
+        -- Màu FPS
         local fpsColor
-        if fps < 25 then
+        if currentFPS < 25 then
             fpsColor = Color3.fromRGB(255, 60, 60)
-        elseif fps < 40 then
+        elseif currentFPS < 40 then
             fpsColor = Color3.fromRGB(255, 200, 60)
-        else
+        elseif currentFPS <= 240 then
             fpsColor = Color3.fromRGB(0, 255, 120)
+        else
+            -- Trên 240: bảy màu rainbow
+            local hue = (tick() % 1)
+            fpsColor = Color3.fromHSV(hue, 1, 1)
         end
         fpsValue.TextColor3 = fpsColor
 
+        -- Ping
         local ping = 0
         pcall(function()
             ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())

@@ -91,8 +91,8 @@ closeBtn.Parent = main
 
 local fpsLabel = Instance.new("TextLabel")
 fpsLabel.Name = "FPS"
-fpsLabel.Size = UDim2.new(0, 110, 0, 24)
-fpsLabel.Position = UDim2.new(1, -120, 1, -32)
+fpsLabel.Size = UDim2.new(0, 120, 0, 26)
+fpsLabel.Position = UDim2.new(1, -130, 1, -34)
 fpsLabel.BackgroundTransparency = 1
 fpsLabel.Text = "FPS: --"
 fpsLabel.Font = Enum.Font.GothamBold
@@ -113,135 +113,107 @@ end
 local function step(text, fn, percent)
     setProgress(percent, text)
     pcall(fn)
-    task.wait(0.05)
+    task.wait(0.02)
 end
 
+-- ===== FFLAG GỌN NHẸ (chỉ những cái có tác dụng thật) =====
 step("Áp dụng FastFlags...", function()
+    -- GRAPHICS
     setfflag("DFIntDebugFRMQualityLevelOverride", "1")
     setfflag("DFIntTextureQualityOverride", "0")
     setfflag("DFFlagTextureQualityOverrideEnabled", "True")
     setfflag("FFlagTextureQualityOverride", "True")
     setfflag("FIntDebugForceMSAASamples", "1")
-    setfflag("FFlagDebugSkyGray", "True")
+    setfflag("DFFlagDisableSSAO", "True")
+    setfflag("FFlagDisableSSAO", "True")
     setfflag("FFlagDisablePostFx", "True")
-    setfflag("FFlagDisableTerrain", "True")
-    setfflag("FFlagRenderFixFog", "True")
+    setfflag("FFlagDisableBloom", "True")
+    setfflag("FFlagDisableDepthOfField", "True")
+    setfflag("FFlagDisableSunRays", "True")
+    setfflag("FFlagDisableColorCorrection", "True")
+    setfflag("FFlagDisableAntiAliasing", "True")
+    setfflag("FFlagDisableVSync", "True")
+    setfflag("FFlagDisableMotionBlur", "True")
+
+    -- SHADOW
     setfflag("FFlagRenderShadowIntensity", "0")
     setfflag("FFlagRenderShadowIntensityOverride", "True")
-    setfflag("FFlagRenderEnableShadowIntensityOverride", "True")
-    setfflag("DFIntCSGLevelOfDetailSwitchingDistance", "0")
-    setfflag("DFIntCSGLevelOfDetailSwitchingDistanceL12", "0")
-    setfflag("DFIntCSGLevelOfDetailSwitchingDistanceL23", "0")
-    setfflag("DFIntCSGLevelOfDetailSwitchingDistanceL34", "0")
-    setfflag("FIntFRMMaxGrassDistance", "0")
-    setfflag("FIntFRMMinGrassDistance", "0")
-    setfflag("FIntGrassMovementReducedMotionFactor", "0")
-    setfflag("DFFlagDisableTerrainTextures", "True")
-    setfflag("DFFlagDebugRenderForceTechnologyVoxel", "True")
-    setfflag("FFlagDebugPauseVoxelizer", "True")
-    setfflag("DFFlagSkipHighResolutionEnvironment", "True")
-    setfflag("DFFlagTextureCompositorEnable", "False")
-    setfflag("DFFlagTextureCompositorEnabled", "False")
-    setfflag("DFFlagForceTextureLOD", "True")
-    setfflag("DFFlagDisableDPIScale", "True")
-    setfflag("DFIntSolverSpringDamping", "0")
-    setfflag("DFIntPhysicsSendRate", "1")
-    setfflag("DFIntMaxSimultaneousPhysicsJobs", "1")
-    setfflag("DFIntTaskSchedulerTargetFps", "240")
-    setfflag("FFlagTaskSchedulerUseTaskQueue", "True")
-    setfflag("DFIntConnectionMTUSize", "1400")
-    setfflag("FFlagDisableDPIScale", "True")
-    setfflag("DFFlagDisableGPUOcclusion", "False")
-    setfflag("FFlagDebugGraphicsDisableDirect3D11", "True")
-    setfflag("FFlagDebugGraphicsPreferOpenGL", "True")
-    setfflag("FFlagDebugGraphicsPreferVulkan", "True")
-    setfflag("FFlagDisableRenderMeshes", "True")
-    setfflag("FFlagRenderDisableWireframe", "True")
-    setfflag("FFlagDisableParticleMesh", "True")
     setfflag("DFFlagDisableRenderShadowMap", "True")
+    setfflag("FFlagDisableShadows", "True")
+
+    -- SKY/ATMOSPHERE
+    setfflag("FFlagDebugSkyGray", "True")
     setfflag("FFlagDisableAtmosphere", "True")
     setfflag("FFlagDisableSky", "True")
     setfflag("FFlagDisableSkybox", "True")
     setfflag("FFlagDisableFog", "True")
     setfflag("FFlagDisableWater", "True")
+
+    -- TERRAIN
+    setfflag("FFlagDisableTerrain", "True")
+    setfflag("DFFlagDisableTerrainTextures", "True")
     setfflag("FFlagDisableTerrainDecoration", "True")
-    setfflag("DFFlagSkipRenderMesh", "True")
-    setfflag("FFlagDisableParticleEffects", "True")
-    setfflag("FFlagDisableTrails", "True")
-    setfflag("FFlagDisableBeams", "True")
-    setfflag("FFlagDisableBillboards", "True")
-    setfflag("FFlagDisableDecals", "True")
-    setfflag("FFlagDisableTextures", "True")
-    setfflag("FFlagDisableSurfaceAppearance", "True")
-    setfflag("FFlagDisableMaterialTextures", "True")
-    setfflag("FFlagDisableReflections", "True")
-    setfflag("FFlagDisableGlassRefraction", "True")
-    setfflag("DFFlagDisableSSAO", "True")
-    setfflag("FFlagDisableSSAO", "True")
-    setfflag("FFlagDisableAntiAliasing", "True")
-    setfflag("FFlagDisableVSync", "True")
-    setfflag("FFlagDisableMotionBlur", "True")
-    setfflag("FFlagDisableDepthOfField", "True")
-    setfflag("FFlagDisableBloom", "True")
-    setfflag("FFlagDisableSunRays", "True")
-    setfflag("FFlagDisableColorCorrection", "True")
-    setfflag("FFlagDisableAtmosphericScattering", "True")
-    setfflag("FFlagRenderSkipTerrain", "True")
-    setfflag("DFFlagRenderSkipMaterialTextures", "True")
-    setfflag("FFlagRenderSkipLighting", "True")
-    setfflag("FFlagRenderSkipSpecular", "True")
-    setfflag("FFlagRenderSkipNormal", "True")
-    setfflag("FFlagRenderSkipRoughness", "True")
-    setfflag("FFlagRenderSkipMetalness", "True")
-    setfflag("FFlagRenderSkipEmissive", "True")
-    setfflag("DFIntFrameBufferPoolSize", "1")
-    setfflag("DFIntRenderMeshMaxBones", "1")
-    setfflag("DFIntDebugEngineOptimizationLevel", "3")
-    setfflag("DFFlagGCEnableIncremental", "True")
-    setfflag("DFIntGCIncrementalPause", "1")
-    setfflag("DFIntGCIncrementalStepMul", "500")
-    setfflag("DFIntMinFrameRate", "30")
-    setfflag("DFIntMaxFrameRate", "240")
-    setfflag("DFIntFrameRateCap", "240")
-    setfflag("FFlagDisableAnimationBlending", "True")
-    setfflag("FFlagDisableFacialAnimation", "True")
-    setfflag("DFFlagSkipAnimationBlending", "True")
-    setfflag("FFlagDisableIKControl", "True")
-    setfflag("FFlagDisableHikeAnimation", "True")
-    setfflag("FFlagDisableShadows", "True")
+    setfflag("FIntFRMMaxGrassDistance", "0")
+    setfflag("FIntFRMMinGrassDistance", "0")
+
+    -- LOD
+    setfflag("DFIntCSGLevelOfDetailSwitchingDistance", "0")
+    setfflag("DFIntCSGLevelOfDetailSwitchingDistanceL12", "0")
+    setfflag("DFIntCSGLevelOfDetailSwitchingDistanceL23", "0")
+    setfflag("DFIntCSGLevelOfDetailSwitchingDistanceL34", "0")
+    setfflag("FFlagDisableLODTransitions", "True")
+    setfflag("FFlagForceLOD0", "True")
+    setfflag("DFIntLODBias", "4")
+
+    -- LIGHTING
     setfflag("FFlagDisableDynamicLighting", "True")
     setfflag("FFlagDisablePointLightShadows", "True")
     setfflag("FFlagDisableSpotLightShadows", "True")
     setfflag("FFlagDisableSurfaceLightShadows", "True")
-    setfflag("FFlagDisableSpriteSheet", "True")
-    setfflag("FFlagDisableRagdoll", "True")
-    setfflag("FFlagDisableLODTransitions", "True")
-    setfflag("DFFlagSkipLODTransitions", "True")
-    setfflag("FFlagForceLOD0", "True")
-    setfflag("DFIntLODBias", "4")
-    setfflag("DFIntPhysicsTickerMaxTime", "1")
+    setfflag("DFFlagDebugRenderForceTechnologyVoxel", "True")
+    setfflag("FFlagDebugPauseVoxelizer", "True")
+
+    -- PHYSICS
+    setfflag("DFIntSolverSpringDamping", "0")
+    setfflag("DFIntPhysicsSendRate", "1")
+    setfflag("DFIntMaxSimultaneousPhysicsJobs", "1")
     setfflag("DFIntPhysicsStepPerFrame", "1")
-    setfflag("FFlagDisableRaycastFiltering", "True")
-    setfflag("DFFlagSkipRaycastFiltering", "True")
     setfflag("DFIntMaximumCollisionIterations", "1")
     setfflag("DFIntSolverConvergenceIterations", "1")
-    setfflag("FFlagDisableRenderingShadows", "True")
-    setfflag("FFlagDisableRenderingWater", "True")
-    setfflag("FFlagDisableRenderingTerrain", "True")
-    setfflag("FFlagDisableRenderingDecals", "True")
-    setfflag("FFlagDisableRenderingTextures", "True")
-    setfflag("FFlagDisableRenderingParticles", "True")
-    setfflag("FFlagDisableRenderingBeams", "True")
-    setfflag("FFlagDisableRenderingTrails", "True")
-end, 12)
+
+    -- FPS / GC
+    setfflag("DFIntTaskSchedulerTargetFps", "240")
+    setfflag("DFIntFrameRateCap", "240")
+    setfflag("DFIntMinFrameRate", "30")
+    setfflag("DFIntMaxFrameRate", "240")
+    setfflag("DFFlagGCEnableIncremental", "True")
+    setfflag("DFIntGCIncrementalPause", "1")
+    setfflag("DFIntGCIncrementalStepMul", "500")
+
+    -- RENDER OPTIMIZE
+    setfflag("DFIntFrameBufferPoolSize", "1")
+    setfflag("DFIntRenderMeshMaxBones", "1")
+    setfflag("DFIntDebugEngineOptimizationLevel", "3")
+    setfflag("DFFlagForceTextureLOD", "True")
+    setfflag("DFFlagTextureCompositorEnable", "False")
+    setfflag("DFFlagTextureCompositorEnabled", "False")
+
+    -- ANIMATION (chỉ tắt blend, giữ animation chạy)
+    setfflag("FFlagDisableAnimationBlending", "True")
+    setfflag("DFFlagSkipAnimationBlending", "True")
+    setfflag("FFlagDisableFacialAnimation", "True")
+
+    -- NETWORK
+    setfflag("DFIntConnectionMTUSize", "1400")
+    setfflag("DFIntS2PhysicsSenderRate", "1")
+end, 15)
 
 step("Hạ graphics...", function()
     settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
     settings().Rendering.MeshPartDetailLevel = Enum.MeshPartDetailLevel.Level01
     settings().Rendering.AnimationWeightedBlendFix = Enum.AnimationWeightedBlendFix.Disabled
     settings().Rendering.EagerBulkExecution = true
-    settings().Rendering.EditQualityLevel = Enum.QualityLevel.Level01
-end, 22)
+end, 25)
 
 step("Tối ưu Camera...", function()
     if Camera then
@@ -249,9 +221,9 @@ step("Tối ưu Camera...", function()
         Camera.CameraType = Enum.CameraType.Custom
     end
     pcall(function() Workspace.StreamingEnabled = true end)
-    pcall(function() Workspace.StreamingTargetRadius = 128 end)
+    pcall(function() Workspace.StreamingTargetRadius = 256 end)
     pcall(function() Workspace.StreamingMinRadius = 64 end)
-end, 30)
+end, 35)
 
 step("Tắt Terrain...", function()
     if Terrain then
@@ -260,9 +232,8 @@ step("Tắt Terrain...", function()
         Terrain.WaterReflectance = 0
         Terrain.WaterTransparency = 1
         Terrain.Decoration = false
-        pcall(function() Terrain:Clear() end)
     end
-end, 38)
+end, 45)
 
 step("Tắt PostFX & Lighting...", function()
     for _, v in ipairs(Lighting:GetChildren()) do
@@ -280,16 +251,14 @@ step("Tắt PostFX & Lighting...", function()
     Lighting.OutdoorAmbient = Color3.fromRGB(128,128,128)
     Lighting.Ambient = Color3.fromRGB(128,128,128)
     Lighting.ClockTime = 14
-    Lighting.GeographicLatitude = 0
     Lighting.ExposureCompensation = 0
     Lighting.ShadowSoftness = 0
-end, 48)
+end, 55)
 
 step("Tắt âm thanh...", function()
     SoundService.AmbientReverb = Enum.ReverbType.NoReverb
     SoundService.DistanceFactor = 0
     SoundService.DopplerScale = 0
-    SoundService.RespectFilteringEnabled = false
     pcall(function() SoundService.VolumetricAudio = Enum.VolumetricAudio.Disabled end)
     for _, v in ipairs(game:GetDescendants()) do
         if v:IsA("Sound") then
@@ -298,7 +267,7 @@ step("Tắt âm thanh...", function()
             v.Looped = false
         end
     end
-end, 56)
+end, 60)
 
 local potatoMaterials = {
     [Enum.Material.Grass]=true,[Enum.Material.LeafyGrass]=true,[Enum.Material.Wood]=true,
@@ -327,13 +296,12 @@ local function refreshCharModels()
 end
 refreshCharModels()
 
-local playerAddConn = game.Players.PlayerAdded:Connect(function(plr)
+game.Players.PlayerAdded:Connect(function(plr)
     plr.CharacterAdded:Connect(function(c)
         charModels[c] = true
     end)
 end)
-
-local playerRemoveConn = game.Players.PlayerRemoving:Connect(function(plr)
+game.Players.PlayerRemoving:Connect(function(plr)
     if plr.Character then
         charModels[plr.Character] = nil
     end
@@ -372,23 +340,18 @@ local function optimizeObject(v)
             v.Reflectance = 0
             v.CastShadow = false
             v.Massless = true
-            v.CanTouch = false
-            v.CanQuery = false
         end)
     elseif v:IsA("Texture") then
         pcall(function() v.Transparency = 1 end)
     elseif v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Smoke")
         or v:IsA("Fire") or v:IsA("Sparkles") or v:IsA("Beam") then
-        pcall(function() v.Enabled = false; v:Destroy() end)
+        pcall(function() v.Enabled = false end)
     elseif v:IsA("SurfaceAppearance") then
         pcall(function() v:Destroy() end)
     elseif v:IsA("SpecialMesh") then
         pcall(function()
             if v.MeshType == Enum.MeshType.FileMesh or v.MeshType == Enum.MeshType.Head then
-                v.MeshType = Enum.MeshType.Brick
                 v.TextureId = ""
-                v.Scale = Vector3.new(1,1,1)
-                v.Offset = Vector3.new(0,0,0)
             end
         end)
     elseif v:IsA("MeshPart") then
@@ -398,20 +361,9 @@ local function optimizeObject(v)
             v.CollisionFidelity = Enum.CollisionFidelity.Box
             v.CastShadow = false
             v.Massless = true
-            v.CanTouch = false
-            v.CanQuery = false
-            v.DoubleSided = false
         end)
     elseif v:IsA("Sound") then
-        pcall(function() v.Volume = 0; v.Playing = false; v:Destroy() end)
-    elseif v:IsA("Animation") then
-        pcall(function() v:Destroy() end)
-    elseif v:IsA("AnimationController") or v:IsA("Animator") then
-        pcall(function()
-            for _, t in ipairs(v:GetPlayingAnimationTracks()) do
-                t:Stop(); t:Destroy()
-            end
-        end)
+        pcall(function() v.Volume = 0; v.Playing = false end)
     elseif v:IsA("Highlight") or v:IsA("SelectionBox") or v:IsA("BoxHandleAdornment") then
         pcall(function() v.Enabled = false end)
     elseif v:IsA("Attachment") then
@@ -424,8 +376,6 @@ local function optimizeObject(v)
         end)
     elseif v:IsA("PointLight") or v:IsA("SpotLight") or v:IsA("SurfaceLight") then
         pcall(function() v:Destroy() end)
-    elseif v:IsA("ForceField") or v:IsA("Explosion") then
-        pcall(function() v:Destroy() end)
     end
 end
 
@@ -434,8 +384,8 @@ local total = #allDescendants
 
 for i, v in ipairs(allDescendants) do
     optimizeObject(v)
-    if i % 100 == 0 then
-        local p = 60 + math.floor((i / total) * 30)
+    if i % 200 == 0 then
+        local p = 65 + math.floor((i / total) * 25)
         setProgress(p, "Đang quét... " .. i .. "/" .. total)
         task.wait()
     end
@@ -457,7 +407,7 @@ step("Tối ưu Player...", function()
             end
         end
     end)
-end, 96)
+end, 94)
 
 setProgress(97, "Dọn bộ nhớ...")
 pcall(function()
@@ -473,43 +423,35 @@ end)
 
 task.spawn(function()
     while sg.Parent do
-        task.wait(5)
+        task.wait(10)
         pcall(function() collectgarbage("collect") end)
     end
 end)
 
-task.spawn(function()
-    while sg.Parent do
-        task.wait(2)
-        pcall(function()
-            for _, v in ipairs(Workspace:GetDescendants()) do
-                if (v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam")
-                    or v:IsA("Smoke") or v:IsA("Fire") or v:IsA("Sparkles")
-                    or v:IsA("PointLight") or v:IsA("SpotLight") or v:IsA("SurfaceLight")) then
-                    if not isCharacterDescendant(v) then
-                        v.Enabled = false
-                    end
-                end
-            end
-        end)
-    end
-end)
+-- ===== FPS COUNTER CHẠY MÃI MÃI (không bị destroy khi GUI ẩn) =====
+local fpsGui = Instance.new("ScreenGui")
+fpsGui.Name = "KudoFPS"
+fpsGui.ResetOnSpawn = false
+fpsGui.IgnoreGuiInset = true
+fpsGui.Parent = playerGui
 
-task.spawn(function()
-    while sg.Parent do
-        task.wait(1)
-        pcall(function()
-            if Camera then Camera.FieldOfView = 70 end
-        end)
-    end
-end)
+local fpsBox = Instance.new("TextLabel")
+fpsBox.Size = UDim2.new(0, 120, 0, 26)
+fpsBox.Position = UDim2.new(1, -130, 1, -34)
+fpsBox.BackgroundTransparency = 1
+fpsBox.Text = "FPS: --"
+fpsBox.Font = Enum.Font.GothamBold
+fpsBox.TextSize = 13
+fpsBox.TextColor3 = Color3.fromRGB(0, 255, 120)
+fpsBox.TextXAlignment = Enum.TextXAlignment.Right
+fpsBox.Parent = fpsGui
 
 local frames = 0
 task.spawn(function()
     RunService.RenderStepped:Connect(function()
         frames = frames + 1
     end)
-    while sg.Parent do
+    while fpsGui.Parent do
         task.wait(0.5)
         local fps = math.floor(frames * 2 + 0.5)
         frames = 0
@@ -521,8 +463,8 @@ task.spawn(function()
         else
             color = Color3.fromRGB(255, 80, 80)
         end
-        fpsLabel.Text = "FPS: " .. fps
-        fpsLabel.TextColor3 = color
+        fpsBox.Text = "FPS: " .. fps
+        fpsBox.TextColor3 = color
     end
 end)
 
@@ -533,7 +475,7 @@ TweenService:Create(progressFill, TweenInfo.new(0.3), {
     BackgroundColor3 = Color3.fromRGB(0, 255, 120)
 }):Play()
 
-task.wait(1)
+task.wait(0.5)
 
 titleLabel.Text = "⚡ fix lag by kudo29001"
 statusLabel.Text = ""
@@ -552,7 +494,7 @@ TweenService:Create(titleLabel, TweenInfo.new(0.4), {
 
 closeBtn.Visible = false
 
-task.wait(6)
+task.wait(4)
 pcall(function()
     TweenService:Create(main, TweenInfo.new(0.5), {
         BackgroundTransparency = 1,
@@ -561,17 +503,11 @@ pcall(function()
     TweenService:Create(titleLabel, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
     TweenService:Create(stroke, TweenInfo.new(0.5), {Transparency = 1}):Play()
     task.wait(0.6)
-    if scanConn then scanConn:Disconnect() end
-    if playerAddConn then playerAddConn:Disconnect() end
-    if playerRemoveConn then playerRemoveConn:Disconnect() end
     sg:Destroy()
 end)
 
 closeBtn.MouseButton1Click:Connect(function()
     pcall(function()
-        if scanConn then scanConn:Disconnect() end
-        if playerAddConn then playerAddConn:Disconnect() end
-        if playerRemoveConn then playerRemoveConn:Disconnect() end
         sg:Destroy()
     end)
 end)

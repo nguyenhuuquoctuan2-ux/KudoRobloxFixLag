@@ -249,9 +249,11 @@ pcall(function()
     setfflag("DFFlagSkipAnimationBlending", "True")
     setfflag("FFlagDisableFacialAnimation", "True")
 
+    -- GC TUNING MẠNH HƠN
     setfflag("DFFlagGCEnableIncremental", "True")
-    setfflag("DFIntGCIncrementalPause", "0")
-    setfflag("DFIntGCIncrementalStepMul", "2000")
+    setfflag("DFIntGCIncrementalPause", "2")
+    setfflag("DFIntGCIncrementalStepMul", "3000")
+    setfflag("DFIntGCIncrementalStepSizeKb", "64")
 
     setfflag("DFIntConnectionMTUSize", "1400")
     setfflag("DFIntS2PhysicsSenderRate", "1")
@@ -302,7 +304,7 @@ task.spawn(function()
     end)
 end)
 
--- ==================== XOÁ BẦU TRỜI ====================
+-- ==================== XOÁ BẦU TRỜI (CHỈ 1 LẦN) ====================
 pcall(function()
     for _, v in ipairs(Lighting:GetChildren()) do
         if v:IsA("PostEffect") or v:IsA("Sky") or v:IsA("Atmosphere") 
@@ -324,23 +326,21 @@ pcall(function()
     Lighting.ShadowSoftness = 0
 end)
 
-task.spawn(function()
-    while uiParent.Parent do
-        task.wait(3)
+-- Bắt Sky mới spawn qua DescendantAdded (KHÔNG dùng vòng lặp)
+Lighting.DescendantAdded:Connect(function(v)
+    task.defer(function()
         pcall(function()
-            for _, v in ipairs(Lighting:GetChildren()) do
-                if v:IsA("Sky") or v:IsA("Atmosphere") or v:IsA("Clouds") 
-                    or v:IsA("Skybox") or v:IsA("BloomEffect") or v:IsA("BlurEffect")
-                    or v:IsA("SunRaysEffect") or v:IsA("DepthOfFieldEffect")
-                    or v:IsA("ColorCorrectionEffect") or v:IsA("ImageLabel") then
-                    v:Destroy()
-                end
+            if v:IsA("Sky") or v:IsA("Atmosphere") or v:IsA("Clouds") 
+                or v:IsA("Skybox") or v:IsA("BloomEffect") or v:IsA("BlurEffect")
+                or v:IsA("SunRaysEffect") or v:IsA("DepthOfFieldEffect")
+                or v:IsA("ColorCorrectionEffect") then
+                v:Destroy()
             end
         end)
-    end
+    end)
 end)
 
--- ==================== NƯỚC ====================
+-- ==================== NƯỚC (CHỈ 1 LẦN) ====================
 pcall(function()
     if Terrain then
         Terrain.WaterWaveSize = 0
@@ -349,21 +349,6 @@ pcall(function()
         Terrain.WaterTransparency = 0
         Terrain.WaterColor = Color3.fromRGB(70, 140, 230)
         Terrain.Decoration = false
-    end
-end)
-
-task.spawn(function()
-    while uiParent.Parent do
-        task.wait(3)
-        pcall(function()
-            if Terrain then
-                if Terrain.WaterWaveSize ~= 0 then Terrain.WaterWaveSize = 0 end
-                if Terrain.WaterWaveSpeed ~= 0 then Terrain.WaterWaveSpeed = 0 end
-                if Terrain.WaterReflectance ~= 0 then Terrain.WaterReflectance = 0 end
-                if Terrain.WaterTransparency ~= 0 then Terrain.WaterTransparency = 0 end
-                if Terrain.Decoration then Terrain.Decoration = false end
-            end
-        end)
     end
 end)
 
@@ -413,72 +398,37 @@ local killTypes = {
     Decal = true, Texture = true, SpecialMesh = true,
 }
 
+-- ==================== XỬ LÝ 1 OBJECT ====================
+local function handleObject(v)
+    if isName(v) then return end
+    if isChar(v) then return end
+    
+    local cn = v.ClassName
+    if killTypes[cn] then
+        pcall(function() v:Destroy() end)
+    elseif cn == "Part" or cn == "MeshPart" or cn == "UnionOperation" or cn == "WedgePart"
+        or cn == "TrussPart" or cn == "CornerWedgePart" or cn == "SpawnLocation" then
+        potatoPart(v)
+    end
+end
+
+-- ==================== BULK XỬ LÝ BAN ĐẦU ====================
 local descendants = Workspace:GetDescendants()
 local total = #descendants
 
 for i = 1, total do
-    local v = descendants[i]
-    local cn = v.ClassName
-    if not isChar(v) then
-        if cn == "Part" or cn == "MeshPart" or cn == "UnionOperation" or cn == "WedgePart"
-            or cn == "TrussPart" or cn == "CornerWedgePart" or cn == "SpawnLocation" then
-            potatoPart(v)
-        elseif killTypes[cn] then
-            if not isName(v) then
-                pcall(function() v:Destroy() end)
-            end
-        end
-    end
-    if i % 500 == 0 then task.wait() end
+    handleObject(descendants[i])
+    if i % 800 == 0 then task.wait() end
 end
 
-local scanConn = Workspace.DescendantAdded:Connect(function(v)
+-- ==================== OBJECT MỚI (CHỈ EVENT, KHÔNG VÒNG LẶP) ====================
+Workspace.DescendantAdded:Connect(function(v)
     task.defer(function()
-        pcall(function()
-            if isChar(v) then return end
-            local cn = v.ClassName
-            if cn == "Part" or cn == "MeshPart" or cn == "UnionOperation" or cn == "WedgePart"
-                or cn == "TrussPart" or cn == "CornerWedgePart" or cn == "SpawnLocation" then
-                potatoPart(v)
-            elseif killTypes[cn] then
-                if not isName(v) then
-                    v:Destroy()
-                end
-            end
-        end)
+        pcall(function() handleObject(v) end)
     end)
 end)
 
-task.spawn(function()
-    while uiParent.Parent do
-        task.wait(2)
-        pcall(function()
-            for _, v in ipairs(Workspace:GetDescendants()) do
-                if not isChar(v) then
-                    local cn = v.ClassName
-                    if not isName(v) then
-                        if cn == "ParticleEmitter" or cn == "Trail" or cn == "Beam"
-                            or cn == "Smoke" or cn == "Fire" or cn == "Sparkles"
-                            or cn == "PointLight" or cn == "SpotLight" or cn == "SurfaceLight"
-                            or cn == "SurfaceAppearance" or cn == "Decal" or cn == "Texture"
-                            or cn == "Highlight" or cn == "SelectionBox" or cn == "BoxHandleAdornment" then
-                            v:Destroy()
-                        elseif cn == "Part" or cn == "MeshPart" or cn == "UnionOperation" 
-                            or cn == "WedgePart" or cn == "TrussPart" or cn == "CornerWedgePart" 
-                            or cn == "SpawnLocation" then
-                            if v.Material ~= Enum.Material.SmoothPlastic 
-                                and v.Material ~= Enum.Material.Plastic then
-                                v.Material = Enum.Material.SmoothPlastic
-                            end
-                        end
-                    end
-                end
-            end
-        end)
-    end
-end)
-
--- ==================== CULLING (nới lên 80 studs) ====================
+-- ==================== CULLING CHIA ĐỢT (5 giây refresh, xử lý 1/5 mỗi 0.1s) ====================
 local CULL_DIST_SQ = 80 * 80
 local culled = {}
 local cullIndex = 1
@@ -486,11 +436,11 @@ local cullList = {}
 
 task.spawn(function()
     while uiParent.Parent do
-        task.wait(3)
+        task.wait(5)
         local list = {}
         for _, v in ipairs(Workspace:GetDescendants()) do
             if v:IsA("BasePart") and not isChar(v) then
-                table.insert(list, v)
+                list[#list + 1] = v
             end
         end
         cullList = list
@@ -509,15 +459,14 @@ task.spawn(function()
             if n == 0 then return end
             
             local startIdx = cullIndex
-            local endIdx = math.min(startIdx + math.ceil(n / 10), n)
+            local chunk = math.ceil(n / 5)
+            local endIdx = math.min(startIdx + chunk, n)
             
             for i = startIdx, endIdx do
                 local v = list[i]
                 if v and v.Parent then
                     local pos = v.Position
-                    local isGround = (pos.Y < camPos.Y - 3)
-                    
-                    if isGround then
+                    if pos.Y < camPos.Y - 3 then
                         if culled[v] then
                             culled[v] = false
                             pcall(function() v.LocalTransparencyModifier = 0 end)
@@ -529,16 +478,12 @@ task.spawn(function()
                         local distSq = dx*dx + dy*dy + dz*dz
                         local shouldHide = distSq > CULL_DIST_SQ
 
-                        if shouldHide then
-                            if not culled[v] then
-                                culled[v] = true
-                                pcall(function() v.LocalTransparencyModifier = 1 end)
-                            end
-                        else
-                            if culled[v] then
-                                culled[v] = false
-                                pcall(function() v.LocalTransparencyModifier = 0 end)
-                            end
+                        if shouldHide and not culled[v] then
+                            culled[v] = true
+                            pcall(function() v.LocalTransparencyModifier = 1 end)
+                        elseif not shouldHide and culled[v] then
+                            culled[v] = false
+                            pcall(function() v.LocalTransparencyModifier = 0 end)
                         end
                     end
                 end
@@ -546,6 +491,19 @@ task.spawn(function()
             
             cullIndex = endIdx + 1
             if cullIndex > n then cullIndex = 1 end
+        end)
+    end
+end)
+
+-- ==================== GC KHI IDLE ====================
+-- Chỉ gọi GC khi game không bận — không đúng chu kỳ, không gây spike
+task.spawn(function()
+    while uiParent.Parent do
+        task.wait(30)
+        pcall(function()
+            if RunService:IsRunning() then
+                collectgarbage("collect")
+            end
         end)
     end
 end)
@@ -632,13 +590,11 @@ pingValue.TextXAlignment = Enum.TextXAlignment.Right
 pingValue.ZIndex = 1001
 pingValue.Parent = box
 
+-- Giữ DisplayOrder (chỉ chạy 1 lần, không loop)
 task.spawn(function()
-    while statsGui.Parent do
-        task.wait(2)
-        pcall(function()
-            statsGui.DisplayOrder = 2147483647
-        end)
-    end
+    pcall(function()
+        statsGui.DisplayOrder = 2147483647
+    end)
 end)
 
 local frames = 0
@@ -686,13 +642,6 @@ task.spawn(function()
             pingColor = Color3.fromRGB(255, 60, 60)
         end
         pingValue.TextColor3 = pingColor
-    end
-end)
-
-task.spawn(function()
-    while statsGui.Parent do
-        task.wait(15)
-        pcall(function() collectgarbage("collect") end)
     end
 end)
 

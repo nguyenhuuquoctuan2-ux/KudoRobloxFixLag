@@ -8,7 +8,7 @@ local Terrain = Workspace:FindFirstChildOfClass("Terrain")
 local Camera = Workspace.CurrentCamera
 local Stats = game:GetService("Stats")
 
--- ==================== POPUP 6 GIÂY ====================
+-- ==================== POPUP ====================
 local popupGui = Instance.new("ScreenGui")
 popupGui.Name = "KudoPopup"
 popupGui.ResetOnSpawn = false
@@ -16,8 +16,8 @@ popupGui.IgnoreGuiInset = true
 popupGui.Parent = playerGui
 
 local popup = Instance.new("Frame")
-popup.Size = UDim2.new(0, 240, 0, 44)
-popup.Position = UDim2.new(1, 20, 0.35, -22)
+popup.Size = UDim2.new(0, 240, 0, 60)
+popup.Position = UDim2.new(1, 20, 0.35, -30)
 popup.BackgroundColor3 = Color3.fromRGB(14, 14, 20)
 popup.BackgroundTransparency = 0.05
 popup.BorderSizePixel = 0
@@ -34,21 +34,23 @@ local popupLabel = Instance.new("TextLabel")
 popupLabel.Size = UDim2.new(1, -20, 1, -12)
 popupLabel.Position = UDim2.new(0, 10, 0, 6)
 popupLabel.BackgroundTransparency = 1
-popupLabel.Text = "fix lag by kudo29001⚡"
+popupLabel.Text = "fix lag : ✓\nmade by kudo29001"
 popupLabel.Font = Enum.Font.GothamBold
-popupLabel.TextSize = 14
+popupLabel.TextSize = 13
 popupLabel.TextColor3 = Color3.fromRGB(255, 70, 70)
 popupLabel.TextXAlignment = Enum.TextXAlignment.Center
+popupLabel.TextYAlignment = Enum.TextYAlignment.Center
+popupLabel.TextWrapped = true
 popupLabel.Parent = popup
 
 TweenService:Create(popup, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-    Position = UDim2.new(1, -260, 0.35, -22)
+    Position = UDim2.new(1, -260, 0.35, -30)
 }):Play()
 
 task.delay(6, function()
     pcall(function()
         local out = TweenService:Create(popup, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-            Position = UDim2.new(1, 20, 0.35, -22),
+            Position = UDim2.new(1, 20, 0.35, -30),
             BackgroundTransparency = 1
         })
         out:Play()
@@ -213,7 +215,7 @@ local function isName(v)
     return v:IsA("BillboardGui") or v:IsA("TextLabel") or v:IsA("TextButton") or v:IsA("Humanoid")
 end
 
--- ==================== BULK DESTROY ====================
+-- ==================== BULK DESTROY (KHÔNG XOÁ PART GỐC CỦA MAP) ====================
 local killTypes = {
     ParticleEmitter = true, Trail = true, Smoke = true, Fire = true,
     Sparkles = true, Beam = true, Highlight = true, SelectionBox = true,
@@ -232,19 +234,10 @@ for i = 1, total do
         if not isName(v) and not isChar(v) then
             pcall(function() v:Destroy() end)
         end
-    elseif cn == "BasePart" or cn == "MeshPart" or cn == "UnionOperation" or cn == "Part" then
-        pcall(function()
-            v.Material = Enum.Material.SmoothPlastic
-            v.Reflectance = 0
-            v.CastShadow = false
-        end)
     elseif cn == "Decal" or cn == "Texture" then
-        -- Giữ decal mặt cho nhân vật, xoá decal môi trường
         if isChar(v) then
             local parent = v.Parent
-            if parent and parent.Name == "Head" then
-                -- Giữ lại khuôn mặt
-            else
+            if not (parent and parent.Name == "Head") then
                 pcall(function() v.Transparency = 1 end)
             end
         else
@@ -253,7 +246,6 @@ for i = 1, total do
     elseif cn == "SpecialMesh" then
         pcall(function()
             if v.MeshType == Enum.MeshType.FileMesh or v.MeshType == Enum.MeshType.Head then
-                -- Đưa đầu về mặc định
                 v.MeshType = Enum.MeshType.Head
                 v.TextureId = ""
             end
@@ -262,7 +254,7 @@ for i = 1, total do
     if i % 500 == 0 then task.wait() end
 end
 
--- Đưa đầu nhân vật về mặc định (xoá mesh custom, giữ head shape chuẩn)
+-- Đầu nhân vật về mặc định
 local function resetHead(character)
     if not character then return end
     local head = character:FindFirstChild("Head")
@@ -277,7 +269,6 @@ local function resetHead(character)
     newMesh.Parent = head
 end
 
--- Áp dụng cho nhân vật hiện tại + tương lai
 for _, plr in ipairs(game.Players:GetPlayers()) do
     if plr.Character then resetHead(plr.Character) end
     plr.CharacterAdded:Connect(function(c)
@@ -292,10 +283,6 @@ local scanConn = Workspace.DescendantAdded:Connect(function(v)
             local cn = v.ClassName
             if killTypes[cn] then
                 if not isName(v) and not isChar(v) then v:Destroy() end
-            elseif cn == "BasePart" or cn == "MeshPart" then
-                v.Material = Enum.Material.SmoothPlastic
-                v.Reflectance = 0
-                v.CastShadow = false
             elseif cn == "Decal" or cn == "Texture" then
                 if isChar(v) then
                     local parent = v.Parent
@@ -310,8 +297,8 @@ local scanConn = Workspace.DescendantAdded:Connect(function(v)
     end)
 end)
 
--- ==================== DISTANCE CULLING (20 studs) ====================
-local CULL_DIST = 20
+-- ==================== DISTANCE CULLING (12 studs) ====================
+local CULL_DIST = 12
 local CULL_DIST_SQ = CULL_DIST * CULL_DIST
 
 local culledState = {}
@@ -372,14 +359,13 @@ local cullConn = RunService.Heartbeat:Connect(function()
     end)
 end)
 
--- ==================== UI MỚI CHO FPS + PING ====================
+-- ==================== UI FPS + PING ====================
 local statsGui = Instance.new("ScreenGui")
 statsGui.Name = "KudoStats"
 statsGui.ResetOnSpawn = false
 statsGui.IgnoreGuiInset = true
 statsGui.Parent = playerGui
 
--- Frame chính
 local box = Instance.new("Frame")
 box.Size = UDim2.new(0, 130, 0, 60)
 box.Position = UDim2.new(1, -145, 1, -75)
@@ -395,7 +381,6 @@ boxStroke.Thickness = 1
 boxStroke.Transparency = 0.4
 boxStroke.Parent = box
 
--- Đường phân cách
 local sep = Instance.new("Frame")
 sep.Size = UDim2.new(1, -20, 0, 1)
 sep.Position = UDim2.new(0, 10, 0, 30)
@@ -404,7 +389,6 @@ sep.BackgroundTransparency = 0.6
 sep.BorderSizePixel = 0
 sep.Parent = box
 
--- FPS
 local fpsTitle = Instance.new("TextLabel")
 fpsTitle.Size = UDim2.new(0, 45, 0, 30)
 fpsTitle.Position = UDim2.new(0, 8, 0, 0)
@@ -423,11 +407,10 @@ fpsValue.BackgroundTransparency = 1
 fpsValue.Text = "--"
 fpsValue.Font = Enum.Font.GothamBold
 fpsValue.TextSize = 14
-fpsValue.TextColor3 = Color3.fromRGB(255, 80, 80)
+fpsValue.TextColor3 = Color3.fromRGB(0, 255, 120)
 fpsValue.TextXAlignment = Enum.TextXAlignment.Right
 fpsValue.Parent = box
 
--- Ping
 local pingTitle = Instance.new("TextLabel")
 pingTitle.Size = UDim2.new(0, 45, 0, 30)
 pingTitle.Position = UDim2.new(0, 8, 0, 30)
@@ -446,7 +429,7 @@ pingValue.BackgroundTransparency = 1
 pingValue.Text = "--"
 pingValue.Font = Enum.Font.GothamBold
 pingValue.TextSize = 14
-pingValue.TextColor3 = Color3.fromRGB(255, 80, 80)
+pingValue.TextColor3 = Color3.fromRGB(0, 255, 120)
 pingValue.TextXAlignment = Enum.TextXAlignment.Right
 pingValue.Parent = box
 
@@ -459,11 +442,31 @@ task.spawn(function()
         frames = 0
         fpsValue.Text = tostring(fps)
 
+        local fpsColor
+        if fps < 25 then
+            fpsColor = Color3.fromRGB(255, 60, 60)
+        elseif fps < 40 then
+            fpsColor = Color3.fromRGB(255, 200, 60)
+        else
+            fpsColor = Color3.fromRGB(0, 255, 120)
+        end
+        fpsValue.TextColor3 = fpsColor
+
         local ping = 0
         pcall(function()
             ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
         end)
         pingValue.Text = ping .. "ms"
+
+        local pingColor
+        if ping <= 60 then
+            pingColor = Color3.fromRGB(0, 255, 120)
+        elseif ping <= 150 then
+            pingColor = Color3.fromRGB(255, 200, 60)
+        else
+            pingColor = Color3.fromRGB(255, 60, 60)
+        end
+        pingValue.TextColor3 = pingColor
     end
 end)
 

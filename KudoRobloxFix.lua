@@ -10,11 +10,29 @@ local Workspace = game:GetService("Workspace")
 local Terrain = Workspace:FindFirstChildOfClass("Terrain")
 local Camera = Workspace.CurrentCamera
 
+-- Đưa UI vào CoreGui để không bị game đè
+local uiParent = pg
+pcall(function()
+    if gethui then
+        uiParent = gethui()
+    elseif syn and syn.protect_gui then
+        -- fallback khác nếu có
+    end
+end)
+
 for _, v in pairs(pg:GetChildren()) do
     if v.Name == "KudoPopup" or v.Name == "KudoStats" or v.Name == "KudoToggle" then
         v:Destroy()
     end
 end
+pcall(function()
+    local cg = game:GetService("CoreGui")
+    for _, v in pairs(cg:GetChildren()) do
+        if v.Name == "KudoPopup" or v.Name == "KudoStats" or v.Name == "KudoToggle" then
+            v:Destroy()
+        end
+    end
+end)
 
 pcall(function()
     setfflag("DFIntTaskSchedulerTargetFps", "9999")
@@ -196,8 +214,9 @@ local sg = Instance.new("ScreenGui")
 sg.Name = "KudoPopup"
 sg.ResetOnSpawn = false
 sg.IgnoreGuiInset = true
-sg.DisplayOrder = 1000
-sg.Parent = pg
+sg.DisplayOrder = 2147483647
+sg.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+sg.Parent = uiParent
 
 local popup = Instance.new("Frame")
 popup.Size = UDim2.new(0, 360, 0, 140)
@@ -209,13 +228,9 @@ popup.ZIndex = 1000
 popup.Parent = sg
 Instance.new("UICorner", popup).CornerRadius = UDim.new(0, 14)
 
--- DẢI SÁNG ĐỎ CHẠY QUANH VIỀN
--- Cách làm: 4 frame sáng (trên/dưới/trái/phải) di chuyển tuần tự quanh viền
 local lightThickness = 3
 
--- Cạnh trên (chạy từ trái sang phải)
 local lightTop = Instance.new("Frame")
-lightTop.Name = "LightTop"
 lightTop.Size = UDim2.new(0, 60, 0, lightThickness)
 lightTop.Position = UDim2.new(0, -60, 0, -1)
 lightTop.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
@@ -235,9 +250,7 @@ lightTopGlow.ImageTransparency = 0.3
 lightTopGlow.ZIndex = 1000
 lightTopGlow.Parent = lightTop
 
--- Cạnh phải (chạy từ trên xuống dưới)
 local lightRight = Instance.new("Frame")
-lightRight.Name = "LightRight"
 lightRight.Size = UDim2.new(0, lightThickness, 0, 60)
 lightRight.Position = UDim2.new(1, -1, 0, -60)
 lightRight.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
@@ -257,9 +270,7 @@ lightRightGlow.ImageTransparency = 0.3
 lightRightGlow.ZIndex = 1000
 lightRightGlow.Parent = lightRight
 
--- Cạnh dưới (chạy từ phải sang trái)
 local lightBottom = Instance.new("Frame")
-lightBottom.Name = "LightBottom"
 lightBottom.Size = UDim2.new(0, 60, 0, lightThickness)
 lightBottom.Position = UDim2.new(1, 0, 1, -lightThickness + 1)
 lightBottom.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
@@ -279,9 +290,7 @@ lightBottomGlow.ImageTransparency = 0.3
 lightBottomGlow.ZIndex = 1000
 lightBottomGlow.Parent = lightBottom
 
--- Cạnh trái (chạy từ dưới lên trên)
 local lightLeft = Instance.new("Frame")
-lightLeft.Name = "LightLeft"
 lightLeft.Size = UDim2.new(0, lightThickness, 0, 60)
 lightLeft.Position = UDim2.new(0, -1, 1, 0)
 lightLeft.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
@@ -301,31 +310,26 @@ lightLeftGlow.ImageTransparency = 0.3
 lightLeftGlow.ZIndex = 1000
 lightLeftGlow.Parent = lightLeft
 
--- Animation chạy dải sáng quanh viền
 task.spawn(function()
     while popup.Parent do
-        -- Trên: trái sang phải (0.8s)
         lightTop.Position = UDim2.new(0, -60, 0, -1)
         TS:Create(lightTop, TweenInfo.new(0.8, Enum.EasingStyle.Linear), {
             Position = UDim2.new(1, 0, 0, -1)
         }):Play()
         task.wait(0.8)
 
-        -- Phải: trên xuống dưới (0.5s)
         lightRight.Position = UDim2.new(1, -1, 0, -60)
         TS:Create(lightRight, TweenInfo.new(0.5, Enum.EasingStyle.Linear), {
             Position = UDim2.new(1, -1, 1, 0)
         }):Play()
         task.wait(0.5)
 
-        -- Dưới: phải sang trái (0.8s)
         lightBottom.Position = UDim2.new(1, 0, 1, -lightThickness + 1)
         TS:Create(lightBottom, TweenInfo.new(0.8, Enum.EasingStyle.Linear), {
             Position = UDim2.new(0, -60, 1, -lightThickness + 1)
         }):Play()
         task.wait(0.8)
 
-        -- Trái: dưới lên trên (0.5s)
         lightLeft.Position = UDim2.new(0, -1, 1, 0)
         TS:Create(lightLeft, TweenInfo.new(0.5, Enum.EasingStyle.Linear), {
             Position = UDim2.new(0, -1, 0, -60)
@@ -334,7 +338,6 @@ task.spawn(function()
     end
 end)
 
--- NỘI DUNG POPUP
 local iconWrap = Instance.new("Frame")
 iconWrap.Size = UDim2.new(0, 52, 0, 52)
 iconWrap.Position = UDim2.new(0, 20, 0, 22)
@@ -494,8 +497,9 @@ local stats = Instance.new("ScreenGui")
 stats.Name = "KudoStats"
 stats.ResetOnSpawn = false
 stats.IgnoreGuiInset = true
-stats.DisplayOrder = 999
-stats.Parent = pg
+stats.DisplayOrder = 2147483647
+stats.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+stats.Parent = uiParent
 
 local box = Instance.new("Frame")
 box.Size = UDim2.new(0, 150, 0, 92)
@@ -634,185 +638,73 @@ lockB.MouseButton1Click:Connect(function()
     end
 end)
 
-local opacityLevels = {0.4, 0.55, 0.7, 0.85, 1}
-local opacityIndex = 1
+-- ===== SLIDER ĐỘ MỜ =====
+local sliderPanel = Instance.new("Frame")
+sliderPanel.Name = "OpacitySlider"
+sliderPanel.Size = UDim2.new(1, -20, 0, 30)
+sliderPanel.Position = UDim2.new(0, 10, 1, -34)
+sliderPanel.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+sliderPanel.BorderSizePixel = 0
+sliderPanel.Visible = false
+sliderPanel.ZIndex = 5
+sliderPanel.Parent = box
+Instance.new("UICorner", sliderPanel).CornerRadius = UDim.new(0, 6)
 
-local function applyOpacity(v)
-    box.BackgroundTransparency = v
+local sliderBg = Instance.new("Frame")
+sliderBg.Size = UDim2.new(1, -20, 0, 6)
+sliderBg.Position = UDim2.new(0, 10, 0.5, -3)
+sliderBg.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
+sliderBg.BorderSizePixel = 0
+sliderBg.ZIndex = 6
+sliderBg.Parent = sliderPanel
+Instance.new("UICorner", sliderBg).CornerRadius = UDim.new(1, 0)
+
+local sliderFill = Instance.new("Frame")
+sliderFill.Size = UDim2.new(0.5, 0, 1, 0)
+sliderFill.BackgroundColor3 = Color3.fromRGB(80, 150, 255)
+sliderFill.BorderSizePixel = 0
+sliderFill.ZIndex = 7
+sliderFill.Parent = sliderBg
+Instance.new("UICorner", sliderFill).CornerRadius = UDim.new(1, 0)
+
+local sliderKnob = Instance.new("TextButton")
+sliderKnob.Size = UDim2.new(0, 14, 0, 14)
+sliderKnob.Position = UDim2.new(0.5, -7, 0.5, -7)
+sliderKnob.BackgroundColor3 = Color3.fromRGB(120, 180, 255)
+sliderKnob.Text = ""
+sliderKnob.BorderSizePixel = 0
+sliderKnob.ZIndex = 8
+sliderKnob.Parent = sliderBg
+Instance.new("UICorner", sliderKnob).CornerRadius = UDim.new(1, 0)
+
+-- Hàm cập nhật độ mờ dựa vào giá trị từ 0 đến 1
+local function applyOpacity(value)
+    -- value: 0 = đục hoàn toàn, 1 = trong suốt hoàn toàn
+    -- Đảo lại: opacity cao = rõ (transparency thấp)
+    local bgT = value * 0.8 -- từ 0 (đục) đến 0.8 (mờ)
+    box.BackgroundColor3 = Color3.fromRGB(14, 14, 20)
+    box.BackgroundTransparency = 0.4 + bgT * 0.5
+    header.BackgroundTransparency = math.clamp(0.7 + bgT * 0.3, 0, 1)
+    bxStroke.Transparency = math.clamp(0.6 + bgT * 0.4, 0, 1)
+    
     for _, child in ipairs(box:GetDescendants()) do
         if child:IsA("TextLabel") then
-            if child.Name ~= "fpsValue" and child.Name ~= "pingValue" and child.Name ~= "timeValue" then
-                child.TextTransparency = math.clamp(v - 0.4, 0, 0.5)
-            end
+            child.TextTransparency = bgT
         end
     end
-    header.BackgroundTransparency = math.clamp(v + 0.3, 0, 1)
-    bxStroke.Transparency = math.clamp(v + 0.2, 0, 1)
 end
 
-opacityB.MouseButton1Click:Connect(function()
-    opacityIndex = opacityIndex + 1
-    if opacityIndex > #opacityLevels then
-        opacityIndex = 1
-    end
-    applyOpacity(opacityLevels[opacityIndex])
-end)
-
-applyOpacity(opacityLevels[opacityIndex])
-
-local resizeB = Instance.new("TextButton")
-resizeB.Size = UDim2.new(0, 24, 0, 24)
-resizeB.Position = UDim2.new(0, 6, 1, -26)
-resizeB.BackgroundTransparency = 1
-resizeB.Text = ""
-resizeB.BorderSizePixel = 0
-resizeB.Parent = box
-
-local vL = Instance.new("Frame")
-vL.Size = UDim2.new(0, 2, 0, 12)
-vL.Position = UDim2.new(0, 7, 0, 9)
-vL.AnchorPoint = Vector2.new(0.5, 0.5)
-vL.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-vL.BackgroundTransparency = 0.3
-vL.BorderSizePixel = 0
-vL.Rotation = -45
-vL.Active = false
-vL.Parent = resizeB
-Instance.new("UICorner", vL).CornerRadius = UDim.new(1, 0)
-
-local vR = Instance.new("Frame")
-vR.Size = UDim2.new(0, 2, 0, 12)
-vR.Position = UDim2.new(0, 17, 0, 9)
-vR.AnchorPoint = Vector2.new(0.5, 0.5)
-vR.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-vR.BackgroundTransparency = 0.3
-vR.BorderSizePixel = 0
-vR.Rotation = 45
-vR.Active = false
-vR.Parent = resizeB
-Instance.new("UICorner", vR).CornerRadius = UDim.new(1, 0)
-
-local showSg = Instance.new("ScreenGui")
-showSg.Name = "KudoToggle"
-showSg.ResetOnSpawn = false
-showSg.IgnoreGuiInset = true
-showSg.DisplayOrder = 998
-showSg.Parent = pg
-
-local showB = Instance.new("TextButton")
-showB.Size = UDim2.new(0, 44, 0, 44)
-showB.Position = UDim2.new(1, -54, 1, -54)
-showB.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
-showB.Text = "⚡"
-showB.Font = Enum.Font.GothamBold
-showB.TextSize = 22
-showB.TextColor3 = Color3.new(1, 1, 1)
-showB.BorderSizePixel = 0
-showB.Visible = false
-showB.Parent = showSg
-Instance.new("UICorner", showB).CornerRadius = UDim.new(1, 0)
-
-hideB.MouseButton1Click:Connect(function()
-    box.Visible = false
-    showB.Visible = true
-end)
-
-showB.MouseButton1Click:Connect(function()
-    box.Visible = true
-    showB.Visible = false
-end)
-
-closeB.MouseButton1Click:Connect(function()
-    stats:Destroy()
-    showSg:Destroy()
-end)
-
-local dragging = false
-local ds, sp
-header.InputBegan:Connect(function(i)
-    if locked then return end
+-- Logic kéo knob
+local draggingSlider = false
+sliderKnob.InputBegan:Connect(function(i)
     if i.UserInputType == Enum.UserInputType.Touch or i.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = true
-        ds = i.Position
-        sp = box.Position
+        draggingSlider = true
     end
 end)
 
 UIS.InputChanged:Connect(function(i)
-    if dragging and not locked then
-        local d = i.Position - ds
-        box.Position = UDim2.new(sp.X.Scale, sp.X.Offset + d.X, sp.Y.Scale, sp.Y.Offset + d.Y)
-    end
-end)
-
-UIS.InputEnded:Connect(function(i)
-    if i.UserInputType == Enum.UserInputType.Touch or i.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = false
-    end
-end)
-
-local resizing = false
-local rs, rss
-resizeB.InputBegan:Connect(function(i)
-    if locked then return end
-    if i.UserInputType == Enum.UserInputType.Touch or i.UserInputType == Enum.UserInputType.MouseButton1 then
-        resizing = true
-        rs = i.Position
-        rss = box.Size
-    end
-end)
-
-UIS.InputChanged:Connect(function(i)
-    if resizing and not locked then
-        local d = i.Position - rs
-        local nx = math.max(120, rss.X.Offset - d.X)
-        local ny = math.max(80, rss.Y.Offset + d.Y)
-        box.Size = UDim2.new(0, nx, 0, ny)
-    end
-end)
-
-UIS.InputEnded:Connect(function(i)
-    if i.UserInputType == Enum.UserInputType.Touch or i.UserInputType == Enum.UserInputType.MouseButton1 then
-        resizing = false
-    end
-end)
-
-local st = tick()
-task.spawn(function()
-    while stats.Parent do
-        task.wait(1)
-        local e = math.floor(tick() - st)
-        timeV.Text = string.format("%02d:%02d", math.floor(e / 60), e % 60)
-    end
-end)
-
-local fr = 0
-RS.RenderStepped:Connect(function()
-    fr = fr + 1
-end)
-
-task.spawn(function()
-    while stats.Parent do
-        task.wait(1)
-        fpsV.Text = tostring(fr)
-        if fr < 40 then
-            fpsV.TextColor3 = Color3.fromRGB(255, 60, 60)
-        else
-            fpsV.TextColor3 = Color3.fromRGB(0, 255, 120)
-        end
-        fr = 0
-        
-        local p = 0
-        pcall(function()
-            p = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
-        end)
-        pingV.Text = p .. "ms"
-        if p <= 100 then
-            pingV.TextColor3 = Color3.fromRGB(0, 255, 120)
-        else
-            pingV.TextColor3 = Color3.fromRGB(255, 60, 60)
-        end
-    end
-end)
-
-print("✅ fix lag v1.0 by kudo29001 loaded")
+    if draggingSlider then
+        local mouseX = i.Position.X
+        local bgAbsPos = sliderBg.AbsolutePosition.X
+        local bgAbsSize = sliderBg.AbsoluteSize.X
+        local percent = math.clamp((mouseX - bgAbsPos)

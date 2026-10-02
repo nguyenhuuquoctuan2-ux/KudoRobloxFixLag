@@ -214,15 +214,26 @@ border.Color = Color3.fromRGB(255, 60, 60)
 border.Thickness = 2
 border.Parent = popup
 
-local starIcon = Instance.new("TextLabel")
-starIcon.Size = UDim2.new(0, 52, 0, 52)
-starIcon.Position = UDim2.new(0, 20, 0, 22)
-starIcon.BackgroundTransparency = 1
-starIcon.Text = "💫"
-starIcon.Font = Enum.Font.GothamBold
-starIcon.TextSize = 38
-starIcon.TextColor3 = Color3.fromRGB(255, 255, 255)
-starIcon.Parent = popup
+-- ↻ ICON với spin animation
+local spinIcon = Instance.new("TextLabel")
+spinIcon.Size = UDim2.new(0, 52, 0, 52)
+spinIcon.Position = UDim2.new(0, 20, 0, 22)
+spinIcon.BackgroundTransparency = 1
+spinIcon.Text = "↻"
+spinIcon.Font = Enum.Font.GothamBold
+spinIcon.TextSize = 38
+spinIcon.TextColor3 = Color3.fromRGB(255, 255, 255)
+spinIcon.Parent = popup
+
+-- Spin animation
+task.spawn(function()
+    local rot = 0
+    while spinIcon.Parent do
+        rot = (rot + 8) % 360
+        spinIcon.Rotation = rot
+        task.wait(0.03)
+    end
+end)
 
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, -180, 0, 26)
@@ -294,12 +305,12 @@ task.delay(4.5, function()
     TS:Create(percentL, TweenInfo.new(0.6), {TextTransparency = 1}):Play()
     TS:Create(pBg, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
     TS:Create(pFill, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
-    TS:Create(starIcon, TweenInfo.new(0.6), {TextTransparency = 1}):Play()
+    TS:Create(spinIcon, TweenInfo.new(0.6), {TextTransparency = 1}):Play()
     task.wait(0.7)
     sg:Destroy()
 end)
 
--- UI FPS/PING/TIME
+-- UI FPS/PING/TIME góc phải DƯỚI màn hình
 local stats = Instance.new("ScreenGui")
 stats.Name = "KudoStats"
 stats.ResetOnSpawn = false
@@ -309,9 +320,9 @@ stats.Parent = pg
 
 local box = Instance.new("Frame")
 box.Size = UDim2.new(0, 150, 0, 92)
-box.Position = UDim2.new(1, -160, 1, -102)
--- Neo về bên phải để khi size tăng thì box mở rộng về bên trái
-box.AnchorPoint = Vector2.new(1, 0)
+-- Neo phải + dưới cùng: Position mép phải = 1, mép dưới = 1
+box.AnchorPoint = Vector2.new(1, 1)
+box.Position = UDim2.new(1, -10, 1, -10)
 box.BackgroundColor3 = Color3.fromRGB(14, 14, 20)
 box.BackgroundTransparency = 0.4
 box.BorderSizePixel = 0
@@ -405,7 +416,7 @@ hideB.BorderSizePixel = 0
 hideB.Parent = box
 Instance.new("UICorner", hideB).CornerRadius = UDim.new(1, 0)
 
--- Chữ V GÓC TRÁI DƯỚI TRONG UI
+-- Chữ V góc trái dưới trong UI
 local resizeB = Instance.new("TextButton")
 resizeB.Size = UDim2.new(0, 24, 0, 24)
 resizeB.Position = UDim2.new(0, 6, 1, -26)
@@ -495,10 +506,7 @@ UIS.InputEnded:Connect(function(i)
     end
 end)
 
--- ===== RESIZE MỞ RỘNG VỀ BÊN TRÁI =====
--- Neo ở góc phải (AnchorPoint = 1, 0) nên khi size tăng,
--- box tự động mở rộng về bên trái. Không cần điều chỉnh Position.
--- Kéo sang phải = giảm size (vì neo phải giữ nguyên), kéo sang trái = tăng size
+-- Resize (neo phải nên mở rộng về bên trái)
 local resizing = false
 local rs, rss
 resizeB.InputBegan:Connect(function(i)
@@ -512,7 +520,6 @@ end)
 UIS.InputChanged:Connect(function(i)
     if resizing then
         local d = i.Position - rs
-        -- Với neo phải: kéo sang trái (d.X âm) = tăng width
         local nx = math.max(120, rss.X.Offset - d.X)
         local ny = math.max(80, rss.Y.Offset + d.Y)
         box.Size = UDim2.new(0, nx, 0, ny)

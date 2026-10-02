@@ -454,7 +454,7 @@ task.spawn(function()
     end
 end)
 
--- ==================== UI FPS + PING (KÉO + RESIZE) ====================
+-- ==================== UI FPS + PING ====================
 local statsGui = Instance.new("ScreenGui")
 statsGui.Name = "KudoStats"
 statsGui.ResetOnSpawn = false
@@ -463,13 +463,12 @@ statsGui.DisplayOrder = 2147483647
 statsGui.Parent = uiParent
 
 local box = Instance.new("Frame")
-box.Size = UDim2.new(0, 100, 0, 46)
-box.Position = UDim2.new(1, -110, 1, -56)
+box.Size = UDim2.new(0, 110, 0, 50)
+box.Position = UDim2.new(1, -120, 1, -60)
 box.BackgroundColor3 = Color3.fromRGB(14, 14, 20)
 box.BackgroundTransparency = 0.4
 box.BorderSizePixel = 0
 box.Active = true
-box.Draggable = true
 box.Parent = statsGui
 Instance.new("UICorner", box).CornerRadius = UDim.new(0, 8)
 
@@ -479,17 +478,31 @@ boxStroke.Thickness = 1
 boxStroke.Transparency = 0.75
 boxStroke.Parent = box
 
-local sep = Instance.new("Frame")
-sep.Size = UDim2.new(1, -16, 0, 1)
-sep.Position = UDim2.new(0, 8, 0, 23)
-sep.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
-sep.BackgroundTransparency = 0.8
-sep.BorderSizePixel = 0
-sep.Parent = box
+-- Header (vùng kéo)
+local header = Instance.new("Frame")
+header.Name = "Header"
+header.Size = UDim2.new(1, 0, 0, 14)
+header.Position = UDim2.new(0, 0, 0, 0)
+header.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+header.BackgroundTransparency = 0.7
+header.BorderSizePixel = 0
+header.Parent = box
+Instance.new("UICorner", header).CornerRadius = UDim.new(0, 8)
 
+-- Thanh kéo nhỏ ở giữa header (visual hint)
+local dragHint = Instance.new("Frame")
+dragHint.Size = UDim2.new(0, 20, 0, 2)
+dragHint.Position = UDim2.new(0.5, -10, 0.5, -1)
+dragHint.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+dragHint.BackgroundTransparency = 0.3
+dragHint.BorderSizePixel = 0
+dragHint.Parent = header
+Instance.new("UICorner", dragHint).CornerRadius = UDim.new(1, 0)
+
+-- FPS row
 local fpsTitle = Instance.new("TextLabel")
-fpsTitle.Size = UDim2.new(0, 30, 0, 23)
-fpsTitle.Position = UDim2.new(0, 6, 0, 0)
+fpsTitle.Size = UDim2.new(0, 30, 0, 18)
+fpsTitle.Position = UDim2.new(0, 6, 0, 16)
 fpsTitle.BackgroundTransparency = 1
 fpsTitle.Text = "FPS"
 fpsTitle.Font = Enum.Font.GothamBold
@@ -499,8 +512,8 @@ fpsTitle.TextXAlignment = Enum.TextXAlignment.Left
 fpsTitle.Parent = box
 
 local fpsValue = Instance.new("TextLabel")
-fpsValue.Size = UDim2.new(0, 56, 0, 23)
-fpsValue.Position = UDim2.new(1, -62, 0, 0)
+fpsValue.Size = UDim2.new(0, 56, 0, 18)
+fpsValue.Position = UDim2.new(1, -62, 0, 16)
 fpsValue.BackgroundTransparency = 1
 fpsValue.Text = "--"
 fpsValue.Font = Enum.Font.GothamBold
@@ -509,9 +522,10 @@ fpsValue.TextColor3 = Color3.fromRGB(0, 255, 120)
 fpsValue.TextXAlignment = Enum.TextXAlignment.Right
 fpsValue.Parent = box
 
+-- Ping row
 local pingTitle = Instance.new("TextLabel")
-pingTitle.Size = UDim2.new(0, 30, 0, 23)
-pingTitle.Position = UDim2.new(0, 6, 0, 23)
+pingTitle.Size = UDim2.new(0, 30, 0, 18)
+pingTitle.Position = UDim2.new(0, 6, 0, 32)
 pingTitle.BackgroundTransparency = 1
 pingTitle.Text = "PING"
 pingTitle.Font = Enum.Font.GothamBold
@@ -521,8 +535,8 @@ pingTitle.TextXAlignment = Enum.TextXAlignment.Left
 pingTitle.Parent = box
 
 local pingValue = Instance.new("TextLabel")
-pingValue.Size = UDim2.new(0, 56, 0, 23)
-pingValue.Position = UDim2.new(1, -62, 0, 23)
+pingValue.Size = UDim2.new(0, 56, 0, 18)
+pingValue.Position = UDim2.new(1, -62, 0, 32)
 pingValue.BackgroundTransparency = 1
 pingValue.Text = "--"
 pingValue.Font = Enum.Font.GothamBold
@@ -531,28 +545,37 @@ pingValue.TextColor3 = Color3.fromRGB(0, 255, 120)
 pingValue.TextXAlignment = Enum.TextXAlignment.Right
 pingValue.Parent = box
 
--- Nút X hình tròn
+-- ===== NÚT X (đặt sau cùng, ZIndex cao, không bị chặn) =====
 local closeBtn = Instance.new("TextButton")
-closeBtn.Size = UDim2.new(0, 18, 0, 18)
-closeBtn.Position = UDim2.new(1, -24, 0, 4)
-closeBtn.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
-closeBtn.Text = "x"
-closeBtn.Font = Enum.Font.GothamBold
-closeBtn.TextSize = 12
-closeBtn.TextColor3 = Color3.new(1, 1, 1)
+closeBtn.Size = UDim2.new(0, 20, 0, 20)
+closeBtn.Position = UDim2.new(1, -24, 0, -3)
+closeBtn.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+closeBtn.Text = ""
+closeBtn.AutoButtonColor = true
 closeBtn.BorderSizePixel = 0
+closeBtn.ZIndex = 10
 closeBtn.Parent = box
 Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(1, 0)
+
+local closeIcon = Instance.new("TextLabel")
+closeIcon.Size = UDim2.new(1, 0, 1, 0)
+closeIcon.BackgroundTransparency = 1
+closeIcon.Text = "x"
+closeIcon.Font = Enum.Font.GothamBold
+closeIcon.TextSize = 14
+closeIcon.TextColor3 = Color3.new(1, 1, 1)
+closeIcon.ZIndex = 11
+closeIcon.Parent = closeBtn
 
 closeBtn.MouseButton1Click:Connect(function()
     pcall(function() statsGui:Destroy() end)
 end)
 
--- Kéo di chuyển bằng touch (mobile)
+-- ===== KÉO bằng header =====
 local dragging = false
 local dragStart, startPos
 
-box.InputBegan:Connect(function(input)
+header.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.Touch 
         or input.UserInputType == Enum.UserInputType.MouseButton1 then
         dragging = true
@@ -579,13 +602,17 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
--- Resize bằng cách kéo góc dưới phải
+-- ===== RESIZE bằng góc dưới phải =====
 local resizeHandle = Instance.new("TextButton")
-resizeHandle.Size = UDim2.new(0, 12, 0, 12)
-resizeHandle.Position = UDim2.new(1, -14, 1, -14)
-resizeHandle.BackgroundTransparency = 1
+resizeHandle.Size = UDim2.new(0, 16, 0, 16)
+resizeHandle.Position = UDim2.new(1, -18, 1, -18)
+resizeHandle.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+resizeHandle.BackgroundTransparency = 0.6
 resizeHandle.Text = ""
+resizeHandle.BorderSizePixel = 0
+resizeHandle.ZIndex = 9
 resizeHandle.Parent = box
+Instance.new("UICorner", resizeHandle).CornerRadius = UDim.new(0, 4)
 
 local resizing = false
 local resizeStart, resizeStartSize
@@ -603,13 +630,9 @@ UserInputService.InputChanged:Connect(function(input)
     if resizing and (input.UserInputType == Enum.UserInputType.Touch 
         or input.UserInputType == Enum.UserInputType.MouseMovement) then
         local delta = input.Position - resizeStart
-        local newX = math.max(80, resizeStartSize.X.Offset + delta.X)
-        local newY = math.max(40, resizeStartSize.Y.Offset + delta.Y)
+        local newX = math.max(90, resizeStartSize.X.Offset + delta.X)
+        local newY = math.max(48, resizeStartSize.Y.Offset + delta.Y)
         box.Size = UDim2.new(0, newX, 0, newY)
-        -- Cập nhật vị trí các element theo size mới
-        sep.Position = UDim2.new(0, 8, 0.5, 0)
-        pingTitle.Position = UDim2.new(0, 6, 0.5, 0)
-        pingValue.Position = UDim2.new(1, -62, 0.5, 0)
     end
 end)
 

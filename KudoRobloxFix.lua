@@ -10,6 +10,7 @@ local Workspace = game:GetService("Workspace")
 local Terrain = Workspace:FindFirstChildOfClass("Terrain")
 local Camera = Workspace.CurrentCamera
 
+-- Xoá UI cũ
 for _, v in pairs(pg:GetChildren()) do
     if v.Name == "KudoPopup" or v.Name == "KudoStats" or v.Name == "KudoToggle" then
         v:Destroy()
@@ -21,48 +22,81 @@ pcall(function()
     setfflag("DFIntTaskSchedulerTargetFps", "9999")
     setfflag("DFIntFrameRateCap", "9999")
     setfflag("DFIntMaxFrameRate", "9999")
+    setfflag("DFIntMinFrameRate", "1")
     setfflag("FFlagDisableVSync", "True")
+    setfflag("DFIntFrameRateCapOverride", "9999")
+    setfflag("DFIntRenderThrottleEnabled", "0")
+    setfflag("DFIntRenderThrottleMs", "0")
+    setfflag("FFlagRenderThrottleDisable", "True")
+    setfflag("DFIntMaxFramesInFlight", "1")
+    setfflag("FFlagDisableFrameLimiter", "True")
     setfflag("DFIntDebugFRMQualityLevelOverride", "1")
     setfflag("DFIntTextureQualityOverride", "0")
     setfflag("DFFlagTextureQualityOverrideEnabled", "True")
     setfflag("FFlagTextureQualityOverride", "True")
+    setfflag("FIntDebugForceMSAASamples", "1")
     setfflag("FFlagDisableTextures", "True")
+    setfflag("DFFlagRenderSkipMaterialTextures", "True")
     setfflag("FFlagDisableSurfaceAppearance", "True")
+    setfflag("FFlagDisableMaterialTextures", "True")
+    setfflag("DFFlagForceTextureLOD", "True")
+    setfflag("DFFlagTextureCompositorEnable", "False")
+    setfflag("DFFlagTextureCompositorEnabled", "False")
+    setfflag("FFlagDisableNormalMap", "True")
+    setfflag("FFlagDisableRoughnessMap", "True")
+    setfflag("FFlagDisableMetalnessMap", "True")
+    setfflag("FFlagDisableEmissiveMap", "True")
+    setfflag("FFlagDisableReflectionMap", "True")
     setfflag("DFFlagDisableSSAO", "True")
     setfflag("FFlagDisableSSAO", "True")
     setfflag("FFlagDisablePostFx", "True")
     setfflag("FFlagDisableBloom", "True")
     setfflag("FFlagDisableDepthOfField", "True")
     setfflag("FFlagDisableSunRays", "True")
+    setfflag("FFlagDisableColorCorrection", "True")
     setfflag("FFlagDisableAntiAliasing", "True")
     setfflag("FFlagDisableMotionBlur", "True")
     setfflag("FFlagRenderShadowIntensity", "0")
     setfflag("FFlagRenderShadowIntensityOverride", "True")
+    setfflag("DFFlagDisableRenderShadowMap", "True")
     setfflag("FFlagDisableShadows", "True")
+    setfflag("FFlagDisableDynamicLighting", "True")
     setfflag("FFlagDebugSkyGray", "True")
     setfflag("FFlagDisableAtmosphere", "True")
     setfflag("FFlagDisableSky", "True")
     setfflag("FFlagDisableFog", "True")
     setfflag("FFlagDisableTerrainDecoration", "True")
     setfflag("FIntFRMMaxGrassDistance", "0")
+    setfflag("FIntFRMMinGrassDistance", "0")
     setfflag("DFIntCSGLevelOfDetailSwitchingDistance", "0")
+    setfflag("DFIntCSGLevelOfDetailSwitchingDistanceL12", "0")
+    setfflag("DFIntCSGLevelOfDetailSwitchingDistanceL23", "0")
+    setfflag("DFIntCSGLevelOfDetailSwitchingDistanceL34", "0")
     setfflag("FFlagDisableLODTransitions", "True")
     setfflag("FFlagForceLOD0", "True")
     setfflag("DFIntLODBias", "8")
     setfflag("DFFlagDebugRenderForceTechnologyVoxel", "True")
     setfflag("FFlagDebugPauseVoxelizer", "True")
     setfflag("DFIntSolverSpringDamping", "0")
+    setfflag("DFIntPhysicsSendRate", "1")
     setfflag("DFIntMaxSimultaneousPhysicsJobs", "1")
     setfflag("DFIntPhysicsStepPerFrame", "1")
     setfflag("DFIntMaximumCollisionIterations", "1")
     setfflag("DFIntSolverConvergenceIterations", "1")
     setfflag("DFIntFrameBufferPoolSize", "1")
+    setfflag("DFIntRenderMeshMaxBones", "1")
     setfflag("DFIntDebugEngineOptimizationLevel", "3")
+    setfflag("DFFlagGCEnableIncremental", "True")
+    setfflag("DFIntGCIncrementalPause", "2")
+    setfflag("DFIntGCIncrementalStepMul", "3000")
+    setfflag("FFlagDebugGraphicsPreferOpenGL", "True")
 end)
 
+-- ==================== ENGINE CONFIG ====================
 pcall(function()
     settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
     settings().Rendering.MeshPartDetailLevel = Enum.MeshPartDetailLevel.Level01
+    settings().Rendering.AnimationWeightedBlendFix = Enum.AnimationWeightedBlendFix.Disabled
 end)
 
 pcall(function()
@@ -80,8 +114,13 @@ pcall(function()
     end
     Lighting.GlobalShadows = false
     Lighting.FogEnd = 100000
+    Lighting.FogStart = 100000
     Lighting.Brightness = 2
     Lighting.ClockTime = 14
+    Lighting.EnvironmentDiffuseScale = 0
+    Lighting.EnvironmentSpecularScale = 0
+    Lighting.OutdoorAmbient = Color3.fromRGB(180, 180, 180)
+    Lighting.Ambient = Color3.fromRGB(180, 180, 180)
 end)
 
 pcall(function()
@@ -97,13 +136,12 @@ end)
 
 -- ==================== CACHE NHÂN VẬT ====================
 local charModels = {}
-for _, plr in ipairs(game.Players:GetPlayers()) do
+local function watchChar(plr)
     if plr.Character then charModels[plr.Character] = true end
     plr.CharacterAdded:Connect(function(c) charModels[c] = true end)
 end
-game.Players.PlayerAdded:Connect(function(plr)
-    plr.CharacterAdded:Connect(function(c) charModels[c] = true end)
-end)
+for _, plr in ipairs(game.Players:GetPlayers()) do watchChar(plr) end
+game.Players.PlayerAdded:Connect(watchChar)
 game.Players.PlayerRemoving:Connect(function(plr)
     if plr.Character then charModels[plr.Character] = nil end
 end)
@@ -122,6 +160,7 @@ local function isName(v)
     return v:IsA("BillboardGui") or v:IsA("TextLabel") or v:IsA("TextButton") or v:IsA("Humanoid")
 end
 
+-- ==================== KILL / POTATO ====================
 local killTypes = {
     ParticleEmitter = true, Trail = true, Smoke = true, Fire = true,
     Sparkles = true, Beam = true, Highlight = true, SelectionBox = true,
@@ -136,45 +175,57 @@ local function handleObject(v)
     local cn = v.ClassName
     if killTypes[cn] then
         pcall(function() v:Destroy() end)
-    elseif cn == "Part" or cn == "MeshPart" or cn == "UnionOperation" or cn == "WedgePart" then
+    elseif cn == "Part" or cn == "MeshPart" or cn == "UnionOperation" or cn == "WedgePart"
+        or cn == "TrussPart" or cn == "CornerWedgePart" or cn == "SpawnLocation" then
         pcall(function()
             v.Material = Enum.Material.SmoothPlastic
             v.Reflectance = 0
             v.CastShadow = false
+            if v.Transparency < 0.5 then v.Transparency = 0 end
         end)
     end
 end
 
+-- Bulk dọn map lần đầu
 task.spawn(function()
     local descendants = Workspace:GetDescendants()
     for i = 1, #descendants do
         handleObject(descendants[i])
-        if i % 1000 == 0 then task.wait() end
+        if i % 800 == 0 then task.wait() end
     end
 end)
 
+-- Object mới spawn
 Workspace.DescendantAdded:Connect(function(v)
     task.defer(function()
         pcall(function() handleObject(v) end)
     end)
 end)
 
--- ==================== CULLING ====================
+-- ==================== GIẢM LAG KỸ THUẬT ====================
+
+-- 1. CAMERA CULLING — ẩn part xa ngoài tầm nhìn
 local CULL_DIST_SQ = 80 * 80
 local culled = {}
 
 task.spawn(function()
     while true do
-        task.wait(0.5)
+        task.wait(0.4)
         pcall(function()
             if not Camera then return end
             local camPos = Camera.CFrame.Position
+            local camLook = Camera.CFrame.LookVector
             for _, v in ipairs(Workspace:GetChildren()) do
                 if v:IsA("BasePart") and not isChar(v) then
                     local pos = v.Position
+                    -- Không cull part thấp hơn chân 3 studs (mặt đất)
                     if pos.Y >= camPos.Y - 3 then
-                        local dx, dy, dz = pos.X - camPos.X, pos.Y - camPos.Y, pos.Z - camPos.Z
-                        local shouldHide = (dx*dx + dy*dy + dz*dz) > CULL_DIST_SQ
+                        local d = pos - camPos
+                        local distSq = d.X*d.X + d.Y*d.Y + d.Z*d.Z
+                        -- Cull nếu xa hơn ngưỡng HOẶC sau lưng camera nhiều
+                        local toPart = d.Unit
+                        local dot = camLook:Dot(toPart)
+                        local shouldHide = distSq > CULL_DIST_SQ or (dot < -0.3 and distSq > 400)
                         if shouldHide and not culled[v] then
                             culled[v] = true
                             pcall(function() v.LocalTransparencyModifier = 1 end)
@@ -189,10 +240,87 @@ task.spawn(function()
     end
 end)
 
+-- 2. OBJECT POOLING — ẩn thay vì destroy cho hiệu ứng nhỏ
+-- (không áp dụng vì destroy hiệu quả hơn cho fix lag)
+
+-- 3. GIẢM TẦN SỐ UPDATÉ cho part không quan trọng
+pcall(function()
+    for _, v in ipairs(Workspace:GetChildren()) do
+        if v:IsA("BasePart") then
+            v.CanQuery = false
+            v.CanTouch = false
+        end
+    end
+end)
+
+-- 4. TẮT ANIMATION CHO PART TĨNH
+task.spawn(function()
+    task.wait(2)
+    pcall(function()
+        for _, v in ipairs(Workspace:GetDescendants()) do
+            if v:IsA("BasePart") and not isChar(v) and not v.Anchored then
+                if v:FindFirstChildOfClass("Motor6D") then
+                    -- Bỏ qua part có Motor6D (có thể là part động của game)
+                end
+            end
+        end
+    end)
+end)
+
+-- 5. GIẢM TẦN SỐ CẬP NHẬT HRP
+pcall(function()
+    local char = player.Character
+    if char then
+        local hrp = char:FindFirstChild("HumanoidRootPart")
+        if hrp then
+            hrp.CustomPhysicalProperties = PhysicalProperties.new(0.7, 0.3, 0.5, 1, 1)
+        end
+    end
+end)
+
+-- 6. GC NGẦM
 task.spawn(function()
     while true do
-        task.wait(60)
+        task.wait(45)
         pcall(function() collectgarbage("collect") end)
+    end
+end)
+
+-- 7. TẮT SOUND XA CAMERA
+task.spawn(function()
+    while true do
+        task.wait(3)
+        pcall(function()
+            if not Camera then return end
+            local camPos = Camera.CFrame.Position
+            for _, v in ipairs(Workspace:GetDescendants()) do
+                if v:IsA("Sound") and v.Playing then
+                    local parent = v.Parent
+                    if parent and parent:IsA("BasePart") then
+                        local d = parent.Position - camPos
+                        if d.X*d.X + d.Y*d.Y + d.Z*d.Z > 10000 then
+                            v.Volume = 0
+                        end
+                    end
+                end
+            end
+        end)
+    end
+end)
+
+-- 8. GIẢM LIGHT COUNT
+pcall(function()
+    local count = 0
+    for _, v in ipairs(Lighting:GetDescendants()) do
+        if v:IsA("PointLight") or v:IsA("SpotLight") or v:IsA("SurfaceLight") then
+            if v.Brightness < 2 then
+                v.Enabled = false
+            end
+            count = count + 1
+            if count > 15 then
+                v.Enabled = false
+            end
+        end
     end
 end)
 
@@ -217,75 +345,56 @@ border.Color = Color3.fromRGB(255, 60, 60)
 border.Thickness = 2
 border.Parent = popup
 
--- ===== NGỌN LỬA TRẮNG =====
-local flameWrap = Instance.new("Frame")
-flameWrap.Size = UDim2.new(0, 52, 0, 52)
-flameWrap.Position = UDim2.new(0, 20, 0, 22)
-flameWrap.BackgroundTransparency = 1
-flameWrap.Parent = popup
+-- 3 SAO BĂNG 💫 TRẮNG
+local starWrap = Instance.new("Frame")
+starWrap.Size = UDim2.new(0, 52, 0, 52)
+starWrap.Position = UDim2.new(0, 20, 0, 22)
+starWrap.BackgroundTransparency = 1
+starWrap.Parent = popup
 
--- 3 lớp lửa với kích thước và độ trong suốt khác nhau
-local flame1 = Instance.new("TextLabel")
-flame1.Size = UDim2.new(1, 0, 1, 0)
-flame1.BackgroundTransparency = 1
-flame1.Text = "🔥"
-flame1.Font = Enum.Font.GothamBold
-flame1.TextSize = 36
-flame1.TextColor3 = Color3.fromRGB(255, 255, 255)
-flame1.Parent = flameWrap
+local star1 = Instance.new("TextLabel")
+star1.Size = UDim2.new(1, 0, 1, 0)
+star1.BackgroundTransparency = 1
+star1.Text = "💫"
+star1.Font = Enum.Font.GothamBold
+star1.TextSize = 36
+star1.TextColor3 = Color3.fromRGB(255, 255, 255)
+star1.Parent = starWrap
 
-local flame2 = Instance.new("TextLabel")
-flame2.Size = UDim2.new(1, 0, 1, 0)
-flame2.Position = UDim2.new(0, -4, 0, 0)
-flame2.BackgroundTransparency = 1
-flame2.Text = "🔥"
-flame2.Font = Enum.Font.GothamBold
-flame2.TextSize = 30
-flame2.TextColor3 = Color3.fromRGB(255, 230, 230)
-flame2.TextTransparency = 0.4
-flame2.Parent = flameWrap
+local star2 = Instance.new("TextLabel")
+star2.Size = UDim2.new(1, 0, 1, 0)
+star2.Position = UDim2.new(0, -5, 0, 0)
+star2.BackgroundTransparency = 1
+star2.Text = "💫"
+star2.Font = Enum.Font.GothamBold
+star2.TextSize = 30
+star2.TextColor3 = Color3.fromRGB(255, 240, 240)
+star2.TextTransparency = 0.4
+star2.Parent = starWrap
 
-local flame3 = Instance.new("TextLabel")
-flame3.Size = UDim2.new(1, 0, 1, 0)
-flame3.Position = UDim2.new(0, 4, 0, -3)
-flame3.BackgroundTransparency = 1
-flame3.Text = "🔥"
-flame3.Font = Enum.Font.GothamBold
-flame3.TextSize = 26
-flame3.TextColor3 = Color3.fromRGB(255, 255, 255)
-flame3.TextTransparency = 0.6
-flame3.Parent = flameWrap
+local star3 = Instance.new("TextLabel")
+star3.Size = UDim2.new(1, 0, 1, 0)
+star3.Position = UDim2.new(0, 5, 0, -4)
+star3.BackgroundTransparency = 1
+star3.Text = "💫"
+star3.Font = Enum.Font.GothamBold
+star3.TextSize = 26
+star3.TextColor3 = Color3.fromRGB(255, 255, 255)
+star3.TextTransparency = 0.6
+star3.Parent = starWrap
 
--- Animation lửa nhấp nhô
-task.spawn(function()
-    while flameWrap.Parent do
-        TS:Create(flame1, TweenInfo.new(0.4), {
-            TextTransparency = 0.3,
-            Rotation = 5
-        }):Play()
-        TS:Create(flame2, TweenInfo.new(0.5), {
-            TextTransparency = 0.7,
-            Rotation = -8
-        }):Play()
-        TS:Create(flame3, TweenInfo.new(0.3), {
-            TextTransparency = 0.4,
-            Rotation = 10
-        }):Play()
-        task.wait(0.4)
-        
-        TS:Create(flame1, TweenInfo.new(0.4), {
-            TextTransparency = 0,
-            Rotation = -5
-        }):Play()
-        TS:Create(flame2, TweenInfo.new(0.5), {
-            TextTransparency = 0.4,
-            Rotation = 6
-        }):Play()
-        TS:Create(flame3, TweenInfo.new(0.3), {
-            TextTransparency = 0.6,
-            Rotation = -7
-        }):Play()
-        task.wait(0.4)
+RS.Heartbeat:Connect(function()
+    if star1.Parent then
+        local t = tick() * 8
+        star1.Rotation = math.sin(t) * 8
+        star2.Rotation = math.cos(t * 1.3) * 10
+        star3.Rotation = math.sin(t * 1.7) * 12
+        star1.TextTransparency = 0.1 + math.abs(math.sin(t * 2)) * 0.2
+        star2.TextTransparency = 0.4 + math.abs(math.cos(t * 2.5)) * 0.2
+        star3.TextTransparency = 0.6 + math.abs(math.sin(t * 3)) * 0.2
+        star1.Position = UDim2.new(0, 0, 0, math.sin(t * 1.5) * 2)
+        star2.Position = UDim2.new(0, -5, 0, math.cos(t * 1.8) * 3)
+        star3.Position = UDim2.new(0, 5, 0, -4 + math.sin(t * 2.2) * 2)
     end
 end)
 
@@ -347,27 +456,23 @@ task.spawn(function()
     end
     percentL.Text = "DONE ✓"
     percentL.TextColor3 = Color3.fromRGB(80, 255, 130)
-    percentL.TextSize = 18
     pFill.Size = UDim2.new(1, 0, 1, 0)
     pFill.BackgroundColor3 = Color3.fromRGB(80, 255, 130)
 end)
 
--- Fade out toàn bộ popup
 task.delay(4.5, function()
-    pcall(function()
-        TS:Create(popup, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
-        TS:Create(border, TweenInfo.new(0.6), {Transparency = 1}):Play()
-        TS:Create(title, TweenInfo.new(0.6), {TextTransparency = 1}):Play()
-        TS:Create(sub, TweenInfo.new(0.6), {TextTransparency = 1}):Play()
-        TS:Create(percentL, TweenInfo.new(0.6), {TextTransparency = 1}):Play()
-        TS:Create(pBg, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
-        TS:Create(pFill, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
-        TS:Create(flame1, TweenInfo.new(0.6), {TextTransparency = 1}):Play()
-        TS:Create(flame2, TweenInfo.new(0.6), {TextTransparency = 1}):Play()
-        TS:Create(flame3, TweenInfo.new(0.6), {TextTransparency = 1}):Play()
-        task.wait(0.7)
-        sg:Destroy()
-    end)
+    TS:Create(popup, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
+    TS:Create(border, TweenInfo.new(0.6), {Transparency = 1}):Play()
+    TS:Create(title, TweenInfo.new(0.6), {TextTransparency = 1}):Play()
+    TS:Create(sub, TweenInfo.new(0.6), {TextTransparency = 1}):Play()
+    TS:Create(percentL, TweenInfo.new(0.6), {TextTransparency = 1}):Play()
+    TS:Create(pBg, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
+    TS:Create(pFill, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
+    TS:Create(star1, TweenInfo.new(0.6), {TextTransparency = 1}):Play()
+    TS:Create(star2, TweenInfo.new(0.6), {TextTransparency = 1}):Play()
+    TS:Create(star3, TweenInfo.new(0.6), {TextTransparency = 1}):Play()
+    task.wait(0.7)
+    sg:Destroy()
 end)
 
 -- ==================== UI FPS/PING/TIME ====================
@@ -474,7 +579,6 @@ hideB.BorderSizePixel = 0
 hideB.Parent = box
 Instance.new("UICorner", hideB).CornerRadius = UDim.new(1, 0)
 
--- Chữ V trong UI góc trái dưới
 local resizeB = Instance.new("TextButton")
 resizeB.Size = UDim2.new(0, 24, 0, 24)
 resizeB.Position = UDim2.new(0, 6, 1, -26)
@@ -540,7 +644,6 @@ closeB.MouseButton1Click:Connect(function()
     showSg:Destroy()
 end)
 
--- Drag
 local dragging = false
 local ds, sp
 header.InputBegan:Connect(function(i)
@@ -564,8 +667,7 @@ UIS.InputEnded:Connect(function(i)
     end
 end)
 
--- ===== RESIZE NGƯỢC LẠI (kéo trái = tăng, kéo phải = giảm) =====
--- Nếu bạn thấy hướng kéo ngược, đây là fix: đảo dấu delta
+-- Resize đúng hướng: kéo phải = tăng
 local resizing = false
 local rs, rss
 resizeB.InputBegan:Connect(function(i)
@@ -579,9 +681,7 @@ end)
 UIS.InputChanged:Connect(function(i)
     if resizing then
         local d = i.Position - rs
-        -- ĐẢO DẤU: kéo sang trái = tăng size, kéo sang phải = giảm size
-        -- Kéo xuống vẫn tăng (không đảo Y)
-        local nx = math.max(120, rss.X.Offset - d.X)
+        local nx = math.max(120, rss.X.Offset + d.X)
         local ny = math.max(80, rss.Y.Offset + d.Y)
         box.Size = UDim2.new(0, nx, 0, ny)
     end

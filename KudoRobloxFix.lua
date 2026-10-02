@@ -157,7 +157,6 @@ Workspace.DescendantAdded:Connect(function(v)
     end)
 end)
 
--- Culling
 local CULL_DIST_SQ = 80 * 80
 local culled = {}
 task.spawn(function()
@@ -193,7 +192,7 @@ task.spawn(function()
     end
 end)
 
--- POPUP
+-- ==================== POPUP ====================
 local sg = Instance.new("ScreenGui")
 sg.Name = "KudoPopup"
 sg.ResetOnSpawn = false
@@ -214,27 +213,56 @@ border.Color = Color3.fromRGB(255, 60, 60)
 border.Thickness = 2
 border.Parent = popup
 
--- ↻ ICON với spin animation
-local spinIcon = Instance.new("TextLabel")
-spinIcon.Size = UDim2.new(0, 52, 0, 52)
-spinIcon.Position = UDim2.new(0, 20, 0, 22)
-spinIcon.BackgroundTransparency = 1
-spinIcon.Text = "↻"
-spinIcon.Font = Enum.Font.GothamBold
-spinIcon.TextSize = 38
-spinIcon.TextColor3 = Color3.fromRGB(255, 255, 255)
-spinIcon.Parent = popup
+-- LOADING ICON — Vòng cung xoay bằng Frame (không dùng unicode)
+local iconWrap = Instance.new("Frame")
+iconWrap.Size = UDim2.new(0, 52, 0, 52)
+iconWrap.Position = UDim2.new(0, 20, 0, 22)
+iconWrap.BackgroundColor3 = Color3.fromRGB(25, 15, 20)
+iconWrap.BorderSizePixel = 0
+iconWrap.Parent = popup
+Instance.new("UICorner", iconWrap).CornerRadius = UDim.new(1, 0)
 
--- Spin animation
+local iconStroke = Instance.new("UIStroke")
+iconStroke.Color = Color3.fromRGB(60, 40, 45)
+iconStroke.Thickness = 1.5
+iconStroke.Parent = iconWrap
+
+-- Vòng cung trắng xoay — 3/4 đường tròn
+local arcHolder = Instance.new("Frame")
+arcHolder.Size = UDim2.new(0, 34, 0, 34)
+arcHolder.Position = UDim2.new(0.5, -17, 0.5, -17)
+arcHolder.BackgroundTransparency = 1
+arcHolder.Parent = iconWrap
+
+-- 3/4 vòng cung trắng
+local arcFrame = Instance.new("Frame")
+arcFrame.Size = UDim2.new(1, 0, 1, 0)
+arcFrame.BackgroundTransparency = 1
+arcFrame.Parent = arcHolder
+Instance.new("UICorner", arcFrame).CornerRadius = UDim.new(1, 0)
+
+local arcStroke = Instance.new("UIStroke")
+arcStroke.Color = Color3.fromRGB(255, 255, 255)
+arcStroke.Thickness = 3
+arcStroke.Parent = arcFrame
+
+-- Che 1 phần để tạo 3/4 vòng cung
+local arcMask = Instance.new("Frame")
+arcMask.Size = UDim2.new(0, 18, 0, 18)
+arcMask.Position = UDim2.new(0.5, 0, 0.5, 0)
+arcMask.BackgroundColor3 = Color3.fromRGB(25, 15, 20)
+arcMask.BorderSizePixel = 0
+arcMask.Parent = arcHolder
+Instance.new("UICorner", arcMask).CornerRadius = UDim.new(0, 4)
+
 task.spawn(function()
-    local rot = 0
-    while spinIcon.Parent do
-        rot = (rot + 8) % 360
-        spinIcon.Rotation = rot
+    while arcHolder.Parent do
+        arcHolder.Rotation = (arcHolder.Rotation + 14) % 360
         task.wait(0.03)
     end
 end)
 
+-- TEXT
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, -180, 0, 26)
 title.Position = UDim2.new(0, 88, 0, 22)
@@ -305,12 +333,15 @@ task.delay(4.5, function()
     TS:Create(percentL, TweenInfo.new(0.6), {TextTransparency = 1}):Play()
     TS:Create(pBg, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
     TS:Create(pFill, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
-    TS:Create(spinIcon, TweenInfo.new(0.6), {TextTransparency = 1}):Play()
+    TS:Create(iconWrap, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
+    TS:Create(arcStroke, TweenInfo.new(0.6), {Transparency = 1}):Play()
+    TS:Create(arcMask, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
+    TS:Create(iconStroke, TweenInfo.new(0.6), {Transparency = 1}):Play()
     task.wait(0.7)
     sg:Destroy()
 end)
 
--- UI FPS/PING/TIME góc phải DƯỚI màn hình
+-- ==================== UI FPS/PING/TIME ====================
 local stats = Instance.new("ScreenGui")
 stats.Name = "KudoStats"
 stats.ResetOnSpawn = false
@@ -320,9 +351,9 @@ stats.Parent = pg
 
 local box = Instance.new("Frame")
 box.Size = UDim2.new(0, 150, 0, 92)
--- Neo phải + dưới cùng: Position mép phải = 1, mép dưới = 1
-box.AnchorPoint = Vector2.new(1, 1)
-box.Position = UDim2.new(1, -10, 1, -10)
+box.Position = UDim2.new(1, -160, 1, -102)
+-- Neo giữa ngang (0.5, 0) để khi tăng size, box to ra cả 2 phía
+box.AnchorPoint = Vector2.new(0.5, 0)
 box.BackgroundColor3 = Color3.fromRGB(14, 14, 20)
 box.BackgroundTransparency = 0.4
 box.BorderSizePixel = 0
@@ -416,7 +447,6 @@ hideB.BorderSizePixel = 0
 hideB.Parent = box
 Instance.new("UICorner", hideB).CornerRadius = UDim.new(1, 0)
 
--- Chữ V góc trái dưới trong UI
 local resizeB = Instance.new("TextButton")
 resizeB.Size = UDim2.new(0, 24, 0, 24)
 resizeB.Position = UDim2.new(0, 6, 1, -26)
@@ -506,7 +536,10 @@ UIS.InputEnded:Connect(function(i)
     end
 end)
 
--- Resize (neo phải nên mở rộng về bên trái)
+-- ===== RESIZE MỞ RỘNG 2 PHÍA =====
+-- Với AnchorPoint = (0.5, 0), box neo giữa ngang.
+-- Khi Size.X.Offset tăng, box to ra cả 2 phía (trái và phải), mép trên đứng yên.
+-- Chỉ cần đổi Size, không cần đổi Position.
 local resizing = false
 local rs, rss
 resizeB.InputBegan:Connect(function(i)
@@ -520,7 +553,9 @@ end)
 UIS.InputChanged:Connect(function(i)
     if resizing then
         local d = i.Position - rs
-        local nx = math.max(120, rss.X.Offset - d.X)
+        -- Kéo sang phải (d.X > 0) = tăng width; neo giữa tự mở 2 phía
+        -- Kéo xuống (d.Y > 0) = tăng height
+        local nx = math.max(120, rss.X.Offset + d.X)
         local ny = math.max(80, rss.Y.Offset + d.Y)
         box.Size = UDim2.new(0, nx, 0, ny)
     end

@@ -17,7 +17,6 @@ pcall(function()
     if gethui then uiParent = gethui() end
 end)
 
--- XOÁ UI CŨ TRIỆT ĐỂ (cả PlayerGui lẫn CoreGui)
 for _, v in pairs(pg:GetChildren()) do
     if v.Name == "KudoPopup" or v.Name == "KudoStats" or v.Name == "KudoToggle" then
         v:Destroy()
@@ -30,14 +29,12 @@ pcall(function()
         end
     end
 end)
--- Xoá cả GUI cũ dạng khác nếu còn sót
 for _, v in pairs(pg:GetChildren()) do
     if v:IsA("ScreenGui") and (v.Name:find("Kudo") or v.Name:find("FixLag")) then
         pcall(function() v:Destroy() end)
     end
 end
 
--- ==================== FFLAG ====================
 pcall(function()
     setfflag("DFIntTaskSchedulerTargetFps", "9999")
     setfflag("DFIntFrameRateCap", "9999")
@@ -259,66 +256,34 @@ popup.ClipsDescendants = true
 popup.Parent = sg
 Instance.new("UICorner", popup).CornerRadius = UDim.new(0, 14)
 
--- ===== VIỀN ĐỎ CHẠY ĐƠN GIẢN - DÙNG 1 DẢI SÁNG CHẠY VÒNG BẰNG TWEEN POSITION =====
--- Cách: dùng 1 frame dài 60px di chuyển tuần tự 4 cạnh
-local runner = Instance.new("Frame")
-runner.Name = "Runner"
-runner.Size = UDim2.new(0, 60, 0, 2)
-runner.Position = UDim2.new(0, -60, 0, 0)
-runner.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
-runner.BorderSizePixel = 0
-runner.ZIndex = 1001
-runner.Active = false
-runner.Parent = popup
-Instance.new("UICorner", runner).CornerRadius = UDim.new(1, 0)
+-- ===== VIỀN ĐỎ SIÊU MỎNG BO TRÒN - DÙNG UISTROKE =====
+-- Dùng 1 frame nội bộ với UIStroke mỏng chạy màu sáng tối luân phiên
+local borderHolder = Instance.new("Frame")
+borderHolder.Name = "BorderHolder"
+borderHolder.Size = UDim2.new(1, -4, 1, -4)
+borderHolder.Position = UDim2.new(0, 2, 0, 2)
+borderHolder.BackgroundTransparency = 1
+borderHolder.ZIndex = 1001
+borderHolder.Active = false
+borderHolder.Parent = popup
+Instance.new("UICorner", borderHolder).CornerRadius = UDim.new(0, 13)
 
-local runnerGlow = Instance.new("ImageLabel")
-runnerGlow.Size = UDim2.new(1, 20, 1, 20)
-runnerGlow.Position = UDim2.new(0, -10, 0, -10)
-runnerGlow.BackgroundTransparency = 1
-runnerGlow.Image = "rbxassetid://5028857472"
-runnerGlow.ImageColor3 = Color3.fromRGB(255, 60, 60)
-runnerGlow.ImageTransparency = 0.3
-runnerGlow.ZIndex = 1000
-runnerGlow.Parent = runner
+local borderStroke = Instance.new("UIStroke")
+borderStroke.Color = Color3.fromRGB(255, 60, 60)
+borderStroke.Thickness = 1.2
+borderStroke.Transparency = 0
+borderStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+borderStroke.Parent = borderHolder
 
+-- Hiệu ứng dải sáng chạy quanh viền bằng cách pulse độ sáng
+-- Kết hợp thay đổi Thickness + Transparency để tạo cảm giác sáng chạy
 task.spawn(function()
-    while runner.Parent do
-        -- Cạnh trên (0 - 1s): trái -> phải
-        runner.Size = UDim2.new(0, 60, 0, 2)
-        runner.Position = UDim2.new(0, -60, 0, 0)
-        local t1 = TS:Create(runner, TweenInfo.new(1, Enum.EasingStyle.Linear), {
-            Position = UDim2.new(1, 0, 0, 0)
-        })
-        t1:Play()
-        t1.Completed:Wait()
-
-        -- Cạnh phải (0.5s): trên -> dưới
-        runner.Size = UDim2.new(0, 2, 0, 60)
-        runner.Position = UDim2.new(1, -2, 0, -60)
-        local t2 = TS:Create(runner, TweenInfo.new(0.5, Enum.EasingStyle.Linear), {
-            Position = UDim2.new(1, -2, 1, 0)
-        })
-        t2:Play()
-        t2.Completed:Wait()
-
-        -- Cạnh dưới (1s): phải -> trái
-        runner.Size = UDim2.new(0, 60, 0, 2)
-        runner.Position = UDim2.new(1, 0, 1, -2)
-        local t3 = TS:Create(runner, TweenInfo.new(1, Enum.EasingStyle.Linear), {
-            Position = UDim2.new(0, -60, 1, -2)
-        })
-        t3:Play()
-        t3.Completed:Wait()
-
-        -- Cạnh trái (0.5s): dưới -> trên
-        runner.Size = UDim2.new(0, 2, 0, 60)
-        runner.Position = UDim2.new(0, 0, 1, 0)
-        local t4 = TS:Create(runner, TweenInfo.new(0.5, Enum.EasingStyle.Linear), {
-            Position = UDim2.new(0, 0, 0, -60)
-        })
-        t4:Play()
-        t4.Completed:Wait()
+    local hue = 0
+    while borderStroke.Parent do
+        hue = (hue + 0.02) % 1
+        borderStroke.Color = Color3.fromHSV(0, 1, 0.5 + math.abs(math.sin(tick() * 2)) * 0.5)
+        borderStroke.Thickness = 1 + math.abs(math.sin(tick() * 1.5)) * 0.6
+        task.wait(0.03)
     end
 end)
 
@@ -482,7 +447,7 @@ task.delay(4.5, function()
     TS:Create(mask1, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
     TS:Create(mask2, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
     TS:Create(iconStroke, TweenInfo.new(0.6), {Transparency = 1}):Play()
-    TS:Create(runner, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
+    TS:Create(borderStroke, TweenInfo.new(0.6), {Transparency = 1}):Play()
     task.wait(0.7)
     sg:Destroy()
 end)
@@ -637,7 +602,7 @@ lockB.MouseButton1Click:Connect(function()
     end
 end)
 
--- ===== SLIDER ĐỘ MỜ =====
+-- SLIDER ĐỘ MỜ
 local sliderPanel = Instance.new("Frame")
 sliderPanel.Name = "OpacitySlider"
 sliderPanel.Size = UDim2.new(1, -20, 0, 30)
@@ -725,25 +690,43 @@ end)
 
 applyOpacity(0.5)
 
--- ===== CHỮ V GÓC TRÁI DƯỚI =====
--- Dùng 1 TextLabel với ký tự "V", xoay 45 độ
--- Neo ở góc dưới trái, khít vào viền
-local vMark = Instance.new("TextButton")
-vMark.Size = UDim2.new(0, 20, 0, 20)
-vMark.Position = UDim2.new(0, 0, 1, -20)
-vMark.AnchorPoint = Vector2.new(0, 1)
-vMark.BackgroundTransparency = 1
-vMark.Text = "V"
-vMark.Font = Enum.Font.GothamBold
-vMark.TextSize = 14
-vMark.TextColor3 = Color3.fromRGB(255, 255, 255)
-vMark.TextTransparency = 0.3
-vMark.Rotation = 45
-vMark.BorderSizePixel = 0
-vMark.ZIndex = 10
-vMark.Parent = box
+-- ===== CHỮ ∟ BO TRÒN GÓC TRÁI DƯỚI =====
+-- Dùng 2 frame tạo chữ ∟ (L ngược), bo tròn 2 đầu
+local cornerL = Instance.new("TextButton")
+cornerL.Size = UDim2.new(0, 22, 0, 22)
+cornerL.Position = UDim2.new(0, 0, 1, -22)
+cornerL.AnchorPoint = Vector2.new(0, 1)
+cornerL.BackgroundTransparency = 1
+cornerL.Text = ""
+cornerL.BorderSizePixel = 0
+cornerL.ZIndex = 10
+cornerL.Parent = box
 
--- ===== NÚT HIỆN =====
+-- Đường dọc của ∟ (góc trái)
+local vertLine = Instance.new("Frame")
+vertLine.Size = UDim2.new(0, 2, 0, 14)
+vertLine.Position = UDim2.new(0, 6, 0, 4)
+vertLine.AnchorPoint = Vector2.new(0.5, 0.5)
+vertLine.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+vertLine.BackgroundTransparency = 0.3
+vertLine.BorderSizePixel = 0
+vertLine.ZIndex = 11
+vertLine.Parent = cornerL
+Instance.new("UICorner", vertLine).CornerRadius = UDim.new(1, 0)
+
+-- Đường ngang của ∟ (đáy)
+local horizLine = Instance.new("Frame")
+horizLine.Size = UDim2.new(0, 14, 0, 2)
+horizLine.Position = UDim2.new(0, 13, 0, 16)
+horizLine.AnchorPoint = Vector2.new(0.5, 0.5)
+horizLine.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+horizLine.BackgroundTransparency = 0.3
+horizLine.BorderSizePixel = 0
+horizLine.ZIndex = 11
+horizLine.Parent = cornerL
+Instance.new("UICorner", horizLine).CornerRadius = UDim.new(1, 0)
+
+-- NÚT HIỆN
 local showSg = Instance.new("ScreenGui")
 showSg.Name = "KudoToggle"
 showSg.ResetOnSpawn = false
@@ -779,7 +762,7 @@ closeB.MouseButton1Click:Connect(function()
     showSg:Destroy()
 end)
 
--- ===== DRAG =====
+-- DRAG
 local dragging = false
 local ds, sp
 
@@ -805,10 +788,10 @@ UIS.InputEnded:Connect(function(i)
     end
 end)
 
--- ===== RESIZE =====
+-- RESIZE
 local resizing = false
 local rs, rss
-vMark.InputBegan:Connect(function(i)
+cornerL.InputBegan:Connect(function(i)
     if locked then return end
     if i.UserInputType == Enum.UserInputType.Touch or i.UserInputType == Enum.UserInputType.MouseButton1 then
         resizing = true

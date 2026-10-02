@@ -14,7 +14,7 @@ pcall(function()
 end)
 if not uiParent then uiParent = playerGui end
 
--- ==================== POPUP ====================
+-- ==================== POPUP SÁNG TẠO ====================
 local popupGui = Instance.new("ScreenGui")
 popupGui.Name = "KudoPopup"
 popupGui.ResetOnSpawn = false
@@ -23,146 +23,245 @@ popupGui.DisplayOrder = 2147483647
 popupGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 popupGui.Parent = uiParent
 
+-- Container chính
 local popup = Instance.new("Frame")
-popup.Size = UDim2.new(0, 260, 0, 62)
-popup.Position = UDim2.new(1, 20, 0.35, -31)
-popup.BackgroundColor3 = Color3.fromRGB(18, 18, 24)
+popup.Size = UDim2.new(0, 280, 0, 76)
+popup.Position = UDim2.new(1, 20, 0.35, -38)
+popup.BackgroundColor3 = Color3.fromRGB(16, 16, 22)
 popup.BackgroundTransparency = 0.05
 popup.BorderSizePixel = 0
 popup.ZIndex = 1000
+popup.ClipsDescendants = false
 popup.Parent = popupGui
-Instance.new("UICorner", popup).CornerRadius = UDim.new(0, 12)
+Instance.new("UICorner", popup).CornerRadius = UDim.new(0, 14)
 
-local borderTop = Instance.new("Frame")
-borderTop.Size = UDim2.new(1, 4, 0, 2)
-borderTop.Position = UDim2.new(0, -2, 0, -2)
-borderTop.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
-borderTop.BorderSizePixel = 0
-borderTop.ZIndex = 999
-borderTop.Parent = popup
+-- Viền RGB chạy
+local borderStroke = Instance.new("UIStroke")
+borderStroke.Color = Color3.fromRGB(255, 60, 60)
+borderStroke.Thickness = 1.8
+borderStroke.Transparency = 0
+borderStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+borderStroke.Parent = popup
 
-local borderBottom = Instance.new("Frame")
-borderBottom.Size = UDim2.new(1, 4, 0, 2)
-borderBottom.Position = UDim2.new(0, -2, 1, 0)
-borderBottom.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
-borderBottom.BorderSizePixel = 0
-borderBottom.ZIndex = 999
-borderBottom.Parent = popup
+-- Gradient overlay nền (tạo cảm giác sáng tạo)
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(40, 20, 20)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(16, 16, 22))
+})
+gradient.Rotation = 45
+gradient.Parent = popup
 
-local borderLeft = Instance.new("Frame")
-borderLeft.Size = UDim2.new(0, 2, 1, 4)
-borderLeft.Position = UDim2.new(0, -2, 0, -2)
-borderLeft.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
-borderLeft.BorderSizePixel = 0
-borderLeft.ZIndex = 999
-borderLeft.Parent = popup
-
-local borderRight = Instance.new("Frame")
-borderRight.Size = UDim2.new(0, 2, 1, 4)
-borderRight.Position = UDim2.new(1, 0, 0, -2)
-borderRight.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
-borderRight.BorderSizePixel = 0
-borderRight.ZIndex = 999
-borderRight.Parent = popup
-
-local rgbRun = true
-task.spawn(function()
-    local hue = 0
-    while rgbRun do
-        hue = (hue + 0.02) % 1
-        local c = Color3.fromHSV(hue, 1, 1)
-        borderTop.BackgroundColor3 = c
-        borderBottom.BackgroundColor3 = c
-        borderLeft.BackgroundColor3 = c
-        borderRight.BackgroundColor3 = c
-        task.wait(0.05)
-    end
-end)
-
+-- Vạch accent gradient bên trái
 local accentBar = Instance.new("Frame")
-accentBar.Size = UDim2.new(0, 3, 1, -16)
-accentBar.Position = UDim2.new(0, 2, 0, 8)
+accentBar.Size = UDim2.new(0, 4, 1, -20)
+accentBar.Position = UDim2.new(0, 0, 0, 10)
 accentBar.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
 accentBar.BorderSizePixel = 0
 accentBar.ZIndex = 1001
 accentBar.Parent = popup
-Instance.new("UICorner", accentBar).CornerRadius = UDim.new(0, 2)
+Instance.new("UICorner", accentBar).CornerRadius = UDim.new(0, 3)
+
+local accentGradient = Instance.new("UIGradient")
+accentGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 60, 60)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 130, 100)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(200, 40, 80))
+})
+accentGradient.Rotation = 90
+accentGradient.Parent = accentBar
+
+-- Icon tròn với glow
+local iconWrap = Instance.new("Frame")
+iconWrap.Size = UDim2.new(0, 44, 0, 44)
+iconWrap.Position = UDim2.new(0, 18, 0.5, -22)
+iconWrap.BackgroundColor3 = Color3.fromRGB(24, 24, 32)
+iconWrap.BorderSizePixel = 0
+iconWrap.ZIndex = 1001
+iconWrap.Parent = popup
+Instance.new("UICorner", iconWrap).CornerRadius = UDim.new(1, 0)
+
+local iconStroke = Instance.new("UIStroke")
+iconStroke.Color = Color3.fromRGB(255, 60, 60)
+iconStroke.Thickness = 1.5
+iconStroke.Transparency = 0.15
+iconStroke.Parent = iconWrap
+
+-- Glow nền icon (dùng gradient)
+local iconGradient = Instance.new("UIGradient")
+iconGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(50, 20, 30)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(24, 24, 32))
+})
+iconGradient.Rotation = 60
+iconGradient.Parent = iconWrap
 
 local gearLabel = Instance.new("TextLabel")
-gearLabel.Size = UDim2.new(0, 36, 0, 36)
-gearLabel.Position = UDim2.new(0, 14, 0.5, -18)
-gearLabel.BackgroundColor3 = Color3.fromRGB(28, 28, 36)
+gearLabel.Size = UDim2.new(1, 0, 1, 0)
+gearLabel.BackgroundTransparency = 1
 gearLabel.Text = "⚙"
 gearLabel.Font = Enum.Font.GothamBold
-gearLabel.TextSize = 22
-gearLabel.TextColor3 = Color3.fromRGB(255, 70, 70)
-gearLabel.ZIndex = 1001
-gearLabel.Parent = popup
-Instance.new("UICorner", gearLabel).CornerRadius = UDim.new(0, 8)
+gearLabel.TextSize = 26
+gearLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+gearLabel.ZIndex = 1002
+gearLabel.Parent = iconWrap
 
-local gearRun = true
 task.spawn(function()
-    while gearRun do
-        for i = 0, 360, 30 do
-            if not gearRun then break end
-            gearLabel.Rotation = i
-            task.wait(0.06)
-        end
+    local rot = 0
+    while gearLabel.Parent do
+        rot = (rot + 4) % 360
+        gearLabel.Rotation = rot
+        task.wait(0.03)
     end
 end)
 
-local popupTitle = Instance.new("TextLabel")
-popupTitle.Size = UDim2.new(1, -75, 0, 18)
-popupTitle.Position = UDim2.new(0, 60, 0, 12)
-popupTitle.BackgroundTransparency = 1
-popupTitle.Text = "fix lag v1.0 ✓"
-popupTitle.Font = Enum.Font.GothamBold
-popupTitle.TextSize = 13
-popupTitle.TextColor3 = Color3.fromRGB(255, 70, 70)
-popupTitle.TextXAlignment = Enum.TextXAlignment.Left
-popupTitle.ZIndex = 1001
-popupTitle.Parent = popup
+-- Viền ring xoay quanh icon
+local ring = Instance.new("Frame")
+ring.Size = UDim2.new(0, 52, 0, 52)
+ring.Position = UDim2.new(0, -4, 0, -4)
+ring.BackgroundTransparency = 1
+ring.ZIndex = 1000
+ring.Parent = iconWrap
+Instance.new("UICorner", ring).CornerRadius = UDim.new(1, 0)
 
-local popupSub = Instance.new("TextLabel")
-popupSub.Size = UDim2.new(1, -75, 0, 14)
-popupSub.Position = UDim2.new(0, 60, 0, 32)
-popupSub.BackgroundTransparency = 1
-popupSub.Text = "by kudo29001⚡"
-popupSub.Font = Enum.Font.Gotham
-popupSub.TextSize = 10
-popupSub.TextColor3 = Color3.fromRGB(180, 180, 190)
-popupSub.TextXAlignment = Enum.TextXAlignment.Left
-popupSub.ZIndex = 1001
-popupSub.Parent = popup
+local ringStroke = Instance.new("UIStroke")
+ringStroke.Color = Color3.fromRGB(255, 60, 60)
+ringStroke.Thickness = 1
+ringStroke.Transparency = 0.6
+ringStroke.Parent = ring
 
-TweenService:Create(popup, TweenInfo.new(0.45, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-    Position = UDim2.new(1, -280, 0.35, -31)
+-- Hai chấm sáng chạy quanh ring (dùng Frame nhỏ)
+local dot1 = Instance.new("Frame")
+dot1.Size = UDim2.new(0, 5, 0, 5)
+dot1.Position = UDim2.new(0.5, -2.5, 0, -2.5)
+dot1.AnchorPoint = Vector2.new(0.5, 0.5)
+dot1.BackgroundColor3 = Color3.fromRGB(255, 100, 100)
+dot1.BorderSizePixel = 0
+dot1.ZIndex = 1003
+dot1.Parent = ring
+Instance.new("UICorner", dot1).CornerRadius = UDim.new(1, 0)
+
+task.spawn(function()
+    local angle = 0
+    while ring.Parent do
+        angle = (angle + 0.06) % (math.pi * 2)
+        local cx = 0.5 + math.cos(angle) * 0.5
+        local cy = 0.5 + math.sin(angle) * 0.5
+        dot1.Position = UDim2.new(cx, -2.5, cy, -2.5)
+        task.wait(0.02)
+    end
+end)
+
+-- Nội dung text
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Size = UDim2.new(1, -90, 0, 20)
+titleLabel.Position = UDim2.new(0, 74, 0, 16)
+titleLabel.BackgroundTransparency = 1
+titleLabel.Text = "fix lag v1.0"
+titleLabel.Font = Enum.Font.GothamBold
+titleLabel.TextSize = 15
+titleLabel.TextColor3 = Color3.fromRGB(255, 90, 90)
+titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+titleLabel.ZIndex = 1001
+titleLabel.Parent = popup
+
+-- Dấu check ở cuối title, tách riêng để đổi màu
+local checkLabel = Instance.new("TextLabel")
+checkLabel.Size = UDim2.new(0, 20, 0, 20)
+checkLabel.Position = UDim2.new(1, -32, 0, 16)
+checkLabel.BackgroundTransparency = 1
+checkLabel.Text = "✓"
+checkLabel.Font = Enum.Font.GothamBold
+checkLabel.TextSize = 15
+checkLabel.TextColor3 = Color3.fromRGB(0, 255, 120)
+checkLabel.ZIndex = 1001
+checkLabel.Parent = popup
+
+-- Subtitle nhỏ
+local subLabel = Instance.new("TextLabel")
+subLabel.Size = UDim2.new(1, -90, 0, 16)
+subLabel.Position = UDim2.new(0, 74, 0, 38)
+subLabel.BackgroundTransparency = 1
+subLabel.Text = "by kudo29001 ⚡"
+subLabel.Font = Enum.Font.Gotham
+subLabel.TextSize = 11
+subLabel.TextColor3 = Color3.fromRGB(170, 170, 180)
+subLabel.TextXAlignment = Enum.TextXAlignment.Left
+subLabel.ZIndex = 1001
+subLabel.Parent = popup
+
+-- Thanh progress mảnh dưới đáy
+local progressBg = Instance.new("Frame")
+progressBg.Size = UDim2.new(1, -24, 0, 2)
+progressBg.Position = UDim2.new(0, 12, 1, -8)
+progressBg.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+progressBg.BorderSizePixel = 0
+progressBg.ZIndex = 1001
+progressBg.Parent = popup
+Instance.new("UICorner", progressBg).CornerRadius = UDim.new(1, 0)
+
+local progressFill = Instance.new("Frame")
+progressFill.Size = UDim2.new(0, 0, 1, 0)
+progressFill.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
+progressFill.BorderSizePixel = 0
+progressFill.ZIndex = 1002
+progressFill.Parent = progressBg
+Instance.new("UICorner", progressFill).CornerRadius = UDim.new(1, 0)
+
+local progressGradient = Instance.new("UIGradient")
+progressGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 60, 60)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 140, 100))
+})
+progressGradient.Parent = progressFill
+
+-- Progress chạy trong 3.5s tương ứng popup
+TweenService:Create(progressFill, TweenInfo.new(3.5, Enum.EasingStyle.Linear), {
+    Size = UDim2.new(1, 0, 1, 0)
 }):Play()
 
+-- RGB border animation
+task.spawn(function()
+    local hue = 0
+    while borderStroke.Parent do
+        hue = (hue + 0.006) % 1
+        borderStroke.Color = Color3.fromHSV(hue, 0.85, 1)
+        task.wait(0.03)
+    end
+end)
+
+-- Slide in
+TweenService:Create(popup, TweenInfo.new(0.45, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+    Position = UDim2.new(1, -300, 0.35, -38)
+}):Play()
+
+-- Slide out sau 3.5s
 task.delay(3.5, function()
     pcall(function()
-        rgbRun = false
-        gearRun = false
         local out = TweenService:Create(popup, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-            Position = UDim2.new(1, 20, 0.35, -31),
+            Position = UDim2.new(1, 20, 0.35, -38),
             BackgroundTransparency = 1
         })
         out:Play()
-        TweenService:Create(popupTitle, TweenInfo.new(0.4), {TextTransparency = 1}):Play()
-        TweenService:Create(popupSub, TweenInfo.new(0.4), {TextTransparency = 1}):Play()
-        TweenService:Create(gearLabel, TweenInfo.new(0.4), {TextTransparency = 1, BackgroundTransparency = 1}):Play()
+        TweenService:Create(titleLabel, TweenInfo.new(0.4), {TextTransparency = 1}):Play()
+        TweenService:Create(checkLabel, TweenInfo.new(0.4), {TextTransparency = 1}):Play()
+        TweenService:Create(subLabel, TweenInfo.new(0.4), {TextTransparency = 1}):Play()
+        TweenService:Create(gearLabel, TweenInfo.new(0.4), {TextTransparency = 1}):Play()
+        TweenService:Create(iconWrap, TweenInfo.new(0.4), {BackgroundTransparency = 1}):Play()
+        TweenService:Create(iconStroke, TweenInfo.new(0.4), {Transparency = 1}):Play()
+        TweenService:Create(borderStroke, TweenInfo.new(0.4), {Transparency = 1}):Play()
         TweenService:Create(accentBar, TweenInfo.new(0.4), {BackgroundTransparency = 1}):Play()
-        for _, b in ipairs({borderTop, borderBottom, borderLeft, borderRight}) do
-            TweenService:Create(b, TweenInfo.new(0.4), {BackgroundTransparency = 1}):Play()
-        end
+        TweenService:Create(ringStroke, TweenInfo.new(0.4), {Transparency = 1}):Play()
+        TweenService:Create(progressBg, TweenInfo.new(0.4), {BackgroundTransparency = 1}):Play()
+        TweenService:Create(progressFill, TweenInfo.new(0.4), {BackgroundTransparency = 1}):Play()
+        TweenService:Create(dot1, TweenInfo.new(0.4), {BackgroundTransparency = 1}):Play()
         out.Completed:Wait()
         popupGui:Destroy()
     end)
 end)
 
--- ==================== FFLAG — TỐI ƯU NETWORK + GRAPHICS ====================
+-- ==================== FFLAG ====================
 pcall(function()
-    -- FPS unlimited
     setfflag("DFIntTaskSchedulerTargetFps", "9999")
     setfflag("DFIntFrameRateCap", "9999")
     setfflag("DFIntMaxFrameRate", "9999")
@@ -175,35 +274,6 @@ pcall(function()
     setfflag("DFIntMaxFramesInFlight", "1")
     setfflag("FFlagDisableFrameLimiter", "True")
 
-    -- ===== NETWORK TỐI ƯU (giảm ping spike) =====
-    setfflag("DFIntConnectionMTUSize", "1400")
-    setfflag("DFIntS2PhysicsSenderRate", "1")
-    setfflag("DFIntClientPhysicsSendRate", "1")
-    setfflag("DFIntPhysicsSenderRate", "1")
-    setfflag("DFIntNetworkClusterPacketCache", "0")
-    setfflag("FFlagEnableNetworkClusterPacketCache", "False")
-    setfflag("DFIntNetworkPacketBufferSize", "2048")
-    setfflag("DFIntNetworkReceiveBufferSize", "2048")
-    setfflag("DFIntNetworkSendBufferSize", "2048")
-    setfflag("DFFlagEnableNetworkPingOptimization", "True")
-    setfflag("DFFlagEnableNetworkPacketCoalescing", "True")
-    setfflag("FFlagEnableNetworkPacketCoalescing", "True")
-    setfflag("DFIntNetworkPacketCoalescingWindow", "1")
-    setfflag("FFlagEnableNetworkPrioritySystem", "True")
-    setfflag("DFIntNetworkPriorityBoost", "1")
-    setfflag("DFFlagEnableNetworkCompression", "True")
-    setfflag("FFlagEnableNetworkCompression", "True")
-    setfflag("DFFlagEnableNetworkEncryptionOptimization", "True")
-    setfflag("DFIntDataPingUpdateInterval", "5")
-    setfflag("DFIntNetworkTimeout", "30")
-    setfflag("DFIntNetworkRetryCount", "3")
-    setfflag("DFIntReplicationDataCompressionLevel", "1")
-    setfflag("DFFlagEnableReplicationCompression", "True")
-    setfflag("DFIntReplicationRate", "30")
-    setfflag("DFIntReplicationQueueSize", "512")
-    setfflag("DFFlagPrioritizeReplication", "True")
-
-    -- ===== GRAPHICS =====
     setfflag("DFIntDebugFRMQualityLevelOverride", "1")
     setfflag("DFIntTextureQualityOverride", "0")
     setfflag("DFFlagTextureQualityOverrideEnabled", "True")
@@ -221,6 +291,8 @@ pcall(function()
     setfflag("FFlagDisableMetalnessMap", "True")
     setfflag("FFlagDisableEmissiveMap", "True")
     setfflag("FFlagDisableReflectionMap", "True")
+    setfflag("DFFlagDisableTextureAnisotropy", "True")
+    setfflag("DFIntTextureAnisotropy", "1")
 
     setfflag("DFFlagDisableSSAO", "True")
     setfflag("FFlagDisableSSAO", "True")
@@ -264,16 +336,17 @@ pcall(function()
     setfflag("DFFlagDebugRenderForceTechnologyVoxel", "True")
     setfflag("FFlagDebugPauseVoxelizer", "True")
     setfflag("DFFlagSkipHighResolutionEnvironment", "True")
+    setfflag("FFlagRenderDisableForwardLights", "True")
 
-    -- ===== PHYSICS =====
     setfflag("DFIntSolverSpringDamping", "0")
     setfflag("DFIntPhysicsSendRate", "1")
     setfflag("DFIntMaxSimultaneousPhysicsJobs", "1")
     setfflag("DFIntPhysicsStepPerFrame", "1")
     setfflag("DFIntMaximumCollisionIterations", "1")
     setfflag("DFIntSolverConvergenceIterations", "1")
+    setfflag("FFlagDisableRaycastFiltering", "True")
+    setfflag("DFFlagSkipRaycastFiltering", "True")
 
-    -- ===== RENDER =====
     setfflag("DFIntFrameBufferPoolSize", "1")
     setfflag("DFIntRenderMeshMaxBones", "1")
     setfflag("DFIntDebugEngineOptimizationLevel", "3")
@@ -284,6 +357,7 @@ pcall(function()
     setfflag("FFlagDisableParticleEffects", "True")
     setfflag("FFlagDisableTrails", "True")
     setfflag("FFlagDisableBeams", "True")
+    setfflag("FFlagDisableBillboards", "True")
     setfflag("FFlagDisableDecals", "True")
     setfflag("FFlagDisableReflections", "True")
     setfflag("FFlagDisableGlassRefraction", "True")
@@ -292,29 +366,35 @@ pcall(function()
     setfflag("FFlagDisableHDR", "True")
     setfflag("FFlagDisableToneMapping", "True")
 
-    -- ===== ANIMATION =====
     setfflag("FFlagDisableAnimationBlending", "True")
     setfflag("DFFlagSkipAnimationBlending", "True")
     setfflag("FFlagDisableFacialAnimation", "True")
 
-    -- ===== GC (chạy nền, không block) =====
     setfflag("DFFlagGCEnableIncremental", "True")
-    setfflag("DFIntGCIncrementalPause", "8")
-    setfflag("DFIntGCIncrementalStepMul", "5000")
-    setfflag("DFIntGCIncrementalStepSizeKb", "128")
+    setfflag("DFIntGCIncrementalPause", "2")
+    setfflag("DFIntGCIncrementalStepMul", "3000")
+    setfflag("DFIntGCIncrementalStepSizeKb", "64")
 
-    -- ===== ASSET DOWNLOAD =====
-    setfflag("DFIntAssetRequestBatchSize", "8")
-    setfflag("DFIntMaxAssetDownloadConcurrency", "4")
-    setfflag("DFFlagThrottleAssetDownloads", "False")
-    setfflag("DFIntAssetDownloadThrottleMs", "0")
-    setfflag("FFlagPrioritizeCriticalAssets", "True")
+    setfflag("DFIntConnectionMTUSize", "1400")
+    setfflag("DFIntS2PhysicsSenderRate", "1")
 
-    -- ===== MISC =====
     setfflag("FFlagDebugGraphicsDisableDirect3D11", "True")
     setfflag("FFlagDebugGraphicsPreferOpenGL", "True")
-    setfflag("FFlagDisableCharacterEmotes", "True")
-    setfflag("FFlagDisableDefaultLoadingScreen", "True")
+
+    setfflag("DFIntNumberOfRenderPasses", "1")
+    setfflag("DFIntMaxConcurrentRenderPasses", "1")
+    setfflag("DFIntRenderPassSortMode", "0")
+
+    setfflag("DFIntAssetRequestBatchSize", "1")
+    setfflag("DFIntMaxAssetDownloadConcurrency", "1")
+    setfflag("DFFlagThrottleAssetDownloads", "True")
+    setfflag("DFIntAssetDownloadThrottleMs", "50")
+
+    setfflag("DFIntMaxPartCacheSize", "1")
+    setfflag("DFIntPartCacheLimit", "1")
+
+    setfflag("DFIntTerrainLODBias", "8")
+    setfflag("FFlagDisableTerrainLODTransitions", "True")
 end)
 
 -- ==================== ENGINE CONFIG ====================
@@ -334,8 +414,8 @@ task.spawn(function()
             Camera.CameraType = Enum.CameraType.Custom
         end
         Workspace.StreamingEnabled = true
-        Workspace.StreamingTargetRadius = 80
-        Workspace.StreamingMinRadius = 40
+        Workspace.StreamingTargetRadius = 96
+        Workspace.StreamingMinRadius = 48
         Workspace.StreamOutBehavior = Enum.StreamOutBehavior.Opportunistic
     end)
 end)
@@ -360,6 +440,19 @@ pcall(function()
     Lighting.ClockTime = 14
     Lighting.ExposureCompensation = 0
     Lighting.ShadowSoftness = 0
+end)
+
+Lighting.DescendantAdded:Connect(function(v)
+    task.defer(function()
+        pcall(function()
+            if v:IsA("Sky") or v:IsA("Atmosphere") or v:IsA("Clouds") 
+                or v:IsA("Skybox") or v:IsA("BloomEffect") or v:IsA("BlurEffect")
+                or v:IsA("SunRaysEffect") or v:IsA("DepthOfFieldEffect")
+                or v:IsA("ColorCorrectionEffect") then
+                v:Destroy()
+            end
+        end)
+    end)
 end)
 
 -- ==================== NƯỚC ====================
@@ -411,12 +504,13 @@ local function potatoPart(part)
     end)
 end
 
+-- KHÔNG xoá Sound
 local killTypes = {
     ParticleEmitter = true, Trail = true, Smoke = true, Fire = true,
     Sparkles = true, Beam = true, Highlight = true, SelectionBox = true,
     BoxHandleAdornment = true, PointLight = true, SpotLight = true,
     SurfaceLight = true, ForceField = true, Explosion = true,
-    Sound = true, Animation = true, SurfaceAppearance = true,
+    Animation = true, SurfaceAppearance = true,
     Decal = true, Texture = true, SpecialMesh = true,
 }
 
@@ -433,39 +527,95 @@ local function handleObject(v)
     end
 end
 
--- ==================== BULK XỬ LÝ ====================
 local descendants = Workspace:GetDescendants()
-local total = #descendants
-
-for i = 1, total do
+for i = 1, #descendants do
     handleObject(descendants[i])
-    if i % 400 == 0 then task.wait() end
-end
-
--- ==================== QUEUE XỬ LÝ OBJECT MỚI ====================
-local pendingQueue = {}
-local processing = false
-
-local function processQueue()
-    if processing then return end
-    processing = true
-    task.spawn(function()
-        while #pendingQueue > 0 do
-            local obj = table.remove(pendingQueue, 1)
-            if obj and obj.Parent then
-                pcall(function() handleObject(obj) end)
-            end
-            if #pendingQueue % 50 == 0 then
-                task.wait()
-            end
-        end
-        processing = false
-    end)
+    if i % 800 == 0 then task.wait() end
 end
 
 Workspace.DescendantAdded:Connect(function(v)
-    table.insert(pendingQueue, v)
-    processQueue()
+    task.defer(function()
+        pcall(function() handleObject(v) end)
+    end)
+end)
+
+-- ==================== CULLING ====================
+local CULL_DIST_SQ = 80 * 80
+local culled = {}
+local cullIndex = 1
+local cullList = {}
+
+task.spawn(function()
+    while uiParent.Parent do
+        task.wait(5)
+        local list = {}
+        for _, v in ipairs(Workspace:GetDescendants()) do
+            if v:IsA("BasePart") and not isChar(v) then
+                list[#list + 1] = v
+            end
+        end
+        cullList = list
+        cullIndex = 1
+    end
+end)
+
+task.spawn(function()
+    while uiParent.Parent do
+        task.wait(0.1)
+        pcall(function()
+            if not Camera then return end
+            local camPos = Camera.CFrame.Position
+            local list = cullList
+            local n = #list
+            if n == 0 then return end
+            
+            local startIdx = cullIndex
+            local chunk = math.ceil(n / 5)
+            local endIdx = math.min(startIdx + chunk, n)
+            
+            for i = startIdx, endIdx do
+                local v = list[i]
+                if v and v.Parent then
+                    local pos = v.Position
+                    if pos.Y < camPos.Y - 3 then
+                        if culled[v] then
+                            culled[v] = false
+                            pcall(function() v.LocalTransparencyModifier = 0 end)
+                        end
+                    else
+                        local dx = pos.X - camPos.X
+                        local dy = pos.Y - camPos.Y
+                        local dz = pos.Z - camPos.Z
+                        local distSq = dx*dx + dy*dy + dz*dz
+                        local shouldHide = distSq > CULL_DIST_SQ
+
+                        if shouldHide and not culled[v] then
+                            culled[v] = true
+                            pcall(function() v.LocalTransparencyModifier = 1 end)
+                        elseif not shouldHide and culled[v] then
+                            culled[v] = false
+                            pcall(function() v.LocalTransparencyModifier = 0 end)
+                        end
+                    end
+                end
+            end
+            
+            cullIndex = endIdx + 1
+            if cullIndex > n then cullIndex = 1 end
+        end)
+    end
+end)
+
+-- ==================== GC ====================
+task.spawn(function()
+    while uiParent.Parent do
+        task.wait(30)
+        pcall(function()
+            if RunService:IsRunning() then
+                collectgarbage("collect")
+            end
+        end)
+    end
 end)
 
 -- ==================== UI FPS + PING ====================
@@ -550,10 +700,27 @@ pingValue.TextXAlignment = Enum.TextXAlignment.Right
 pingValue.ZIndex = 1001
 pingValue.Parent = box
 
+local closeBtn = Instance.new("TextButton")
+closeBtn.Size = UDim2.new(0, 16, 0, 16)
+closeBtn.Position = UDim2.new(1, -22, 0, 4)
+closeBtn.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+closeBtn.Text = "✕"
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextSize = 10
+closeBtn.TextColor3 = Color3.new(1, 1, 1)
+closeBtn.BorderSizePixel = 0
+closeBtn.ZIndex = 1002
+closeBtn.Parent = box
+Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 4)
+
+closeBtn.MouseButton1Click:Connect(function()
+    pcall(function()
+        statsGui:Destroy()
+    end)
+end)
+
 local frames = 0
 local lastTime = tick()
-local pingHistory = {}
-local pingIndex = 1
 
 task.spawn(function()
     RunService.RenderStepped:Connect(function()
@@ -570,43 +737,22 @@ task.spawn(function()
         fpsValue.Text = tostring(currentFPS)
 
         local fpsColor
-        if currentFPS < 25 then
+        if currentFPS < 40 then
             fpsColor = Color3.fromRGB(255, 60, 60)
-        elseif currentFPS < 40 then
-            fpsColor = Color3.fromRGB(255, 200, 60)
-        elseif currentFPS <= 240 then
-            fpsColor = Color3.fromRGB(0, 255, 120)
         else
-            local hue = (tick() % 1)
-            fpsColor = Color3.fromHSV(hue, 1, 1)
+            fpsColor = Color3.fromRGB(0, 255, 120)
         end
         fpsValue.TextColor3 = fpsColor
 
-        -- Ping đo trung bình 5 mẫu để hiển thị mượt
         local ping = 0
         pcall(function()
             ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
         end)
-        
-        pingHistory[pingIndex] = ping
-        pingIndex = pingIndex + 1
-        if pingIndex > 5 then pingIndex = 1 end
-        
-        local sum = 0
-        local count = 0
-        for _, p in pairs(pingHistory) do
-            sum = sum + p
-            count = count + 1
-        end
-        local avgPing = math.floor(sum / count)
-
-        pingValue.Text = avgPing .. "ms"
+        pingValue.Text = ping .. "ms"
 
         local pingColor
-        if avgPing <= 27 then
+        if ping <= 100 then
             pingColor = Color3.fromRGB(0, 255, 120)
-        elseif avgPing <= 110 then
-            pingColor = Color3.fromRGB(255, 200, 60)
         else
             pingColor = Color3.fromRGB(255, 60, 60)
         end

@@ -10,14 +10,9 @@ local Workspace = game:GetService("Workspace")
 local Terrain = Workspace:FindFirstChildOfClass("Terrain")
 local Camera = Workspace.CurrentCamera
 
--- Đưa UI vào CoreGui để không bị game đè
 local uiParent = pg
 pcall(function()
-    if gethui then
-        uiParent = gethui()
-    elseif syn and syn.protect_gui then
-        -- fallback khác nếu có
-    end
+    if gethui then uiParent = gethui() end
 end)
 
 for _, v in pairs(pg:GetChildren()) do
@@ -26,8 +21,7 @@ for _, v in pairs(pg:GetChildren()) do
     end
 end
 pcall(function()
-    local cg = game:GetService("CoreGui")
-    for _, v in pairs(cg:GetChildren()) do
+    for _, v in pairs(game:GetService("CoreGui"):GetChildren()) do
         if v.Name == "KudoPopup" or v.Name == "KudoStats" or v.Name == "KudoToggle" then
             v:Destroy()
         end
@@ -225,116 +219,78 @@ popup.BackgroundColor3 = Color3.fromRGB(15, 15, 22)
 popup.BorderSizePixel = 0
 popup.Active = false
 popup.ZIndex = 1000
+popup.ClipsDescendants = true
 popup.Parent = sg
 Instance.new("UICorner", popup).CornerRadius = UDim.new(0, 14)
 
-local lightThickness = 3
+-- 1 DẢI SÁNG ĐỎ CHẠY QUANH VIỀN - DÙNG 1 FRAME XOAY
+-- Khung vuông bao quanh popup, xoay liên tục, chỉ nhìn thấy khi đi qua viền
+local runnerWrap = Instance.new("Frame")
+runnerWrap.Name = "RunnerWrap"
+runnerWrap.Size = UDim2.new(1, 0, 1, 0)
+runnerWrap.Position = UDim2.new(0, 0, 0, 0)
+runnerWrap.BackgroundTransparency = 1
+runnerWrap.ClipsDescendants = true
+runnerWrap.ZIndex = 1001
+runnerWrap.Parent = popup
+Instance.new("UICorner", runnerWrap).CornerRadius = UDim.new(0, 14)
 
-local lightTop = Instance.new("Frame")
-lightTop.Size = UDim2.new(0, 60, 0, lightThickness)
-lightTop.Position = UDim2.new(0, -60, 0, -1)
-lightTop.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
-lightTop.BorderSizePixel = 0
-lightTop.ZIndex = 1001
-lightTop.Active = false
-lightTop.Parent = popup
-Instance.new("UICorner", lightTop).CornerRadius = UDim.new(1, 0)
+-- Điểm sáng chạy
+local runnerDot = Instance.new("Frame")
+runnerDot.Name = "RunnerDot"
+runnerDot.Size = UDim2.new(0, 50, 0, 3)
+runnerDot.Position = UDim2.new(0, -50, 0, 0)
+runnerDot.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
+runnerDot.BorderSizePixel = 0
+runnerDot.ZIndex = 1002
+runnerDot.Parent = runnerWrap
+Instance.new("UICorner", runnerDot).CornerRadius = UDim.new(1, 0)
 
-local lightTopGlow = Instance.new("ImageLabel")
-lightTopGlow.Size = UDim2.new(1, 30, 1, 30)
-lightTopGlow.Position = UDim2.new(0, -15, 0, -15)
-lightTopGlow.BackgroundTransparency = 1
-lightTopGlow.Image = "rbxassetid://5028857472"
-lightTopGlow.ImageColor3 = Color3.fromRGB(255, 80, 80)
-lightTopGlow.ImageTransparency = 0.3
-lightTopGlow.ZIndex = 1000
-lightTopGlow.Parent = lightTop
+local runnerGlow = Instance.new("ImageLabel")
+runnerGlow.Size = UDim2.new(1, 40, 1, 40)
+runnerGlow.Position = UDim2.new(0, -20, 0, -20)
+runnerGlow.BackgroundTransparency = 1
+runnerGlow.Image = "rbxassetid://5028857472"
+runnerGlow.ImageColor3 = Color3.fromRGB(255, 80, 80)
+runnerGlow.ImageTransparency = 0.2
+runnerGlow.ZIndex = 1001
+runnerGlow.Parent = runnerDot
 
-local lightRight = Instance.new("Frame")
-lightRight.Size = UDim2.new(0, lightThickness, 0, 60)
-lightRight.Position = UDim2.new(1, -1, 0, -60)
-lightRight.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
-lightRight.BorderSizePixel = 0
-lightRight.ZIndex = 1001
-lightRight.Active = false
-lightRight.Parent = popup
-Instance.new("UICorner", lightRight).CornerRadius = UDim.new(1, 0)
-
-local lightRightGlow = Instance.new("ImageLabel")
-lightRightGlow.Size = UDim2.new(1, 30, 1, 30)
-lightRightGlow.Position = UDim2.new(0, -15, 0, -15)
-lightRightGlow.BackgroundTransparency = 1
-lightRightGlow.Image = "rbxassetid://5028857472"
-lightRightGlow.ImageColor3 = Color3.fromRGB(255, 80, 80)
-lightRightGlow.ImageTransparency = 0.3
-lightRightGlow.ZIndex = 1000
-lightRightGlow.Parent = lightRight
-
-local lightBottom = Instance.new("Frame")
-lightBottom.Size = UDim2.new(0, 60, 0, lightThickness)
-lightBottom.Position = UDim2.new(1, 0, 1, -lightThickness + 1)
-lightBottom.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
-lightBottom.BorderSizePixel = 0
-lightBottom.ZIndex = 1001
-lightBottom.Active = false
-lightBottom.Parent = popup
-Instance.new("UICorner", lightBottom).CornerRadius = UDim.new(1, 0)
-
-local lightBottomGlow = Instance.new("ImageLabel")
-lightBottomGlow.Size = UDim2.new(1, 30, 1, 30)
-lightBottomGlow.Position = UDim2.new(0, -15, 0, -15)
-lightBottomGlow.BackgroundTransparency = 1
-lightBottomGlow.Image = "rbxassetid://5028857472"
-lightBottomGlow.ImageColor3 = Color3.fromRGB(255, 80, 80)
-lightBottomGlow.ImageTransparency = 0.3
-lightBottomGlow.ZIndex = 1000
-lightBottomGlow.Parent = lightBottom
-
-local lightLeft = Instance.new("Frame")
-lightLeft.Size = UDim2.new(0, lightThickness, 0, 60)
-lightLeft.Position = UDim2.new(0, -1, 1, 0)
-lightLeft.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
-lightLeft.BorderSizePixel = 0
-lightLeft.ZIndex = 1001
-lightLeft.Active = false
-lightLeft.Parent = popup
-Instance.new("UICorner", lightLeft).CornerRadius = UDim.new(1, 0)
-
-local lightLeftGlow = Instance.new("ImageLabel")
-lightLeftGlow.Size = UDim2.new(1, 30, 1, 30)
-lightLeftGlow.Position = UDim2.new(0, -15, 0, -15)
-lightLeftGlow.BackgroundTransparency = 1
-lightLeftGlow.Image = "rbxassetid://5028857472"
-lightLeftGlow.ImageColor3 = Color3.fromRGB(255, 80, 80)
-lightLeftGlow.ImageTransparency = 0.3
-lightLeftGlow.ZIndex = 1000
-lightLeftGlow.Parent = lightLeft
-
+-- Chạy vòng quanh viền dùng Position tween tuần tự
+-- Top: trái → phải, Right: trên → dưới, Bottom: phải → trái, Left: dưới → trên
 task.spawn(function()
-    while popup.Parent do
-        lightTop.Position = UDim2.new(0, -60, 0, -1)
-        TS:Create(lightTop, TweenInfo.new(0.8, Enum.EasingStyle.Linear), {
-            Position = UDim2.new(1, 0, 0, -1)
+    while runnerDot.Parent do
+        -- Cạnh TRÊN: trái → phải
+        runnerDot.Size = UDim2.new(0, 50, 0, 3)
+        runnerDot.Position = UDim2.new(0, -50, 0, 0)
+        TS:Create(runnerDot, TweenInfo.new(1, Enum.EasingStyle.Linear), {
+            Position = UDim2.new(1, 0, 0, 0)
         }):Play()
-        task.wait(0.8)
+        task.wait(1)
 
-        lightRight.Position = UDim2.new(1, -1, 0, -60)
-        TS:Create(lightRight, TweenInfo.new(0.5, Enum.EasingStyle.Linear), {
-            Position = UDim2.new(1, -1, 1, 0)
+        -- Cạnh PHẢI: trên → dưới
+        runnerDot.Size = UDim2.new(0, 3, 0, 50)
+        runnerDot.Position = UDim2.new(1, -3, 0, -50)
+        TS:Create(runnerDot, TweenInfo.new(0.55, Enum.EasingStyle.Linear), {
+            Position = UDim2.new(1, -3, 1, 0)
         }):Play()
-        task.wait(0.5)
+        task.wait(0.55)
 
-        lightBottom.Position = UDim2.new(1, 0, 1, -lightThickness + 1)
-        TS:Create(lightBottom, TweenInfo.new(0.8, Enum.EasingStyle.Linear), {
-            Position = UDim2.new(0, -60, 1, -lightThickness + 1)
+        -- Cạnh DƯỚI: phải → trái
+        runnerDot.Size = UDim2.new(0, 50, 0, 3)
+        runnerDot.Position = UDim2.new(1, 0, 1, -3)
+        TS:Create(runnerDot, TweenInfo.new(1, Enum.EasingStyle.Linear), {
+            Position = UDim2.new(0, -50, 1, -3)
         }):Play()
-        task.wait(0.8)
+        task.wait(1)
 
-        lightLeft.Position = UDim2.new(0, -1, 1, 0)
-        TS:Create(lightLeft, TweenInfo.new(0.5, Enum.EasingStyle.Linear), {
-            Position = UDim2.new(0, -1, 0, -60)
+        -- Cạnh TRÁI: dưới → trên
+        runnerDot.Size = UDim2.new(0, 3, 0, 50)
+        runnerDot.Position = UDim2.new(0, 0, 1, 0)
+        TS:Create(runnerDot, TweenInfo.new(0.55, Enum.EasingStyle.Linear), {
+            Position = UDim2.new(0, 0, 0, -50)
         }):Play()
-        task.wait(0.5)
+        task.wait(0.55)
     end
 end)
 
@@ -343,7 +299,7 @@ iconWrap.Size = UDim2.new(0, 52, 0, 52)
 iconWrap.Position = UDim2.new(0, 20, 0, 22)
 iconWrap.BackgroundColor3 = Color3.fromRGB(25, 15, 20)
 iconWrap.BorderSizePixel = 0
-iconWrap.ZIndex = 1002
+iconWrap.ZIndex = 1010
 iconWrap.Active = false
 iconWrap.Parent = popup
 Instance.new("UICorner", iconWrap).CornerRadius = UDim.new(1, 0)
@@ -357,7 +313,7 @@ local arcHolder = Instance.new("Frame")
 arcHolder.Size = UDim2.new(0, 34, 0, 34)
 arcHolder.Position = UDim2.new(0.5, -17, 0.5, -17)
 arcHolder.BackgroundTransparency = 1
-arcHolder.ZIndex = 1003
+arcHolder.ZIndex = 1011
 arcHolder.Active = false
 arcHolder.Parent = iconWrap
 
@@ -378,7 +334,7 @@ mask1.Size = UDim2.new(0, 20, 0, 20)
 mask1.Position = UDim2.new(0, -3, 0, -3)
 mask1.BackgroundColor3 = Color3.fromRGB(25, 15, 20)
 mask1.BorderSizePixel = 0
-mask1.ZIndex = 1004
+mask1.ZIndex = 1012
 mask1.Active = false
 mask1.Parent = arcHolder
 Instance.new("UICorner", mask1).CornerRadius = UDim.new(0, 4)
@@ -388,7 +344,7 @@ mask2.Size = UDim2.new(0, 20, 0, 20)
 mask2.Position = UDim2.new(1, -17, 1, -17)
 mask2.BackgroundColor3 = Color3.fromRGB(25, 15, 20)
 mask2.BorderSizePixel = 0
-mask2.ZIndex = 1004
+mask2.ZIndex = 1012
 mask2.Active = false
 mask2.Parent = arcHolder
 Instance.new("UICorner", mask2).CornerRadius = UDim.new(0, 4)
@@ -409,7 +365,7 @@ title.Font = Enum.Font.GothamBold
 title.TextSize = 20
 title.TextColor3 = Color3.fromRGB(255, 100, 100)
 title.TextXAlignment = Enum.TextXAlignment.Left
-title.ZIndex = 1002
+title.ZIndex = 1010
 title.Active = false
 title.Parent = popup
 
@@ -422,7 +378,7 @@ sub.Font = Enum.Font.Gotham
 sub.TextSize = 12
 sub.TextColor3 = Color3.fromRGB(170, 170, 180)
 sub.TextXAlignment = Enum.TextXAlignment.Left
-sub.ZIndex = 1002
+sub.ZIndex = 1010
 sub.Active = false
 sub.Parent = popup
 
@@ -434,7 +390,7 @@ percentL.Text = "0%"
 percentL.Font = Enum.Font.GothamBold
 percentL.TextSize = 16
 percentL.TextColor3 = Color3.fromRGB(255, 130, 100)
-percentL.ZIndex = 1002
+percentL.ZIndex = 1010
 percentL.Active = false
 percentL.Parent = popup
 
@@ -443,7 +399,7 @@ pBg.Size = UDim2.new(1, -40, 0, 8)
 pBg.Position = UDim2.new(0, 20, 0, 112)
 pBg.BackgroundColor3 = Color3.fromRGB(40, 30, 35)
 pBg.BorderSizePixel = 0
-pBg.ZIndex = 1002
+pBg.ZIndex = 1010
 pBg.Active = false
 pBg.Parent = popup
 Instance.new("UICorner", pBg).CornerRadius = UDim.new(1, 0)
@@ -452,7 +408,7 @@ local pFill = Instance.new("Frame")
 pFill.Size = UDim2.new(0, 0, 1, 0)
 pFill.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
 pFill.BorderSizePixel = 0
-pFill.ZIndex = 1003
+pFill.ZIndex = 1011
 pFill.Active = false
 pFill.Parent = pBg
 Instance.new("UICorner", pFill).CornerRadius = UDim.new(1, 0)
@@ -484,10 +440,7 @@ task.delay(4.5, function()
     TS:Create(mask1, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
     TS:Create(mask2, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
     TS:Create(iconStroke, TweenInfo.new(0.6), {Transparency = 1}):Play()
-    TS:Create(lightTop, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
-    TS:Create(lightRight, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
-    TS:Create(lightBottom, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
-    TS:Create(lightLeft, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
+    TS:Create(runnerDot, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
     task.wait(0.7)
     sg:Destroy()
 end)
@@ -523,7 +476,7 @@ header.Size = UDim2.new(1, 0, 0, 16)
 header.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
 header.BackgroundTransparency = 0.7
 header.BorderSizePixel = 0
-header.Active = true
+header.Active = false -- QUAN TRỌNG: tắt để input xuyên qua
 header.Parent = box
 Instance.new("UICorner", header).CornerRadius = UDim.new(0, 10)
 
@@ -587,6 +540,7 @@ closeB.Font = Enum.Font.GothamBold
 closeB.TextSize = 13
 closeB.TextColor3 = Color3.new(1, 1, 1)
 closeB.BorderSizePixel = 0
+closeB.ZIndex = 10
 closeB.Parent = box
 Instance.new("UICorner", closeB).CornerRadius = UDim.new(1, 0)
 
@@ -599,6 +553,7 @@ hideB.Font = Enum.Font.GothamBold
 hideB.TextSize = 15
 hideB.TextColor3 = Color3.new(1, 1, 1)
 hideB.BorderSizePixel = 0
+hideB.ZIndex = 10
 hideB.Parent = box
 Instance.new("UICorner", hideB).CornerRadius = UDim.new(1, 0)
 
@@ -611,6 +566,7 @@ lockB.Font = Enum.Font.GothamBold
 lockB.TextSize = 11
 lockB.TextColor3 = Color3.new(1, 1, 1)
 lockB.BorderSizePixel = 0
+lockB.ZIndex = 10
 lockB.Parent = box
 Instance.new("UICorner", lockB).CornerRadius = UDim.new(1, 0)
 
@@ -623,6 +579,7 @@ opacityB.Font = Enum.Font.GothamBold
 opacityB.TextSize = 13
 opacityB.TextColor3 = Color3.new(1, 1, 1)
 opacityB.BorderSizePixel = 0
+opacityB.ZIndex = 10
 opacityB.Parent = box
 Instance.new("UICorner", opacityB).CornerRadius = UDim.new(1, 0)
 
@@ -646,7 +603,7 @@ sliderPanel.Position = UDim2.new(0, 10, 1, -34)
 sliderPanel.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
 sliderPanel.BorderSizePixel = 0
 sliderPanel.Visible = false
-sliderPanel.ZIndex = 5
+sliderPanel.ZIndex = 20
 sliderPanel.Parent = box
 Instance.new("UICorner", sliderPanel).CornerRadius = UDim.new(0, 6)
 
@@ -655,7 +612,7 @@ sliderBg.Size = UDim2.new(1, -20, 0, 6)
 sliderBg.Position = UDim2.new(0, 10, 0.5, -3)
 sliderBg.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
 sliderBg.BorderSizePixel = 0
-sliderBg.ZIndex = 6
+sliderBg.ZIndex = 21
 sliderBg.Parent = sliderPanel
 Instance.new("UICorner", sliderBg).CornerRadius = UDim.new(1, 0)
 
@@ -663,33 +620,37 @@ local sliderFill = Instance.new("Frame")
 sliderFill.Size = UDim2.new(0.5, 0, 1, 0)
 sliderFill.BackgroundColor3 = Color3.fromRGB(80, 150, 255)
 sliderFill.BorderSizePixel = 0
-sliderFill.ZIndex = 7
+sliderFill.ZIndex = 22
 sliderFill.Parent = sliderBg
 Instance.new("UICorner", sliderFill).CornerRadius = UDim.new(1, 0)
 
 local sliderKnob = Instance.new("TextButton")
-sliderKnob.Size = UDim2.new(0, 14, 0, 14)
-sliderKnob.Position = UDim2.new(0.5, -7, 0.5, -7)
-sliderKnob.BackgroundColor3 = Color3.fromRGB(120, 180, 255)
+sliderKnob.Size = UDim2.new(0, 16, 0, 16)
+sliderKnob.Position = UDim2.new(0.5, -8, 0.5, -8)
+sliderKnob.BackgroundColor3 = Color3.fromRGB(150, 200, 255)
 sliderKnob.Text = ""
 sliderKnob.BorderSizePixel = 0
-sliderKnob.ZIndex = 8
+sliderKnob.ZIndex = 23
 sliderKnob.Parent = sliderBg
 Instance.new("UICorner", sliderKnob).CornerRadius = UDim.new(1, 0)
 
--- Hàm cập nhật độ mờ dựa vào giá trị từ 0 đến 1
+-- applyOpacity: value 0 = mờ, value 1 = rõ
+-- opacity (độ rõ) tỉ lệ với value
 local function applyOpacity(value)
-    -- value: 0 = đục hoàn toàn, 1 = trong suốt hoàn toàn
-    -- Đảo lại: opacity cao = rõ (transparency thấp)
-    local bgT = value * 0.8 -- từ 0 (đục) đến 0.8 (mờ)
-    box.BackgroundColor3 = Color3.fromRGB(14, 14, 20)
-    box.BackgroundTransparency = 0.4 + bgT * 0.5
-    header.BackgroundTransparency = math.clamp(0.7 + bgT * 0.3, 0, 1)
-    bxStroke.Transparency = math.clamp(0.6 + bgT * 0.4, 0, 1)
+    -- value = 0 -> trong suốt hoàn toàn (transparency cao)
+    -- value = 1 -> rõ hoàn toàn (transparency thấp)
+    local transparency = 1 - value -- 0 = rõ, 1 = mờ
+    box.BackgroundTransparency = math.clamp(0.1 + transparency * 0.85, 0, 1)
+    header.BackgroundTransparency = math.clamp(0.4 + transparency * 0.5, 0, 1)
+    bxStroke.Transparency = math.clamp(0.4 + transparency * 0.55, 0, 1)
     
     for _, child in ipairs(box:GetDescendants()) do
         if child:IsA("TextLabel") then
-            child.TextTransparency = bgT
+            child.TextTransparency = math.clamp(transparency * 0.9, 0, 1)
+        elseif child:IsA("TextButton") then
+            -- giữ nút hơi rõ để vẫn bấm được
+            child.BackgroundTransparency = math.clamp(transparency * 0.5, 0, 0.7)
+            child.TextTransparency = math.clamp(transparency * 0.7, 0, 0.8)
         end
     end
 end
@@ -707,9 +668,11 @@ UIS.InputChanged:Connect(function(i)
         local mouseX = i.Position.X
         local bgAbsPos = sliderBg.AbsolutePosition.X
         local bgAbsSize = sliderBg.AbsoluteSize.X
+        -- percent 0 = trái, 1 = phải
         local percent = math.clamp((mouseX - bgAbsPos) / bgAbsSize, 0, 1)
         sliderFill.Size = UDim2.new(percent, 0, 1, 0)
-        sliderKnob.Position = UDim2.new(percent, -7, 0.5, -7)
+        sliderKnob.Position = UDim2.new(percent, -8, 0.5, -8)
+        -- Kéo về PHẢI = rõ hơn, kéo về TRÁI = mờ hơn
         applyOpacity(percent)
     end
 end)
@@ -727,7 +690,7 @@ opacityB.MouseButton1Click:Connect(function()
     sliderPanel.Visible = sliderVisible
 end)
 
--- Khởi tạo giá trị ban đầu
+-- Khởi tạo giá trị ban đầu: 0.5 (rõ vừa)
 applyOpacity(0.5)
 
 local resizeB = Instance.new("TextButton")
@@ -736,6 +699,7 @@ resizeB.Position = UDim2.new(0, 6, 1, -26)
 resizeB.BackgroundTransparency = 1
 resizeB.Text = ""
 resizeB.BorderSizePixel = 0
+resizeB.ZIndex = 10
 resizeB.Parent = box
 
 local vL = Instance.new("Frame")
@@ -797,11 +761,22 @@ closeB.MouseButton1Click:Connect(function()
     showSg:Destroy()
 end)
 
+-- Drag bằng cách giữ vào bất kỳ đâu trên box (trừ các nút)
+-- Dùng UIS.InputBegan để bắt sự kiện chạm trên box
 local dragging = false
 local ds, sp
-header.InputBegan:Connect(function(i)
+local touchOnButton = false
+
+box.InputBegan:Connect(function(i)
     if locked then return end
     if i.UserInputType == Enum.UserInputType.Touch or i.UserInputType == Enum.UserInputType.MouseButton1 then
+        -- Kiểm tra xem có phải chạm vào nút nào không
+        local absPos = box.AbsolutePosition
+        local absSize = box.AbsoluteSize
+        local touchPos = i.Position
+        
+        -- Nếu chạm vào header hoặc bất kỳ đâu trong box (trừ các nút)
+        -- Các nút nằm trên cùng, tự chặn sự kiện
         dragging = true
         ds = i.Position
         sp = box.Position
@@ -829,6 +804,7 @@ resizeB.InputBegan:Connect(function(i)
         resizing = true
         rs = i.Position
         rss = box.Size
+        dragging = false
     end
 end)
 

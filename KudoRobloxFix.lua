@@ -15,7 +15,6 @@ pcall(function()
 end)
 if not uiParent then uiParent = playerGui end
 
--- Xoá UI cũ
 pcall(function()
     for _, v in pairs(game:GetService("CoreGui"):GetChildren()) do
         if v.Name == "KudoPopup" or v.Name == "KudoStats" or v.Name == "KudoToggle" then v:Destroy() end
@@ -40,11 +39,9 @@ popup.Size = UDim2.new(0, 340, 0, 96)
 popup.Position = UDim2.new(1, 360, 0.42, -48)
 popup.BackgroundColor3 = Color3.fromRGB(8, 8, 12)
 popup.BorderSizePixel = 0
-popup.ClipsDescendants = false
 popup.Parent = popupGui
 Instance.new("UICorner", popup).CornerRadius = UDim.new(0, 18)
 
--- Viền RGB chạy
 local border = Instance.new("UIStroke")
 border.Color = Color3.fromRGB(255, 60, 60)
 border.Thickness = 2
@@ -61,7 +58,6 @@ task.spawn(function()
     end
 end)
 
--- Lớp gradient nền
 local bgGradient = Instance.new("UIGradient")
 bgGradient.Color = ColorSequence.new({
     ColorSequenceKeypoint.new(0, Color3.fromRGB(35, 12, 20)),
@@ -71,7 +67,6 @@ bgGradient.Color = ColorSequence.new({
 bgGradient.Rotation = 135
 bgGradient.Parent = popup
 
--- Accent bar bên trái
 local accentBar = Instance.new("Frame")
 accentBar.Size = UDim2.new(0, 5, 1, -30)
 accentBar.Position = UDim2.new(0, 0, 0, 15)
@@ -89,7 +84,6 @@ accentGradient.Color = ColorSequence.new({
 accentGradient.Rotation = 90
 accentGradient.Parent = accentBar
 
--- Icon bánh răng
 local iconWrap = Instance.new("Frame")
 iconWrap.Size = UDim2.new(0, 56, 0, 56)
 iconWrap.Position = UDim2.new(0, 24, 0.5, -28)
@@ -112,7 +106,6 @@ iconStroke.Thickness = 1.5
 iconStroke.Transparency = 0.2
 iconStroke.Parent = iconWrap
 
--- Hào quang phát sáng sau icon
 local glow = Instance.new("ImageLabel")
 glow.Size = UDim2.new(1, 40, 1, 40)
 glow.Position = UDim2.new(0, -20, 0, -20)
@@ -151,7 +144,6 @@ task.spawn(function()
     end
 end)
 
--- Pulse ring
 task.spawn(function()
     while iconWrap.Parent do
         local ring = Instance.new("Frame")
@@ -185,7 +177,6 @@ task.spawn(function()
     end
 end)
 
--- Text
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, -110, 0, 28)
 title.Position = UDim2.new(0, 96, 0, 22)
@@ -221,7 +212,6 @@ sub.TextXAlignment = Enum.TextXAlignment.Left
 sub.ZIndex = 2
 sub.Parent = popup
 
--- Progress bar chạy dưới đáy
 local progressBar = Instance.new("Frame")
 progressBar.Size = UDim2.new(0, 0, 0, 3)
 progressBar.Position = UDim2.new(0, 24, 1, -3)
@@ -238,7 +228,6 @@ progressGradient.Color = ColorSequence.new({
 })
 progressGradient.Parent = progressBar
 
--- ANIMATION MỞ
 popup.BackgroundTransparency = 1
 iconWrap.BackgroundTransparency = 1
 icon.TextTransparency = 1
@@ -789,19 +778,20 @@ hideBtn.ZIndex = 10
 hideBtn.Parent = box
 Instance.new("UICorner", hideBtn).CornerRadius = UDim.new(1, 0)
 
--- Resize hình chữ V sát mép UI, xoay 45 độ
+-- ===== HÌNH CHỮ V Ở GÓC DƯỚI TRÁI, XOAY KHỚP GÓC =====
 local resizeBtn = Instance.new("TextButton")
-resizeBtn.Size = UDim2.new(0, 20, 0, 20)
-resizeBtn.Position = UDim2.new(1, -2, 1, -2)
+resizeBtn.Size = UDim2.new(0, 22, 0, 22)
+resizeBtn.Position = UDim2.new(0, -2, 1, -2)  -- Góc dưới TRÁI
 resizeBtn.BackgroundTransparency = 1
 resizeBtn.Text = ""
 resizeBtn.BorderSizePixel = 0
 resizeBtn.ZIndex = 9
 resizeBtn.Parent = box
 
+-- Đường chéo trái của chữ V (xoay -45°)
 local vLeft = Instance.new("Frame")
-vLeft.Size = UDim2.new(0, 2, 0, 10)
-vLeft.Position = UDim2.new(0, 5, 0, 9)
+vLeft.Size = UDim2.new(0, 2, 0, 12)
+vLeft.Position = UDim2.new(0, 6, 0, 10)
 vLeft.AnchorPoint = Vector2.new(0.5, 0.5)
 vLeft.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 vLeft.BackgroundTransparency = 0.3
@@ -811,9 +801,10 @@ vLeft.ZIndex = 10
 vLeft.Parent = resizeBtn
 Instance.new("UICorner", vLeft).CornerRadius = UDim.new(1, 0)
 
+-- Đường chéo phải của chữ V (xoay 45°)
 local vRight = Instance.new("Frame")
-vRight.Size = UDim2.new(0, 2, 0, 10)
-vRight.Position = UDim2.new(0, 13, 0, 9)
+vRight.Size = UDim2.new(0, 2, 0, 12)
+vRight.Position = UDim2.new(0, 14, 0, 10)
 vRight.AnchorPoint = Vector2.new(0.5, 0.5)
 vRight.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 vRight.BackgroundTransparency = 0.3
@@ -900,6 +891,7 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
+-- ===== RESIZE + SCALE CHỮ V THEO =====
 local resizing = false
 local resizeStart, resizeStartSize
 
@@ -919,6 +911,15 @@ UserInputService.InputChanged:Connect(function(input)
         local newX = math.max(130, resizeStartSize.X.Offset + delta.X)
         local newY = math.max(90, resizeStartSize.Y.Offset + delta.Y)
         box.Size = UDim2.new(0, newX, 0, newY)
+
+        -- Scale chữ V theo kích thước box
+        local vScale = math.clamp(newX / 150, 1, 2.2)
+        local vLength = math.floor(12 * vScale)
+        vLeft.Size = UDim2.new(0, 2, 0, vLength)
+        vRight.Size = UDim2.new(0, 2, 0, vLength)
+        vLeft.Position = UDim2.new(0, 6, 0, 10)
+        vRight.Position = UDim2.new(0, 6 + math.floor(8 * vScale), 0, 10)
+        resizeBtn.Size = UDim2.new(0, math.floor(22 * vScale), 0, math.floor(22 * vScale))
     end
 end)
 

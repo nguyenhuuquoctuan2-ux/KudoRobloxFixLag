@@ -30,15 +30,37 @@ popup.BackgroundColor3 = Color3.fromRGB(18, 18, 24)
 popup.BackgroundTransparency = 0.05
 popup.BorderSizePixel = 0
 popup.ZIndex = 1000
+popup.ClipsDescendants = false
 popup.Parent = popupGui
 Instance.new("UICorner", popup).CornerRadius = UDim.new(0, 12)
 
-local popupStroke = Instance.new("UIStroke")
-popupStroke.Color = Color3.fromRGB(255, 60, 60)
-popupStroke.Thickness = 1.5
-popupStroke.Transparency = 0.3
-popupStroke.Parent = popup
+-- Đường viền đỏ RGB chạy quanh
+local borderFrame = Instance.new("Frame")
+borderFrame.Size = UDim2.new(1, 4, 1, 4)
+borderFrame.Position = UDim2.new(0, -2, 0, -2)
+borderFrame.BackgroundTransparency = 1
+borderFrame.ZIndex = 999
+borderFrame.Parent = popup
+Instance.new("UICorner", borderFrame).CornerRadius = UDim.new(0, 13)
 
+local borderStroke = Instance.new("UIStroke")
+borderStroke.Color = Color3.fromRGB(255, 60, 60)
+borderStroke.Thickness = 2
+borderStroke.Transparency = 0
+borderStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+borderStroke.Parent = borderFrame
+
+-- Animation chạy màu RGB quanh viền
+task.spawn(function()
+    local hue = 0
+    while borderStroke.Parent do
+        hue = (hue + 0.008) % 1
+        borderStroke.Color = Color3.fromHSV(hue, 1, 1)
+        task.wait(0.03)
+    end
+end)
+
+-- Accent bar bên trái (giữ nguyên nhưng đồng bộ màu)
 local accentBar = Instance.new("Frame")
 accentBar.Size = UDim2.new(0, 3, 1, -16)
 accentBar.Position = UDim2.new(0, 0, 0, 8)
@@ -96,7 +118,7 @@ local popupTitle = Instance.new("TextLabel")
 popupTitle.Size = UDim2.new(1, -75, 0, 18)
 popupTitle.Position = UDim2.new(0, 60, 0, 12)
 popupTitle.BackgroundTransparency = 1
-popupTitle.Text = "fix lag activated ✔"
+popupTitle.Text = "fix lag v1.0 ✓"
 popupTitle.Font = Enum.Font.GothamBold
 popupTitle.TextSize = 13
 popupTitle.TextColor3 = Color3.fromRGB(255, 70, 70)
@@ -108,7 +130,7 @@ local popupSub = Instance.new("TextLabel")
 popupSub.Size = UDim2.new(1, -75, 0, 14)
 popupSub.Position = UDim2.new(0, 60, 0, 32)
 popupSub.BackgroundTransparency = 1
-popupSub.Text = "made by kudo29001"
+popupSub.Text = "by kudo29001⚡"
 popupSub.Font = Enum.Font.Gotham
 popupSub.TextSize = 10
 popupSub.TextColor3 = Color3.fromRGB(180, 180, 190)
@@ -131,7 +153,7 @@ task.delay(3.5, function()
         TweenService:Create(popupSub, TweenInfo.new(0.4), {TextTransparency = 1}):Play()
         TweenService:Create(gearLabel, TweenInfo.new(0.4), {TextTransparency = 1}):Play()
         TweenService:Create(gearFrame, TweenInfo.new(0.4), {BackgroundTransparency = 1}):Play()
-        TweenService:Create(popupStroke, TweenInfo.new(0.4), {Transparency = 1}):Play()
+        TweenService:Create(borderStroke, TweenInfo.new(0.4), {Transparency = 1}):Play()
         TweenService:Create(accentBar, TweenInfo.new(0.4), {BackgroundTransparency = 1}):Play()
         TweenService:Create(ringStroke, TweenInfo.new(0.4), {Transparency = 1}):Play()
         out.Completed:Wait()
@@ -249,7 +271,6 @@ pcall(function()
     setfflag("DFFlagSkipAnimationBlending", "True")
     setfflag("FFlagDisableFacialAnimation", "True")
 
-    -- GC TUNING MẠNH HƠN
     setfflag("DFFlagGCEnableIncremental", "True")
     setfflag("DFIntGCIncrementalPause", "2")
     setfflag("DFIntGCIncrementalStepMul", "3000")
@@ -304,7 +325,7 @@ task.spawn(function()
     end)
 end)
 
--- ==================== XOÁ BẦU TRỜI (CHỈ 1 LẦN) ====================
+-- ==================== XOÁ BẦU TRỜI ====================
 pcall(function()
     for _, v in ipairs(Lighting:GetChildren()) do
         if v:IsA("PostEffect") or v:IsA("Sky") or v:IsA("Atmosphere") 
@@ -326,7 +347,6 @@ pcall(function()
     Lighting.ShadowSoftness = 0
 end)
 
--- Bắt Sky mới spawn qua DescendantAdded (KHÔNG dùng vòng lặp)
 Lighting.DescendantAdded:Connect(function(v)
     task.defer(function()
         pcall(function()
@@ -340,7 +360,7 @@ Lighting.DescendantAdded:Connect(function(v)
     end)
 end)
 
--- ==================== NƯỚC (CHỈ 1 LẦN) ====================
+-- ==================== NƯỚC ====================
 pcall(function()
     if Terrain then
         Terrain.WaterWaveSize = 0
@@ -398,7 +418,6 @@ local killTypes = {
     Decal = true, Texture = true, SpecialMesh = true,
 }
 
--- ==================== XỬ LÝ 1 OBJECT ====================
 local function handleObject(v)
     if isName(v) then return end
     if isChar(v) then return end
@@ -412,7 +431,6 @@ local function handleObject(v)
     end
 end
 
--- ==================== BULK XỬ LÝ BAN ĐẦU ====================
 local descendants = Workspace:GetDescendants()
 local total = #descendants
 
@@ -421,14 +439,13 @@ for i = 1, total do
     if i % 800 == 0 then task.wait() end
 end
 
--- ==================== OBJECT MỚI (CHỈ EVENT, KHÔNG VÒNG LẶP) ====================
 Workspace.DescendantAdded:Connect(function(v)
     task.defer(function()
         pcall(function() handleObject(v) end)
     end)
 end)
 
--- ==================== CULLING CHIA ĐỢT (5 giây refresh, xử lý 1/5 mỗi 0.1s) ====================
+-- ==================== CULLING ====================
 local CULL_DIST_SQ = 80 * 80
 local culled = {}
 local cullIndex = 1
@@ -495,8 +512,7 @@ task.spawn(function()
     end
 end)
 
--- ==================== GC KHI IDLE ====================
--- Chỉ gọi GC khi game không bận — không đúng chu kỳ, không gây spike
+-- ==================== GC ====================
 task.spawn(function()
     while uiParent.Parent do
         task.wait(30)
@@ -590,13 +606,6 @@ pingValue.TextXAlignment = Enum.TextXAlignment.Right
 pingValue.ZIndex = 1001
 pingValue.Parent = box
 
--- Giữ DisplayOrder (chỉ chạy 1 lần, không loop)
-task.spawn(function()
-    pcall(function()
-        statsGui.DisplayOrder = 2147483647
-    end)
-end)
-
 local frames = 0
 local lastTime = tick()
 
@@ -645,4 +654,4 @@ task.spawn(function()
     end
 end)
 
-print("✅ fix lag by kudo29001")
+print("✅ fix lag v1.0 by kudo29001")

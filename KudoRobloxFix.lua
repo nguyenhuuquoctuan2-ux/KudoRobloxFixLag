@@ -1,4 +1,4 @@
--- Fix Lag v1.0 by kudo29001 - Xeno compatible
+-- Fix Lag v1.0 by kudo29001 - Lightweight for Xeno
 local player = game.Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 local Lighting = game:GetService("Lighting")
@@ -10,7 +10,6 @@ local Terrain = Workspace:FindFirstChildOfClass("Terrain")
 local Camera = Workspace.CurrentCamera
 local Stats = game:GetService("Stats")
 
--- Xoá UI cũ
 pcall(function()
     for _, v in pairs(playerGui:GetChildren()) do
         if v.Name == "KudoPopup" or v.Name == "KudoStats" or v.Name == "KudoToggle" then
@@ -96,7 +95,6 @@ pcall(function()
     setfflag("DFIntFrameBufferPoolSize", "1")
     setfflag("DFIntRenderMeshMaxBones", "1")
     setfflag("DFIntDebugEngineOptimizationLevel", "3")
-    setfflag("DFFlagForceTextureLOD", "True")
 
     setfflag("DFFlagGCEnableIncremental", "True")
     setfflag("DFIntGCIncrementalPause", "2")
@@ -172,17 +170,6 @@ local function isName(v)
     return v:IsA("BillboardGui") or v:IsA("TextLabel") or v:IsA("TextButton") or v:IsA("Humanoid")
 end
 
-local function potatoPart(part)
-    pcall(function()
-        if part.Material ~= Enum.Material.SmoothPlastic 
-            and part.Material ~= Enum.Material.Plastic then
-            part.Material = Enum.Material.SmoothPlastic
-        end
-        part.Reflectance = 0
-        part.CastShadow = false
-    end)
-end
-
 local killTypes = {
     ParticleEmitter = true, Trail = true, Smoke = true, Fire = true,
     Sparkles = true, Beam = true, Highlight = true, SelectionBox = true,
@@ -201,66 +188,46 @@ local function handleObject(v)
         pcall(function() v:Destroy() end)
     elseif cn == "Part" or cn == "MeshPart" or cn == "UnionOperation" or cn == "WedgePart"
         or cn == "TrussPart" or cn == "CornerWedgePart" or cn == "SpawnLocation" then
-        potatoPart(v)
+        pcall(function()
+            v.Material = Enum.Material.SmoothPlastic
+            v.Reflectance = 0
+            v.CastShadow = false
+        end)
     end
 end
 
-local descendants = Workspace:GetDescendants()
-for i = 1, #descendants do
-    handleObject(descendants[i])
-    if i % 800 == 0 then task.wait() end
-end
+-- Chỉ xử lý 1 lần khi bắt đầu, chia chunk để không spike
+task.spawn(function()
+    local descendants = Workspace:GetDescendants()
+    for i = 1, #descendants do
+        handleObject(descendants[i])
+        if i % 1000 == 0 then task.wait() end
+    end
+end)
 
+-- Chỉ lắng nghe object mới
 Workspace.DescendantAdded:Connect(function(v)
     task.defer(function()
         pcall(function() handleObject(v) end)
     end)
 end)
 
--- ==================== CULLING ====================
+-- ==================== CULLING SIÊU NHẸ ====================
+-- Chỉ cull part cấp 1 của Workspace (không quét folder con)
 local CULL_DIST_SQ = 80 * 80
 local culled = {}
-local cullIndex = 1
-local cullList = {}
 
 task.spawn(function()
     while true do
-        task.wait(5)
-        local list = {}
-        for _, v in ipairs(Workspace:GetDescendants()) do
-            if v:IsA("BasePart") and not isChar(v) then
-                list[#list + 1] = v
-            end
-        end
-        cullList = list
-        cullIndex = 1
-    end
-end)
-
-task.spawn(function()
-    while true do
-        task.wait(0.1)
+        task.wait(0.5)
         pcall(function()
             if not Camera then return end
             local camPos = Camera.CFrame.Position
-            local list = cullList
-            local n = #list
-            if n == 0 then return end
             
-            local startIdx = cullIndex
-            local chunk = math.ceil(n / 5)
-            local endIdx = math.min(startIdx + chunk, n)
-            
-            for i = startIdx, endIdx do
-                local v = list[i]
-                if v and v.Parent then
+            for _, v in ipairs(Workspace:GetChildren()) do
+                if v:IsA("BasePart") and not isChar(v) then
                     local pos = v.Position
-                    if pos.Y < camPos.Y - 3 then
-                        if culled[v] then
-                            culled[v] = false
-                            pcall(function() v.LocalTransparencyModifier = 0 end)
-                        end
-                    else
+                    if pos.Y >= camPos.Y - 3 then
                         local dx = pos.X - camPos.X
                         local dy = pos.Y - camPos.Y
                         local dz = pos.Z - camPos.Z
@@ -277,16 +244,14 @@ task.spawn(function()
                     end
                 end
             end
-            
-            cullIndex = endIdx + 1
-            if cullIndex > n then cullIndex = 1 end
         end)
     end
 end)
 
+-- ==================== GC ====================
 task.spawn(function()
     while true do
-        task.wait(30)
+        task.wait(60)
         pcall(function() collectgarbage("collect") end)
     end
 end)
@@ -300,8 +265,8 @@ popupGui.DisplayOrder = 1000
 popupGui.Parent = playerGui
 
 local popup = Instance.new("Frame")
-popup.Size = UDim2.new(0, 360, 0, 150)
-popup.Position = UDim2.new(0.5, -180, 0.4, -75)
+popup.Size = UDim2.new(0, 380, 0, 160)
+popup.Position = UDim2.new(0.5, -190, 0.4, -80)
 popup.BackgroundColor3 = Color3.fromRGB(15, 15, 22)
 popup.BorderSizePixel = 0
 popup.Parent = popupGui
@@ -312,31 +277,89 @@ border.Color = Color3.fromRGB(255, 60, 60)
 border.Thickness = 2
 border.Parent = popup
 
+-- Bánh răng
+local iconWrap = Instance.new("Frame")
+iconWrap.Size = UDim2.new(0, 48, 0, 48)
+iconWrap.Position = UDim2.new(0, 20, 0, 20)
+iconWrap.BackgroundColor3 = Color3.fromRGB(30, 18, 24)
+iconWrap.BorderSizePixel = 0
+iconWrap.Parent = popup
+Instance.new("UICorner", iconWrap).CornerRadius = UDim.new(1, 0)
+
+local iconStroke = Instance.new("UIStroke")
+iconStroke.Color = Color3.fromRGB(255, 80, 80)
+iconStroke.Thickness = 1.5
+iconStroke.Transparency = 0.3
+iconStroke.Parent = iconWrap
+
+local gear = Instance.new("TextLabel")
+gear.Size = UDim2.new(1, 0, 1, 0)
+gear.BackgroundTransparency = 1
+gear.Text = "⚙"
+gear.Font = Enum.Font.GothamBold
+gear.TextSize = 28
+gear.TextColor3 = Color3.fromRGB(255, 110, 110)
+gear.Parent = iconWrap
+
+task.spawn(function()
+    local rot = 0
+    while gear.Parent do
+        rot = (rot + 8) % 360
+        gear.Rotation = rot
+        task.wait(0.05)
+    end
+end)
+
+-- Dấu tích
+local checkWrap = Instance.new("Frame")
+checkWrap.Size = UDim2.new(0, 48, 0, 48)
+checkWrap.Position = UDim2.new(1, -68, 0, 20)
+checkWrap.BackgroundColor3 = Color3.fromRGB(20, 35, 25)
+checkWrap.BorderSizePixel = 0
+checkWrap.Parent = popup
+Instance.new("UICorner", checkWrap).CornerRadius = UDim.new(1, 0)
+
+local checkStroke = Instance.new("UIStroke")
+checkStroke.Color = Color3.fromRGB(80, 255, 130)
+checkStroke.Thickness = 1.5
+checkStroke.Transparency = 0.3
+checkStroke.Parent = checkWrap
+
+local check = Instance.new("TextLabel")
+check.Size = UDim2.new(1, 0, 1, 0)
+check.BackgroundTransparency = 1
+check.Text = "✓"
+check.Font = Enum.Font.GothamBold
+check.TextSize = 30
+check.TextColor3 = Color3.fromRGB(80, 255, 130)
+check.Parent = checkWrap
+
+-- Text
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, -40, 0, 30)
-title.Position = UDim2.new(0, 20, 0, 20)
+title.Size = UDim2.new(1, -180, 0, 26)
+title.Position = UDim2.new(0, 82, 0, 22)
 title.BackgroundTransparency = 1
-title.Text = "fix lag v1.0 ✓"
+title.Text = "fix lag v1.0"
 title.Font = Enum.Font.GothamBold
-title.TextSize = 22
+title.TextSize = 20
 title.TextColor3 = Color3.fromRGB(255, 100, 100)
 title.TextXAlignment = Enum.TextXAlignment.Left
 title.Parent = popup
 
 local sub = Instance.new("TextLabel")
-sub.Size = UDim2.new(1, -40, 0, 20)
-sub.Position = UDim2.new(0, 20, 0, 52)
+sub.Size = UDim2.new(1, -180, 0, 18)
+sub.Position = UDim2.new(0, 82, 0, 50)
 sub.BackgroundTransparency = 1
 sub.Text = "by kudo29001 ⚡"
 sub.Font = Enum.Font.Gotham
-sub.TextSize = 13
+sub.TextSize = 12
 sub.TextColor3 = Color3.fromRGB(160, 160, 170)
 sub.TextXAlignment = Enum.TextXAlignment.Left
 sub.Parent = popup
 
 local percentLabel = Instance.new("TextLabel")
-percentLabel.Size = UDim2.new(1, -40, 0, 24)
-percentLabel.Position = UDim2.new(0, 20, 0, 80)
+percentLabel.Size = UDim2.new(1, -40, 0, 22)
+percentLabel.Position = UDim2.new(0, 20, 0, 84)
 percentLabel.BackgroundTransparency = 1
 percentLabel.Text = "0%"
 percentLabel.Font = Enum.Font.GothamBold
@@ -346,7 +369,7 @@ percentLabel.Parent = popup
 
 local progressBg = Instance.new("Frame")
 progressBg.Size = UDim2.new(1, -40, 0, 8)
-progressBg.Position = UDim2.new(0, 20, 0, 115)
+progressBg.Position = UDim2.new(0, 20, 0, 118)
 progressBg.BackgroundColor3 = Color3.fromRGB(40, 30, 35)
 progressBg.BorderSizePixel = 0
 progressBg.Parent = popup
@@ -359,21 +382,20 @@ progressFill.BorderSizePixel = 0
 progressFill.Parent = progressBg
 Instance.new("UICorner", progressFill).CornerRadius = UDim.new(1, 0)
 
--- Load animation
-local startTick = tick()
+-- Load 0→100%
 task.spawn(function()
+    local startTick = tick()
     while tick() - startTick < 3 do
         local t = (tick() - startTick) / 3
         if t > 1 then t = 1 end
         percentLabel.Text = math.floor(t * 100) .. "%"
         progressFill.Size = UDim2.new(t, 0, 1, 0)
-        task.wait(0.03)
+        task.wait(0.08)
     end
     percentLabel.Text = "100%"
     progressFill.Size = UDim2.new(1, 0, 1, 0)
 end)
 
--- Auto close
 task.delay(3.5, function()
     pcall(function() popupGui:Destroy() end)
 end)
@@ -488,7 +510,6 @@ creditLabel.TextTransparency = 0.3
 creditLabel.TextXAlignment = Enum.TextXAlignment.Center
 creditLabel.Parent = box
 
--- Nút X
 local closeBtn = Instance.new("TextButton")
 closeBtn.Size = UDim2.new(0, 22, 0, 22)
 closeBtn.Position = UDim2.new(1, -26, 0, -3)
@@ -501,7 +522,6 @@ closeBtn.BorderSizePixel = 0
 closeBtn.Parent = box
 Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(1, 0)
 
--- Nút ẩn
 local hideBtn = Instance.new("TextButton")
 hideBtn.Size = UDim2.new(0, 22, 0, 22)
 hideBtn.Position = UDim2.new(1, -52, 0, -3)
@@ -514,7 +534,6 @@ hideBtn.BorderSizePixel = 0
 hideBtn.Parent = box
 Instance.new("UICorner", hideBtn).CornerRadius = UDim.new(1, 0)
 
--- Nút resize chữ V góc trái dưới
 local resizeBtn = Instance.new("TextButton")
 resizeBtn.Size = UDim2.new(0, 22, 0, 22)
 resizeBtn.Position = UDim2.new(0, -2, 1, -2)
@@ -545,7 +564,6 @@ vR.Rotation = 45
 vR.Parent = resizeBtn
 Instance.new("UICorner", vR).CornerRadius = UDim.new(1, 0)
 
--- Nút hiện ⚡
 local showGui = Instance.new("ScreenGui")
 showGui.Name = "KudoToggle"
 showGui.ResetOnSpawn = false
@@ -566,7 +584,6 @@ showBtn.Visible = false
 showBtn.Parent = showGui
 Instance.new("UICorner", showBtn).CornerRadius = UDim.new(1, 0)
 
--- Handlers
 hideBtn.MouseButton1Click:Connect(function()
     box.Visible = false
     showBtn.Visible = true
@@ -584,7 +601,6 @@ closeBtn.MouseButton1Click:Connect(function()
     end)
 end)
 
--- Drag bằng header
 local dragging = false
 local dragStart, startPos
 
@@ -614,7 +630,6 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
--- Resize
 local resizing = false
 local resizeStart, resizeStartSize
 
@@ -655,15 +670,15 @@ task.spawn(function()
     end
 end)
 
--- FPS đo
+-- FPS
 local frames = 0
 task.spawn(function()
     RunService.RenderStepped:Connect(function()
         frames = frames + 1
     end)
     while statsGui.Parent do
-        task.wait(0.5)
-        local fps = math.floor(frames * 2 + 0.5)
+        task.wait(1)
+        local fps = frames
         frames = 0
         fpsValue.Text = tostring(fps)
         if fps < 40 then
@@ -685,4 +700,4 @@ task.spawn(function()
     end
 end)
 
-print("✅ fix lag v1.0 by kudo29001 - Xeno loaded")
+print("✅ fix lag v1.0 by kudo29001 - Lightweight loaded")

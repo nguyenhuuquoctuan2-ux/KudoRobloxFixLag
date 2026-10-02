@@ -26,7 +26,7 @@ pcall(function()
     end
 end)
 
--- ==================== POPUP GIỮA MÀN HÌNH ====================
+-- ==================== POPUP ====================
 local popupGui = Instance.new("ScreenGui")
 popupGui.Name = "KudoPopup"
 popupGui.ResetOnSpawn = false
@@ -34,7 +34,6 @@ popupGui.IgnoreGuiInset = true
 popupGui.DisplayOrder = 2147483647
 popupGui.Parent = uiParent
 
--- Overlay tối mờ toàn màn hình
 local overlay = Instance.new("Frame")
 overlay.Size = UDim2.new(1, 0, 1, 0)
 overlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
@@ -53,7 +52,6 @@ popup.ZIndex = 1000
 popup.Parent = popupGui
 Instance.new("UICorner", popup).CornerRadius = UDim.new(0, 18)
 
--- Viền RGB
 local border = Instance.new("UIStroke")
 border.Color = Color3.fromRGB(255, 60, 60)
 border.Thickness = 2
@@ -70,7 +68,6 @@ task.spawn(function()
     end
 end)
 
--- Gradient nền
 local bgGradient = Instance.new("UIGradient")
 bgGradient.Color = ColorSequence.new({
     ColorSequenceKeypoint.new(0, Color3.fromRGB(35, 12, 20)),
@@ -80,7 +77,6 @@ bgGradient.Color = ColorSequence.new({
 bgGradient.Rotation = 135
 bgGradient.Parent = popup
 
--- Accent bar trái
 local accentBar = Instance.new("Frame")
 accentBar.Size = UDim2.new(0, 5, 1, -30)
 accentBar.Position = UDim2.new(0, 0, 0, 15)
@@ -99,7 +95,6 @@ accentGradient.Color = ColorSequence.new({
 accentGradient.Rotation = 90
 accentGradient.Parent = accentBar
 
--- Icon bánh răng
 local iconWrap = Instance.new("Frame")
 iconWrap.Size = UDim2.new(0, 64, 0, 64)
 iconWrap.Position = UDim2.new(0, 28, 0, 20)
@@ -195,7 +190,6 @@ task.spawn(function()
     end
 end)
 
--- Text
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, -120, 0, 30)
 title.Position = UDim2.new(0, 108, 0, 30)
@@ -234,7 +228,6 @@ sub.TextXAlignment = Enum.TextXAlignment.Left
 sub.ZIndex = 2
 sub.Parent = popup
 
--- Số % load
 local percentLabel = Instance.new("TextLabel")
 percentLabel.Size = UDim2.new(1, -40, 0, 24)
 percentLabel.Position = UDim2.new(0, 20, 0, 100)
@@ -247,7 +240,6 @@ percentLabel.TextTransparency = 1
 percentLabel.ZIndex = 3
 percentLabel.Parent = popup
 
--- Progress bar
 local progressBg = Instance.new("Frame")
 progressBg.Size = UDim2.new(1, -40, 0, 6)
 progressBg.Position = UDim2.new(0, 20, 0, 130)
@@ -273,14 +265,13 @@ progressGradient.Color = ColorSequence.new({
 })
 progressGradient.Parent = progressFill
 
--- ==================== ANIMATION MỞ ====================
+-- ==================== ANIMATION MỞ (giữ size, chỉ fade) ====================
 -- Overlay tối dần
 TweenService:Create(overlay, TweenInfo.new(0.3), {BackgroundTransparency = 0.5}):Play()
 
--- Popup hiện với scale nhỏ → to
-popup.Size = UDim2.new(0, 0, 0, 0)
-popup.Position = UDim2.new(0.5, 0, 0.5, 0)
-popup.BackgroundTransparency = 1
+-- Popup bắt đầu ở size nhỏ hơn chút
+popup.Size = UDim2.new(0, 340, 0, 145)
+popup.Position = UDim2.new(0.5, -170, 0.5, -72)
 
 TweenService:Create(popup, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
     Size = UDim2.new(0, 380, 0, 160),
@@ -336,9 +327,9 @@ task.delay(3.5, function()
         TweenService:Create(iconStroke, TweenInfo.new(0.25), {Transparency = 1}):Play()
         TweenService:Create(overlay, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
         task.wait(0.15)
-        TweenService:Create(popup, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-            Size = UDim2.new(0, 0, 0, 0),
-            Position = UDim2.new(0.5, 0, 0.5, 0),
+        TweenService:Create(popup, TweenInfo.new(0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+            Size = UDim2.new(0, 320, 0, 135),
+            Position = UDim2.new(0.5, -160, 0.5, -67),
             BackgroundTransparency = 1
         }):Play()
         task.wait(0.5)

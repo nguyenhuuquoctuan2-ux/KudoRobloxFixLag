@@ -1,4 +1,4 @@
--- Fix Lag v1.0 by kudo29001
+-- Fix Lag + Anti-AFK v1.0 by kudo29001
 local player = game.Players.LocalPlayer
 local pg = player:WaitForChild("PlayerGui")
 local UIS = game:GetService("UserInputService")
@@ -9,6 +9,8 @@ local Lighting = game:GetService("Lighting")
 local Workspace = game:GetService("Workspace")
 local Terrain = Workspace:FindFirstChildOfClass("Terrain")
 local Camera = Workspace.CurrentCamera
+local VirtualUser = game:GetService("VirtualUser")
+local VIM = game:GetService("VirtualInputManager")
 
 local uiParent = pg
 pcall(function()
@@ -28,6 +30,7 @@ pcall(function()
     end
 end)
 
+-- ==================== FFLAG ====================
 pcall(function()
     setfflag("DFIntTaskSchedulerTargetFps", "9999")
     setfflag("DFIntFrameRateCap", "9999")
@@ -106,6 +109,34 @@ pcall(function()
     end
 end)
 
+-- ==================== ANTI-AFK ====================
+-- Dùng VirtualUser để gửi input giả mỗi 60 giây
+task.spawn(function()
+    while true do
+        task.wait(60)
+        pcall(function()
+            VirtualUser:CaptureController()
+            VirtualUser:ClickButton2(Vector2.new())
+        end)
+        pcall(function()
+            VIM:SendKeyEvent(true, Enum.KeyCode.Space, false, game)
+            task.wait(0.1)
+            VIM:SendKeyEvent(false, Enum.KeyCode.Space, false, game)
+        end)
+    end
+end)
+
+-- Đồng thời hook Idled event
+pcall(function()
+    player.Idled:Connect(function()
+        pcall(function()
+            VirtualUser:CaptureController()
+            VirtualUser:ClickButton2(Vector2.new())
+        end)
+    end)
+end)
+
+-- ==================== CACHE NHÂN VẬT ====================
 local charModels = {}
 local function watchChar(plr)
     if plr.Character then charModels[plr.Character] = true end
@@ -213,93 +244,149 @@ sg.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 sg.Parent = uiParent
 
 local popup = Instance.new("Frame")
-popup.Size = UDim2.new(0, 360, 0, 140)
-popup.Position = UDim2.new(0.5, -180, 0.4, -70)
+popup.Size = UDim2.new(0, 380, 0, 150)
+popup.Position = UDim2.new(0.5, -190, 0.4, -75)
 popup.BackgroundColor3 = Color3.fromRGB(15, 15, 22)
 popup.BorderSizePixel = 0
 popup.Active = false
 popup.ZIndex = 1000
-popup.ClipsDescendants = true
+popup.ClipsDescendants = false -- Không cắt để viền sáng bo góc hiện ra
 popup.Parent = sg
 Instance.new("UICorner", popup).CornerRadius = UDim.new(0, 14)
 
--- 1 DẢI SÁNG ĐỎ CHẠY QUANH VIỀN - DÙNG 1 FRAME XOAY
--- Khung vuông bao quanh popup, xoay liên tục, chỉ nhìn thấy khi đi qua viền
-local runnerWrap = Instance.new("Frame")
-runnerWrap.Name = "RunnerWrap"
-runnerWrap.Size = UDim2.new(1, 0, 1, 0)
-runnerWrap.Position = UDim2.new(0, 0, 0, 0)
-runnerWrap.BackgroundTransparency = 1
-runnerWrap.ClipsDescendants = true
-runnerWrap.ZIndex = 1001
-runnerWrap.Parent = popup
-Instance.new("UICorner", runnerWrap).CornerRadius = UDim.new(0, 14)
+-- ===== VIỀN ĐỎ MỎNG CHẠY QUANH - BO GÓC TỰ ĐỘNG =====
+-- Dùng 4 đoạn thẳng nối tiếp, mỗi đoạn có UICorner để bo cong theo viền
+-- Thickness mỏng 2px, chạy như sợi chỉ đỏ
+local borderThickness = 2
 
--- Điểm sáng chạy
-local runnerDot = Instance.new("Frame")
-runnerDot.Name = "RunnerDot"
-runnerDot.Size = UDim2.new(0, 50, 0, 3)
-runnerDot.Position = UDim2.new(0, -50, 0, 0)
-runnerDot.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
-runnerDot.BorderSizePixel = 0
-runnerDot.ZIndex = 1002
-runnerDot.Parent = runnerWrap
-Instance.new("UICorner", runnerDot).CornerRadius = UDim.new(1, 0)
+-- Cạnh trên
+local edgeTop = Instance.new("Frame")
+edgeTop.Name = "EdgeTop"
+edgeTop.Size = UDim2.new(0, 80, 0, borderThickness)
+edgeTop.Position = UDim2.new(0, -80, 0, 0)
+edgeTop.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+edgeTop.BorderSizePixel = 0
+edgeTop.ZIndex = 1001
+edgeTop.Active = false
+edgeTop.Parent = popup
 
-local runnerGlow = Instance.new("ImageLabel")
-runnerGlow.Size = UDim2.new(1, 40, 1, 40)
-runnerGlow.Position = UDim2.new(0, -20, 0, -20)
-runnerGlow.BackgroundTransparency = 1
-runnerGlow.Image = "rbxassetid://5028857472"
-runnerGlow.ImageColor3 = Color3.fromRGB(255, 80, 80)
-runnerGlow.ImageTransparency = 0.2
-runnerGlow.ZIndex = 1001
-runnerGlow.Parent = runnerDot
+local topGlow = Instance.new("ImageLabel")
+topGlow.Size = UDim2.new(1, 20, 1, 20)
+topGlow.Position = UDim2.new(0, -10, 0, -10)
+topGlow.BackgroundTransparency = 1
+topGlow.Image = "rbxassetid://5028857472"
+topGlow.ImageColor3 = Color3.fromRGB(255, 60, 60)
+topGlow.ImageTransparency = 0.35
+topGlow.ZIndex = 1000
+topGlow.Parent = edgeTop
 
--- Chạy vòng quanh viền dùng Position tween tuần tự
--- Top: trái → phải, Right: trên → dưới, Bottom: phải → trái, Left: dưới → trên
+-- Cạnh phải
+local edgeRight = Instance.new("Frame")
+edgeRight.Name = "EdgeRight"
+edgeRight.Size = UDim2.new(0, borderThickness, 0, 80)
+edgeRight.Position = UDim2.new(1, -borderThickness, 0, -80)
+edgeRight.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+edgeRight.BorderSizePixel = 0
+edgeRight.ZIndex = 1001
+edgeRight.Active = false
+edgeRight.Parent = popup
+
+local rightGlow = Instance.new("ImageLabel")
+rightGlow.Size = UDim2.new(1, 20, 1, 20)
+rightGlow.Position = UDim2.new(0, -10, 0, -10)
+rightGlow.BackgroundTransparency = 1
+rightGlow.Image = "rbxassetid://5028857472"
+rightGlow.ImageColor3 = Color3.fromRGB(255, 60, 60)
+rightGlow.ImageTransparency = 0.35
+rightGlow.ZIndex = 1000
+rightGlow.Parent = edgeRight
+
+-- Cạnh dưới
+local edgeBottom = Instance.new("Frame")
+edgeBottom.Name = "EdgeBottom"
+edgeBottom.Size = UDim2.new(0, 80, 0, borderThickness)
+edgeBottom.Position = UDim2.new(1, 0, 1, -borderThickness)
+edgeBottom.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+edgeBottom.BorderSizePixel = 0
+edgeBottom.ZIndex = 1001
+edgeBottom.Active = false
+edgeBottom.Parent = popup
+
+local bottomGlow = Instance.new("ImageLabel")
+bottomGlow.Size = UDim2.new(1, 20, 1, 20)
+bottomGlow.Position = UDim2.new(0, -10, 0, -10)
+bottomGlow.BackgroundTransparency = 1
+bottomGlow.Image = "rbxassetid://5028857472"
+bottomGlow.ImageColor3 = Color3.fromRGB(255, 60, 60)
+bottomGlow.ImageTransparency = 0.35
+bottomGlow.ZIndex = 1000
+bottomGlow.Parent = edgeBottom
+
+-- Cạnh trái
+local edgeLeft = Instance.new("Frame")
+edgeLeft.Name = "EdgeLeft"
+edgeLeft.Size = UDim2.new(0, borderThickness, 0, 80)
+edgeLeft.Position = UDim2.new(0, 0, 1, 0)
+edgeLeft.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+edgeLeft.BorderSizePixel = 0
+edgeLeft.ZIndex = 1001
+edgeLeft.Active = false
+edgeLeft.Parent = popup
+
+local leftGlow = Instance.new("ImageLabel")
+leftGlow.Size = UDim2.new(1, 20, 1, 20)
+leftGlow.Position = UDim2.new(0, -10, 0, -10)
+leftGlow.BackgroundTransparency = 1
+leftGlow.Image = "rbxassetid://5028857472"
+leftGlow.ImageColor3 = Color3.fromRGB(255, 60, 60)
+leftGlow.ImageTransparency = 0.35
+leftGlow.ZIndex = 1000
+leftGlow.Parent = edgeLeft
+
+-- Chạy tuần tự 4 cạnh, mỗi cạnh chạy hết thì biến mất và cạnh tiếp theo chạy
 task.spawn(function()
-    while runnerDot.Parent do
-        -- Cạnh TRÊN: trái → phải
-        runnerDot.Size = UDim2.new(0, 50, 0, 3)
-        runnerDot.Position = UDim2.new(0, -50, 0, 0)
-        TS:Create(runnerDot, TweenInfo.new(1, Enum.EasingStyle.Linear), {
+    while popup.Parent do
+        -- Top: trái -> phải
+        edgeTop.Size = UDim2.new(0, 80, 0, borderThickness)
+        edgeTop.Position = UDim2.new(0, -80, 0, 0)
+        TS:Create(edgeTop, TweenInfo.new(1, Enum.EasingStyle.Linear), {
             Position = UDim2.new(1, 0, 0, 0)
         }):Play()
         task.wait(1)
 
-        -- Cạnh PHẢI: trên → dưới
-        runnerDot.Size = UDim2.new(0, 3, 0, 50)
-        runnerDot.Position = UDim2.new(1, -3, 0, -50)
-        TS:Create(runnerDot, TweenInfo.new(0.55, Enum.EasingStyle.Linear), {
-            Position = UDim2.new(1, -3, 1, 0)
+        -- Right: trên -> dưới
+        edgeRight.Size = UDim2.new(0, borderThickness, 0, 80)
+        edgeRight.Position = UDim2.new(1, -borderThickness, 0, -80)
+        TS:Create(edgeRight, TweenInfo.new(0.55, Enum.EasingStyle.Linear), {
+            Position = UDim2.new(1, -borderThickness, 1, 0)
         }):Play()
         task.wait(0.55)
 
-        -- Cạnh DƯỚI: phải → trái
-        runnerDot.Size = UDim2.new(0, 50, 0, 3)
-        runnerDot.Position = UDim2.new(1, 0, 1, -3)
-        TS:Create(runnerDot, TweenInfo.new(1, Enum.EasingStyle.Linear), {
-            Position = UDim2.new(0, -50, 1, -3)
+        -- Bottom: phải -> trái
+        edgeBottom.Size = UDim2.new(0, 80, 0, borderThickness)
+        edgeBottom.Position = UDim2.new(1, 0, 1, -borderThickness)
+        TS:Create(edgeBottom, TweenInfo.new(1, Enum.EasingStyle.Linear), {
+            Position = UDim2.new(0, -80, 1, -borderThickness)
         }):Play()
         task.wait(1)
 
-        -- Cạnh TRÁI: dưới → trên
-        runnerDot.Size = UDim2.new(0, 3, 0, 50)
-        runnerDot.Position = UDim2.new(0, 0, 1, 0)
-        TS:Create(runnerDot, TweenInfo.new(0.55, Enum.EasingStyle.Linear), {
-            Position = UDim2.new(0, 0, 0, -50)
+        -- Left: dưới -> trên
+        edgeLeft.Size = UDim2.new(0, borderThickness, 0, 80)
+        edgeLeft.Position = UDim2.new(0, 0, 1, 0)
+        TS:Create(edgeLeft, TweenInfo.new(0.55, Enum.EasingStyle.Linear), {
+            Position = UDim2.new(0, 0, 0, -80)
         }):Play()
         task.wait(0.55)
     end
 end)
 
+-- ===== NỘI DUNG POPUP =====
 local iconWrap = Instance.new("Frame")
 iconWrap.Size = UDim2.new(0, 52, 0, 52)
 iconWrap.Position = UDim2.new(0, 20, 0, 22)
 iconWrap.BackgroundColor3 = Color3.fromRGB(25, 15, 20)
 iconWrap.BorderSizePixel = 0
-iconWrap.ZIndex = 1010
+iconWrap.ZIndex = 1002
 iconWrap.Active = false
 iconWrap.Parent = popup
 Instance.new("UICorner", iconWrap).CornerRadius = UDim.new(1, 0)
@@ -313,7 +400,7 @@ local arcHolder = Instance.new("Frame")
 arcHolder.Size = UDim2.new(0, 34, 0, 34)
 arcHolder.Position = UDim2.new(0.5, -17, 0.5, -17)
 arcHolder.BackgroundTransparency = 1
-arcHolder.ZIndex = 1011
+arcHolder.ZIndex = 1003
 arcHolder.Active = false
 arcHolder.Parent = iconWrap
 
@@ -334,7 +421,7 @@ mask1.Size = UDim2.new(0, 20, 0, 20)
 mask1.Position = UDim2.new(0, -3, 0, -3)
 mask1.BackgroundColor3 = Color3.fromRGB(25, 15, 20)
 mask1.BorderSizePixel = 0
-mask1.ZIndex = 1012
+mask1.ZIndex = 1004
 mask1.Active = false
 mask1.Parent = arcHolder
 Instance.new("UICorner", mask1).CornerRadius = UDim.new(0, 4)
@@ -344,7 +431,7 @@ mask2.Size = UDim2.new(0, 20, 0, 20)
 mask2.Position = UDim2.new(1, -17, 1, -17)
 mask2.BackgroundColor3 = Color3.fromRGB(25, 15, 20)
 mask2.BorderSizePixel = 0
-mask2.ZIndex = 1012
+mask2.ZIndex = 1004
 mask2.Active = false
 mask2.Parent = arcHolder
 Instance.new("UICorner", mask2).CornerRadius = UDim.new(0, 4)
@@ -357,28 +444,40 @@ task.spawn(function()
 end)
 
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, -180, 0, 26)
+title.Size = UDim2.new(1, -200, 0, 26)
 title.Position = UDim2.new(0, 88, 0, 22)
 title.BackgroundTransparency = 1
-title.Text = "fix lag v1.0"
+title.Text = "fix lag + anti-afk v1.0"
 title.Font = Enum.Font.GothamBold
-title.TextSize = 20
+title.TextSize = 18
 title.TextColor3 = Color3.fromRGB(255, 100, 100)
 title.TextXAlignment = Enum.TextXAlignment.Left
-title.ZIndex = 1010
+title.ZIndex = 1002
 title.Active = false
 title.Parent = popup
+
+local checkMark = Instance.new("TextLabel")
+checkMark.Size = UDim2.new(0, 24, 0, 26)
+checkMark.Position = UDim2.new(1, -32, 0, 22)
+checkMark.BackgroundTransparency = 1
+checkMark.Text = "✓"
+checkMark.Font = Enum.Font.GothamBold
+checkMark.TextSize = 18
+checkMark.TextColor3 = Color3.fromRGB(80, 255, 130)
+checkMark.ZIndex = 1002
+checkMark.Active = false
+checkMark.Parent = popup
 
 local sub = Instance.new("TextLabel")
 sub.Size = UDim2.new(1, -180, 0, 18)
 sub.Position = UDim2.new(0, 88, 0, 50)
 sub.BackgroundTransparency = 1
-sub.Text = "by kudo29001 ⚡"
+sub.Text = "made by kudo29001"
 sub.Font = Enum.Font.Gotham
 sub.TextSize = 12
 sub.TextColor3 = Color3.fromRGB(170, 170, 180)
 sub.TextXAlignment = Enum.TextXAlignment.Left
-sub.ZIndex = 1010
+sub.ZIndex = 1002
 sub.Active = false
 sub.Parent = popup
 
@@ -390,7 +489,7 @@ percentL.Text = "0%"
 percentL.Font = Enum.Font.GothamBold
 percentL.TextSize = 16
 percentL.TextColor3 = Color3.fromRGB(255, 130, 100)
-percentL.ZIndex = 1010
+percentL.ZIndex = 1002
 percentL.Active = false
 percentL.Parent = popup
 
@@ -399,7 +498,7 @@ pBg.Size = UDim2.new(1, -40, 0, 8)
 pBg.Position = UDim2.new(0, 20, 0, 112)
 pBg.BackgroundColor3 = Color3.fromRGB(40, 30, 35)
 pBg.BorderSizePixel = 0
-pBg.ZIndex = 1010
+pBg.ZIndex = 1002
 pBg.Active = false
 pBg.Parent = popup
 Instance.new("UICorner", pBg).CornerRadius = UDim.new(1, 0)
@@ -408,7 +507,7 @@ local pFill = Instance.new("Frame")
 pFill.Size = UDim2.new(0, 0, 1, 0)
 pFill.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
 pFill.BorderSizePixel = 0
-pFill.ZIndex = 1011
+pFill.ZIndex = 1003
 pFill.Active = false
 pFill.Parent = pBg
 Instance.new("UICorner", pFill).CornerRadius = UDim.new(1, 0)
@@ -431,6 +530,7 @@ end)
 task.delay(4.5, function()
     TS:Create(popup, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
     TS:Create(title, TweenInfo.new(0.6), {TextTransparency = 1}):Play()
+    TS:Create(checkMark, TweenInfo.new(0.6), {TextTransparency = 1}):Play()
     TS:Create(sub, TweenInfo.new(0.6), {TextTransparency = 1}):Play()
     TS:Create(percentL, TweenInfo.new(0.6), {TextTransparency = 1}):Play()
     TS:Create(pBg, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
@@ -440,7 +540,10 @@ task.delay(4.5, function()
     TS:Create(mask1, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
     TS:Create(mask2, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
     TS:Create(iconStroke, TweenInfo.new(0.6), {Transparency = 1}):Play()
-    TS:Create(runnerDot, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
+    TS:Create(edgeTop, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
+    TS:Create(edgeRight, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
+    TS:Create(edgeBottom, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
+    TS:Create(edgeLeft, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
     task.wait(0.7)
     sg:Destroy()
 end)
@@ -476,7 +579,7 @@ header.Size = UDim2.new(1, 0, 0, 16)
 header.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
 header.BackgroundTransparency = 0.7
 header.BorderSizePixel = 0
-header.Active = false -- QUAN TRỌNG: tắt để input xuyên qua
+header.Active = false
 header.Parent = box
 Instance.new("UICorner", header).CornerRadius = UDim.new(0, 10)
 
@@ -634,12 +737,8 @@ sliderKnob.ZIndex = 23
 sliderKnob.Parent = sliderBg
 Instance.new("UICorner", sliderKnob).CornerRadius = UDim.new(1, 0)
 
--- applyOpacity: value 0 = mờ, value 1 = rõ
--- opacity (độ rõ) tỉ lệ với value
 local function applyOpacity(value)
-    -- value = 0 -> trong suốt hoàn toàn (transparency cao)
-    -- value = 1 -> rõ hoàn toàn (transparency thấp)
-    local transparency = 1 - value -- 0 = rõ, 1 = mờ
+    local transparency = 1 - value
     box.BackgroundTransparency = math.clamp(0.1 + transparency * 0.85, 0, 1)
     header.BackgroundTransparency = math.clamp(0.4 + transparency * 0.5, 0, 1)
     bxStroke.Transparency = math.clamp(0.4 + transparency * 0.55, 0, 1)
@@ -648,14 +747,12 @@ local function applyOpacity(value)
         if child:IsA("TextLabel") then
             child.TextTransparency = math.clamp(transparency * 0.9, 0, 1)
         elseif child:IsA("TextButton") then
-            -- giữ nút hơi rõ để vẫn bấm được
             child.BackgroundTransparency = math.clamp(transparency * 0.5, 0, 0.7)
             child.TextTransparency = math.clamp(transparency * 0.7, 0, 0.8)
         end
     end
 end
 
--- Logic kéo knob
 local draggingSlider = false
 sliderKnob.InputBegan:Connect(function(i)
     if i.UserInputType == Enum.UserInputType.Touch or i.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -668,11 +765,9 @@ UIS.InputChanged:Connect(function(i)
         local mouseX = i.Position.X
         local bgAbsPos = sliderBg.AbsolutePosition.X
         local bgAbsSize = sliderBg.AbsoluteSize.X
-        -- percent 0 = trái, 1 = phải
         local percent = math.clamp((mouseX - bgAbsPos) / bgAbsSize, 0, 1)
         sliderFill.Size = UDim2.new(percent, 0, 1, 0)
         sliderKnob.Position = UDim2.new(percent, -8, 0.5, -8)
-        -- Kéo về PHẢI = rõ hơn, kéo về TRÁI = mờ hơn
         applyOpacity(percent)
     end
 end)
@@ -683,49 +778,52 @@ UIS.InputEnded:Connect(function(i)
     end
 end)
 
--- Toggle slider khi bấm nút ◐
 local sliderVisible = false
 opacityB.MouseButton1Click:Connect(function()
     sliderVisible = not sliderVisible
     sliderPanel.Visible = sliderVisible
 end)
 
--- Khởi tạo giá trị ban đầu: 0.5 (rõ vừa)
 applyOpacity(0.5)
 
-local resizeB = Instance.new("TextButton")
-resizeB.Size = UDim2.new(0, 24, 0, 24)
-resizeB.Position = UDim2.new(0, 6, 1, -26)
-resizeB.BackgroundTransparency = 1
-resizeB.Text = ""
-resizeB.BorderSizePixel = 0
-resizeB.ZIndex = 10
-resizeB.Parent = box
+-- ===== CHỮ V GÓC TRÁI DƯỚI =====
+-- Vẽ bằng 2 đường chéo, xoay sao cho ôm khít góc trái dưới
+-- Không có nền vuông, chỉ có 2 đường mảnh tạo hình V
+local vAngle = Instance.new("TextButton")
+vAngle.Size = UDim2.new(0, 22, 0, 22)
+vAngle.Position = UDim2.new(0, 0, 1, -22) -- Ôm khít góc trái dưới
+vAngle.BackgroundTransparency = 1
+vAngle.Text = ""
+vAngle.BorderSizePixel = 0
+vAngle.ZIndex = 10
+vAngle.Parent = box
 
-local vL = Instance.new("Frame")
-vL.Size = UDim2.new(0, 2, 0, 12)
-vL.Position = UDim2.new(0, 7, 0, 9)
-vL.AnchorPoint = Vector2.new(0.5, 0.5)
-vL.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-vL.BackgroundTransparency = 0.3
-vL.BorderSizePixel = 0
-vL.Rotation = -45
-vL.Active = false
-vL.Parent = resizeB
-Instance.new("UICorner", vL).CornerRadius = UDim.new(1, 0)
+-- 2 đường tạo chữ V hướng xuống dưới, xoay 45 độ để ôm góc
+local vDownLeft = Instance.new("Frame")
+vDownLeft.Size = UDim2.new(0, 2, 0, 10)
+vDownLeft.Position = UDim2.new(0, 6, 0, 8)
+vDownLeft.AnchorPoint = Vector2.new(0.5, 0.5)
+vDownLeft.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+vDownLeft.BackgroundTransparency = 0.2
+vDownLeft.BorderSizePixel = 0
+vDownLeft.Rotation = -45
+vDownLeft.ZIndex = 11
+vDownLeft.Parent = vAngle
+Instance.new("UICorner", vDownLeft).CornerRadius = UDim.new(1, 0)
 
-local vR = Instance.new("Frame")
-vR.Size = UDim2.new(0, 2, 0, 12)
-vR.Position = UDim2.new(0, 17, 0, 9)
-vR.AnchorPoint = Vector2.new(0.5, 0.5)
-vR.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-vR.BackgroundTransparency = 0.3
-vR.BorderSizePixel = 0
-vR.Rotation = 45
-vR.Active = false
-vR.Parent = resizeB
-Instance.new("UICorner", vR).CornerRadius = UDim.new(1, 0)
+local vDownRight = Instance.new("Frame")
+vDownRight.Size = UDim2.new(0, 2, 0, 10)
+vDownRight.Position = UDim2.new(0, 15, 0, 8)
+vDownRight.AnchorPoint = Vector2.new(0.5, 0.5)
+vDownRight.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+vDownRight.BackgroundTransparency = 0.2
+vDownRight.BorderSizePixel = 0
+vDownRight.Rotation = 45
+vDownRight.ZIndex = 11
+vDownRight.Parent = vAngle
+Instance.new("UICorner", vDownRight).CornerRadius = UDim.new(1, 0)
 
+-- ===== NÚT HIỆN =====
 local showSg = Instance.new("ScreenGui")
 showSg.Name = "KudoToggle"
 showSg.ResetOnSpawn = false
@@ -761,22 +859,13 @@ closeB.MouseButton1Click:Connect(function()
     showSg:Destroy()
 end)
 
--- Drag bằng cách giữ vào bất kỳ đâu trên box (trừ các nút)
--- Dùng UIS.InputBegan để bắt sự kiện chạm trên box
+-- ===== DRAG =====
 local dragging = false
 local ds, sp
-local touchOnButton = false
 
 box.InputBegan:Connect(function(i)
     if locked then return end
     if i.UserInputType == Enum.UserInputType.Touch or i.UserInputType == Enum.UserInputType.MouseButton1 then
-        -- Kiểm tra xem có phải chạm vào nút nào không
-        local absPos = box.AbsolutePosition
-        local absSize = box.AbsoluteSize
-        local touchPos = i.Position
-        
-        -- Nếu chạm vào header hoặc bất kỳ đâu trong box (trừ các nút)
-        -- Các nút nằm trên cùng, tự chặn sự kiện
         dragging = true
         ds = i.Position
         sp = box.Position
@@ -796,9 +885,10 @@ UIS.InputEnded:Connect(function(i)
     end
 end)
 
+-- ===== RESIZE =====
 local resizing = false
 local rs, rss
-resizeB.InputBegan:Connect(function(i)
+vAngle.InputBegan:Connect(function(i)
     if locked then return end
     if i.UserInputType == Enum.UserInputType.Touch or i.UserInputType == Enum.UserInputType.MouseButton1 then
         resizing = true
@@ -861,4 +951,4 @@ task.spawn(function()
     end
 end)
 
-print("✅ fix lag v1.0 by kudo29001 loaded")
+print("✅ fix lag + anti-afk v1.0 by kudo29001 loaded")

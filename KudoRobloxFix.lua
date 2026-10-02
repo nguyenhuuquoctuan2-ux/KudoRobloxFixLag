@@ -707,4 +707,182 @@ UIS.InputChanged:Connect(function(i)
         local mouseX = i.Position.X
         local bgAbsPos = sliderBg.AbsolutePosition.X
         local bgAbsSize = sliderBg.AbsoluteSize.X
-        local percent = math.clamp((mouseX - bgAbsPos)
+        local percent = math.clamp((mouseX - bgAbsPos) / bgAbsSize, 0, 1)
+        sliderFill.Size = UDim2.new(percent, 0, 1, 0)
+        sliderKnob.Position = UDim2.new(percent, -7, 0.5, -7)
+        applyOpacity(percent)
+    end
+end)
+
+UIS.InputEnded:Connect(function(i)
+    if i.UserInputType == Enum.UserInputType.Touch or i.UserInputType == Enum.UserInputType.MouseButton1 then
+        draggingSlider = false
+    end
+end)
+
+-- Toggle slider khi bấm nút ◐
+local sliderVisible = false
+opacityB.MouseButton1Click:Connect(function()
+    sliderVisible = not sliderVisible
+    sliderPanel.Visible = sliderVisible
+end)
+
+-- Khởi tạo giá trị ban đầu
+applyOpacity(0.5)
+
+local resizeB = Instance.new("TextButton")
+resizeB.Size = UDim2.new(0, 24, 0, 24)
+resizeB.Position = UDim2.new(0, 6, 1, -26)
+resizeB.BackgroundTransparency = 1
+resizeB.Text = ""
+resizeB.BorderSizePixel = 0
+resizeB.Parent = box
+
+local vL = Instance.new("Frame")
+vL.Size = UDim2.new(0, 2, 0, 12)
+vL.Position = UDim2.new(0, 7, 0, 9)
+vL.AnchorPoint = Vector2.new(0.5, 0.5)
+vL.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+vL.BackgroundTransparency = 0.3
+vL.BorderSizePixel = 0
+vL.Rotation = -45
+vL.Active = false
+vL.Parent = resizeB
+Instance.new("UICorner", vL).CornerRadius = UDim.new(1, 0)
+
+local vR = Instance.new("Frame")
+vR.Size = UDim2.new(0, 2, 0, 12)
+vR.Position = UDim2.new(0, 17, 0, 9)
+vR.AnchorPoint = Vector2.new(0.5, 0.5)
+vR.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+vR.BackgroundTransparency = 0.3
+vR.BorderSizePixel = 0
+vR.Rotation = 45
+vR.Active = false
+vR.Parent = resizeB
+Instance.new("UICorner", vR).CornerRadius = UDim.new(1, 0)
+
+local showSg = Instance.new("ScreenGui")
+showSg.Name = "KudoToggle"
+showSg.ResetOnSpawn = false
+showSg.IgnoreGuiInset = true
+showSg.DisplayOrder = 2147483647
+showSg.Parent = uiParent
+
+local showB = Instance.new("TextButton")
+showB.Size = UDim2.new(0, 44, 0, 44)
+showB.Position = UDim2.new(1, -54, 1, -54)
+showB.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+showB.Text = "⚡"
+showB.Font = Enum.Font.GothamBold
+showB.TextSize = 22
+showB.TextColor3 = Color3.new(1, 1, 1)
+showB.BorderSizePixel = 0
+showB.Visible = false
+showB.Parent = showSg
+Instance.new("UICorner", showB).CornerRadius = UDim.new(1, 0)
+
+hideB.MouseButton1Click:Connect(function()
+    box.Visible = false
+    showB.Visible = true
+end)
+
+showB.MouseButton1Click:Connect(function()
+    box.Visible = true
+    showB.Visible = false
+end)
+
+closeB.MouseButton1Click:Connect(function()
+    stats:Destroy()
+    showSg:Destroy()
+end)
+
+local dragging = false
+local ds, sp
+header.InputBegan:Connect(function(i)
+    if locked then return end
+    if i.UserInputType == Enum.UserInputType.Touch or i.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        ds = i.Position
+        sp = box.Position
+    end
+end)
+
+UIS.InputChanged:Connect(function(i)
+    if dragging and not locked then
+        local d = i.Position - ds
+        box.Position = UDim2.new(sp.X.Scale, sp.X.Offset + d.X, sp.Y.Scale, sp.Y.Offset + d.Y)
+    end
+end)
+
+UIS.InputEnded:Connect(function(i)
+    if i.UserInputType == Enum.UserInputType.Touch or i.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = false
+    end
+end)
+
+local resizing = false
+local rs, rss
+resizeB.InputBegan:Connect(function(i)
+    if locked then return end
+    if i.UserInputType == Enum.UserInputType.Touch or i.UserInputType == Enum.UserInputType.MouseButton1 then
+        resizing = true
+        rs = i.Position
+        rss = box.Size
+    end
+end)
+
+UIS.InputChanged:Connect(function(i)
+    if resizing and not locked then
+        local d = i.Position - rs
+        local nx = math.max(120, rss.X.Offset - d.X)
+        local ny = math.max(80, rss.Y.Offset + d.Y)
+        box.Size = UDim2.new(0, nx, 0, ny)
+    end
+end)
+
+UIS.InputEnded:Connect(function(i)
+    if i.UserInputType == Enum.UserInputType.Touch or i.UserInputType == Enum.UserInputType.MouseButton1 then
+        resizing = false
+    end
+end)
+
+local st = tick()
+task.spawn(function()
+    while stats.Parent do
+        task.wait(1)
+        local e = math.floor(tick() - st)
+        timeV.Text = string.format("%02d:%02d", math.floor(e / 60), e % 60)
+    end
+end)
+
+local fr = 0
+RS.RenderStepped:Connect(function()
+    fr = fr + 1
+end)
+
+task.spawn(function()
+    while stats.Parent do
+        task.wait(1)
+        fpsV.Text = tostring(fr)
+        if fr < 40 then
+            fpsV.TextColor3 = Color3.fromRGB(255, 60, 60)
+        else
+            fpsV.TextColor3 = Color3.fromRGB(0, 255, 120)
+        end
+        fr = 0
+        
+        local p = 0
+        pcall(function()
+            p = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
+        end)
+        pingV.Text = p .. "ms"
+        if p <= 100 then
+            pingV.TextColor3 = Color3.fromRGB(0, 255, 120)
+        else
+            pingV.TextColor3 = Color3.fromRGB(255, 60, 60)
+        end
+    end
+end)
+
+print("✅ fix lag v1.0 by kudo29001 loaded")

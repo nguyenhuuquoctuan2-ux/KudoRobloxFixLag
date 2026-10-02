@@ -17,22 +17,19 @@ pcall(function()
     if gethui then uiParent = gethui() end
 end)
 
--- ===== XOÁ TRIỆT ĐỂ UI CŨ - QUÉT MỌI SCREENGUI =====
+-- ===== XOÁ TRIỆT ĐỂ UI CŨ =====
 local function destroyOldUI()
-    -- Quét PlayerGui
     for _, v in pairs(pg:GetChildren()) do
         if v:IsA("ScreenGui") then
             local n = v.Name:lower()
-            if n:find("kudo") or n:find("fixlag") or n:find("mailbox") or n:find("sender") or n == "kudopopup" or n == "kudostats" or n == "kudotoggle" then
+            if n:find("kudo") or n:find("fixlag") or n:find("mailbox") or n:find("sender") then
                 pcall(function() v:Destroy() end)
             end
         end
     end
-    -- Quét CoreGui
     pcall(function()
-        local cg = game:GetService("CoreGui")
-        for _, v in pairs(cg:GetChildren()) do
-            if v:IsA("ScreenGui") or v:IsA("Folder") then
+        for _, v in pairs(game:GetService("CoreGui"):GetChildren()) do
+            if v:IsA("ScreenGui") then
                 local n = v.Name:lower()
                 if n:find("kudo") or n:find("fixlag") then
                     pcall(function() v:Destroy() end)
@@ -40,12 +37,11 @@ local function destroyOldUI()
             end
         end
     end)
-    -- Quét cả những ScreenGui có chứa element tên "KudoPopup"/"KudoStats"
     local function scanContainer(container)
         if not container then return end
         for _, v in pairs(container:GetChildren()) do
             if v:IsA("ScreenGui") then
-                if v:FindFirstChild("MainFrame") or v:FindFirstChild("Runner") or v:FindFirstChild("RunnerDot") then
+                if v:FindFirstChild("BorderHolder") or v:FindFirstChild("Runner") or v:FindFirstChild("RunnerDot") then
                     pcall(function() v:Destroy() end)
                 end
             end
@@ -709,10 +705,12 @@ end)
 
 applyOpacity(0.5)
 
--- ===== KÍ TỰ ∟ SÁT GÓC TRÁI DƯỚI, ÔM KHÍT VIỀN =====
+-- ===== KÍ TỰ ∟ SÁT GÓC TRÁI DƯỚI =====
+-- vertLine và horizLine dùng AnchorPoint (0,1) để neo góc dưới trái của chính đường
+-- sau đó đặt Position (0,0,1,0) để đầu dưới/đầu trái chạm chính xác mép box
 local cornerL = Instance.new("TextButton")
 cornerL.Size = UDim2.new(0, 20, 0, 20)
-cornerL.Position = UDim2.new(0, 0, 1, -20)
+cornerL.Position = UDim2.new(0, 0, 1, 0)
 cornerL.AnchorPoint = Vector2.new(0, 1)
 cornerL.BackgroundTransparency = 1
 cornerL.Text = ""
@@ -720,11 +718,11 @@ cornerL.BorderSizePixel = 0
 cornerL.ZIndex = 10
 cornerL.Parent = box
 
--- Đường dọc của ∟ - sát trái, kéo dài từ đáy lên
+-- Đường dọc của ∟ - đầu dưới chạm đáy box
 local vertLine = Instance.new("Frame")
 vertLine.Size = UDim2.new(0, 2, 0, 16)
-vertLine.Position = UDim2.new(0, 3, 0, 3)
-vertLine.AnchorPoint = Vector2.new(0, 0)
+vertLine.Position = UDim2.new(0, 1, 1, 0)
+vertLine.AnchorPoint = Vector2.new(0, 1)
 vertLine.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 vertLine.BackgroundTransparency = 0.3
 vertLine.BorderSizePixel = 0
@@ -732,11 +730,11 @@ vertLine.ZIndex = 11
 vertLine.Parent = cornerL
 Instance.new("UICorner", vertLine).CornerRadius = UDim.new(1, 0)
 
--- Đường ngang của ∟ - sát đáy, kéo dài sang phải
+-- Đường ngang của ∟ - đầu trái chạm mép trái box, đáy sát đáy
 local horizLine = Instance.new("Frame")
 horizLine.Size = UDim2.new(0, 16, 0, 2)
-horizLine.Position = UDim2.new(0, 3, 0, 17)
-horizLine.AnchorPoint = Vector2.new(0, 0)
+horizLine.Position = UDim2.new(0, 1, 1, 0)
+horizLine.AnchorPoint = Vector2.new(0, 1)
 horizLine.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 horizLine.BackgroundTransparency = 0.3
 horizLine.BorderSizePixel = 0

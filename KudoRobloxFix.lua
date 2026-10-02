@@ -1,4 +1,4 @@
--- Fix Lag v1.0 by kudo29001 - Xeno compatible (with gear spin + Done)
+-- Fix Lag v1.0 by kudo29001 - Lightweight
 local player = game.Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 local Lighting = game:GetService("Lighting")
@@ -31,7 +31,6 @@ pcall(function()
     setfflag("FFlagRenderThrottleDisable", "True")
     setfflag("DFIntMaxFramesInFlight", "1")
     setfflag("FFlagDisableFrameLimiter", "True")
-
     setfflag("DFIntDebugFRMQualityLevelOverride", "1")
     setfflag("DFIntTextureQualityOverride", "0")
     setfflag("DFFlagTextureQualityOverrideEnabled", "True")
@@ -49,7 +48,6 @@ pcall(function()
     setfflag("FFlagDisableMetalnessMap", "True")
     setfflag("FFlagDisableEmissiveMap", "True")
     setfflag("FFlagDisableReflectionMap", "True")
-
     setfflag("DFFlagDisableSSAO", "True")
     setfflag("FFlagDisableSSAO", "True")
     setfflag("FFlagDisablePostFx", "True")
@@ -59,13 +57,11 @@ pcall(function()
     setfflag("FFlagDisableColorCorrection", "True")
     setfflag("FFlagDisableAntiAliasing", "True")
     setfflag("FFlagDisableMotionBlur", "True")
-
     setfflag("FFlagRenderShadowIntensity", "0")
     setfflag("FFlagRenderShadowIntensityOverride", "True")
     setfflag("DFFlagDisableRenderShadowMap", "True")
     setfflag("FFlagDisableShadows", "True")
     setfflag("FFlagDisableDynamicLighting", "True")
-
     setfflag("FFlagDebugSkyGray", "True")
     setfflag("FFlagDisableAtmosphere", "True")
     setfflag("FFlagDisableSky", "True")
@@ -73,7 +69,6 @@ pcall(function()
     setfflag("FFlagDisableTerrainDecoration", "True")
     setfflag("FIntFRMMaxGrassDistance", "0")
     setfflag("FIntFRMMinGrassDistance", "0")
-
     setfflag("DFIntCSGLevelOfDetailSwitchingDistance", "0")
     setfflag("DFIntCSGLevelOfDetailSwitchingDistanceL12", "0")
     setfflag("DFIntCSGLevelOfDetailSwitchingDistanceL23", "0")
@@ -81,25 +76,20 @@ pcall(function()
     setfflag("FFlagDisableLODTransitions", "True")
     setfflag("FFlagForceLOD0", "True")
     setfflag("DFIntLODBias", "8")
-
     setfflag("DFFlagDebugRenderForceTechnologyVoxel", "True")
     setfflag("FFlagDebugPauseVoxelizer", "True")
-
     setfflag("DFIntSolverSpringDamping", "0")
     setfflag("DFIntPhysicsSendRate", "1")
     setfflag("DFIntMaxSimultaneousPhysicsJobs", "1")
     setfflag("DFIntPhysicsStepPerFrame", "1")
     setfflag("DFIntMaximumCollisionIterations", "1")
     setfflag("DFIntSolverConvergenceIterations", "1")
-
     setfflag("DFIntFrameBufferPoolSize", "1")
     setfflag("DFIntRenderMeshMaxBones", "1")
     setfflag("DFIntDebugEngineOptimizationLevel", "3")
-
     setfflag("DFFlagGCEnableIncremental", "True")
     setfflag("DFIntGCIncrementalPause", "2")
     setfflag("DFIntGCIncrementalStepMul", "3000")
-
     setfflag("FFlagDebugGraphicsPreferOpenGL", "True")
 end)
 
@@ -182,7 +172,6 @@ local killTypes = {
 local function handleObject(v)
     if isName(v) then return end
     if isChar(v) then return end
-    
     local cn = v.ClassName
     if killTypes[cn] then
         pcall(function() v:Destroy() end)
@@ -210,7 +199,7 @@ Workspace.DescendantAdded:Connect(function(v)
     end)
 end)
 
--- ==================== CULLING SIÊU NHẸ ====================
+-- ==================== CULLING ====================
 local CULL_DIST_SQ = 80 * 80
 local culled = {}
 
@@ -220,7 +209,6 @@ task.spawn(function()
         pcall(function()
             if not Camera then return end
             local camPos = Camera.CFrame.Position
-            
             for _, v in ipairs(Workspace:GetChildren()) do
                 if v:IsA("BasePart") and not isChar(v) then
                     local pos = v.Position
@@ -230,7 +218,6 @@ task.spawn(function()
                         local dz = pos.Z - camPos.Z
                         local distSq = dx*dx + dy*dy + dz*dz
                         local shouldHide = distSq > CULL_DIST_SQ
-
                         if shouldHide and not culled[v] then
                             culled[v] = true
                             pcall(function() v.LocalTransparencyModifier = 1 end)
@@ -261,8 +248,8 @@ popupGui.DisplayOrder = 1000
 popupGui.Parent = playerGui
 
 local popup = Instance.new("Frame")
-popup.Size = UDim2.new(0, 380, 0, 170)
-popup.Position = UDim2.new(0.5, -190, 0.4, -85)
+popup.Size = UDim2.new(0, 360, 0, 140)
+popup.Position = UDim2.new(0.5, -180, 0.4, -70)
 popup.BackgroundColor3 = Color3.fromRGB(15, 15, 22)
 popup.BorderSizePixel = 0
 popup.Parent = popupGui
@@ -273,92 +260,58 @@ border.Color = Color3.fromRGB(255, 60, 60)
 border.Thickness = 2
 border.Parent = popup
 
--- ===== BÁNH RĂNG (dùng ImageLabel xoay) =====
-local gearWrap = Instance.new("Frame")
-gearWrap.Size = UDim2.new(0, 52, 0, 52)
-gearWrap.Position = UDim2.new(0, 20, 0, 22)
-gearWrap.BackgroundColor3 = Color3.fromRGB(30, 18, 24)
-gearWrap.BorderSizePixel = 0
-gearWrap.Parent = popup
-Instance.new("UICorner", gearWrap).CornerRadius = UDim.new(1, 0)
+-- ===== VÒNG TRÒN XOAY LOADING =====
+local spinWrap = Instance.new("Frame")
+spinWrap.Size = UDim2.new(0, 50, 0, 50)
+spinWrap.Position = UDim2.new(0, 20, 0, 20)
+spinWrap.BackgroundColor3 = Color3.fromRGB(30, 18, 24)
+spinWrap.BorderSizePixel = 0
+spinWrap.Parent = popup
+Instance.new("UICorner", spinWrap).CornerRadius = UDim.new(1, 0)
 
-local gearStroke = Instance.new("UIStroke")
-gearStroke.Color = Color3.fromRGB(255, 80, 80)
-gearStroke.Thickness = 1.5
-gearStroke.Transparency = 0.3
-gearStroke.Parent = gearWrap
+local spinStroke = Instance.new("UIStroke")
+spinStroke.Color = Color3.fromRGB(255, 80, 80)
+spinStroke.Thickness = 1.5
+spinStroke.Transparency = 0.4
+spinStroke.Parent = spinWrap
 
--- Dùng ImageLabel để xoay mượt (không bị lỗi font trên Xeno)
-local gearImg = Instance.new("ImageLabel")
-gearImg.Size = UDim2.new(0.7, 0, 0.7, 0)
-gearImg.Position = UDim2.new(0.15, 0, 0.15, 0)
-gearImg.BackgroundTransparency = 1
-gearImg.Image = "rbxassetid://7820784555"  -- icon bánh răng
-gearImg.ImageColor3 = Color3.fromRGB(255, 110, 110)
-gearImg.Parent = gearWrap
+-- Vòng cung loading (dùng Frame + UICorner)
+local arcHolder = Instance.new("Frame")
+arcHolder.Size = UDim2.new(0, 36, 0, 36)
+arcHolder.Position = UDim2.new(0.5, -18, 0.5, -18)
+arcHolder.BackgroundTransparency = 1
+arcHolder.Parent = spinWrap
 
--- Nếu asset không load, hiện chữ ⚙ thay thế
-local gearText = Instance.new("TextLabel")
-gearText.Size = UDim2.new(1, 0, 1, 0)
-gearText.BackgroundTransparency = 1
-gearText.Text = "⚙"
-gearText.Font = Enum.Font.GothamBold
-gearText.TextSize = 30
-gearText.TextColor3 = Color3.fromRGB(255, 110, 110)
-gearText.TextTransparency = 0.5  -- mờ để không tranh với image
-gearText.Parent = gearWrap
+local arc = Instance.new("Frame")
+arc.Size = UDim2.new(0, 36, 0, 36)
+arc.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
+arc.BorderSizePixel = 0
+arc.Parent = arcHolder
+Instance.new("UICorner", arc).CornerRadius = UDim.new(1, 0)
 
--- Xoay bánh răng liên tục (dùng 2 cách để chắc chắn chạy)
+-- Che giữa bằng frame nền để tạo vòng cung
+local arcMask = Instance.new("Frame")
+arcMask.Size = UDim2.new(0, 26, 0, 26)
+arcMask.Position = UDim2.new(0.5, -13, 0.5, -13)
+arcMask.BackgroundColor3 = Color3.fromRGB(30, 18, 24)
+arcMask.BorderSizePixel = 0
+arcMask.Parent = spinWrap
+Instance.new("UICorner", arcMask).CornerRadius = UDim.new(1, 0)
+
+-- Xoay vòng loading liên tục
 task.spawn(function()
     local rot = 0
-    while gearWrap.Parent do
-        rot = (rot + 5) % 360
-        pcall(function()
-            gearImg.Rotation = rot
-            gearText.Rotation = rot
-        end)
+    while arcHolder.Parent do
+        rot = (rot + 8) % 360
+        arcHolder.Rotation = rot
         task.wait(0.03)
-    end
-end)
-
--- ===== DẤU TÍCH =====
-local checkWrap = Instance.new("Frame")
-checkWrap.Size = UDim2.new(0, 52, 0, 52)
-checkWrap.Position = UDim2.new(1, -72, 0, 22)
-checkWrap.BackgroundColor3 = Color3.fromRGB(20, 35, 25)
-checkWrap.BorderSizePixel = 0
-checkWrap.Parent = popup
-Instance.new("UICorner", checkWrap).CornerRadius = UDim.new(1, 0)
-
-local checkStroke = Instance.new("UIStroke")
-checkStroke.Color = Color3.fromRGB(80, 255, 130)
-checkStroke.Thickness = 1.5
-checkStroke.Transparency = 0.3
-checkStroke.Parent = checkWrap
-
-local check = Instance.new("TextLabel")
-check.Size = UDim2.new(1, 0, 1, 0)
-check.BackgroundTransparency = 1
-check.Text = "✓"
-check.Font = Enum.Font.GothamBold
-check.TextSize = 32
-check.TextColor3 = Color3.fromRGB(80, 255, 130)
-check.Parent = checkWrap
-
--- Check nhấp nhô nhẹ
-task.spawn(function()
-    while check.Parent do
-        TweenService:Create(check, TweenInfo.new(0.7), {TextTransparency = 0.2}):Play()
-        task.wait(0.7)
-        TweenService:Create(check, TweenInfo.new(0.7), {TextTransparency = 0}):Play()
-        task.wait(0.7)
     end
 end)
 
 -- ===== TEXT =====
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, -200, 0, 26)
-title.Position = UDim2.new(0, 86, 0, 24)
+title.Size = UDim2.new(1, -180, 0, 26)
+title.Position = UDim2.new(0, 86, 0, 22)
 title.BackgroundTransparency = 1
 title.Text = "fix lag v1.0"
 title.Font = Enum.Font.GothamBold
@@ -368,8 +321,8 @@ title.TextXAlignment = Enum.TextXAlignment.Left
 title.Parent = popup
 
 local sub = Instance.new("TextLabel")
-sub.Size = UDim2.new(1, -200, 0, 18)
-sub.Position = UDim2.new(0, 86, 0, 52)
+sub.Size = UDim2.new(1, -180, 0, 18)
+sub.Position = UDim2.new(0, 86, 0, 50)
 sub.BackgroundTransparency = 1
 sub.Text = "by kudo29001 ⚡"
 sub.Font = Enum.Font.Gotham
@@ -378,21 +331,21 @@ sub.TextColor3 = Color3.fromRGB(160, 160, 170)
 sub.TextXAlignment = Enum.TextXAlignment.Left
 sub.Parent = popup
 
--- ===== % LOAD =====
+-- % load
 local percentLabel = Instance.new("TextLabel")
-percentLabel.Size = UDim2.new(1, -40, 0, 24)
-percentLabel.Position = UDim2.new(0, 20, 0, 88)
+percentLabel.Size = UDim2.new(1, -40, 0, 22)
+percentLabel.Position = UDim2.new(0, 20, 0, 82)
 percentLabel.BackgroundTransparency = 1
 percentLabel.Text = "0%"
 percentLabel.Font = Enum.Font.GothamBold
-percentLabel.TextSize = 17
+percentLabel.TextSize = 16
 percentLabel.TextColor3 = Color3.fromRGB(255, 130, 100)
 percentLabel.Parent = popup
 
--- ===== PROGRESS BAR =====
+-- Progress bar
 local progressBg = Instance.new("Frame")
 progressBg.Size = UDim2.new(1, -40, 0, 8)
-progressBg.Position = UDim2.new(0, 20, 0, 122)
+progressBg.Position = UDim2.new(0, 20, 0, 112)
 progressBg.BackgroundColor3 = Color3.fromRGB(40, 30, 35)
 progressBg.BorderSizePixel = 0
 progressBg.Parent = popup
@@ -405,19 +358,7 @@ progressFill.BorderSizePixel = 0
 progressFill.Parent = progressBg
 Instance.new("UICorner", progressFill).CornerRadius = UDim.new(1, 0)
 
--- ===== DONE LABEL (ẩn ban đầu) =====
-local doneLabel = Instance.new("TextLabel")
-doneLabel.Size = UDim2.new(1, -40, 0, 20)
-doneLabel.Position = UDim2.new(0, 20, 0, 145)
-doneLabel.BackgroundTransparency = 1
-doneLabel.Text = "✓ DONE"
-doneLabel.Font = Enum.Font.GothamBold
-doneLabel.TextSize = 14
-doneLabel.TextColor3 = Color3.fromRGB(80, 255, 130)
-doneLabel.TextTransparency = 1
-doneLabel.Parent = popup
-
--- ===== LOAD ANIMATION 0 → 100% =====
+-- Load 0→100%
 task.spawn(function()
     local startTick = tick()
     local duration = 3
@@ -430,16 +371,12 @@ task.spawn(function()
     end
     percentLabel.Text = "100%"
     progressFill.Size = UDim2.new(1, 0, 1, 0)
-    
-    -- Hiện DONE với hiệu ứng
-    TweenService:Create(doneLabel, TweenInfo.new(0.3), {TextTransparency = 0}):Play()
     TweenService:Create(progressFill, TweenInfo.new(0.2), {
         BackgroundColor3 = Color3.fromRGB(80, 255, 130)
     }):Play()
 end)
 
--- Auto close sau 5s (đủ thời gian thấy DONE)
-task.delay(5, function()
+task.delay(4, function()
     pcall(function() popupGui:Destroy() end)
 end)
 
@@ -553,6 +490,7 @@ creditLabel.TextTransparency = 0.3
 creditLabel.TextXAlignment = Enum.TextXAlignment.Center
 creditLabel.Parent = box
 
+-- Nút X
 local closeBtn = Instance.new("TextButton")
 closeBtn.Size = UDim2.new(0, 22, 0, 22)
 closeBtn.Position = UDim2.new(1, -26, 0, -3)
@@ -565,6 +503,7 @@ closeBtn.BorderSizePixel = 0
 closeBtn.Parent = box
 Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(1, 0)
 
+-- Nút ẩn
 local hideBtn = Instance.new("TextButton")
 hideBtn.Size = UDim2.new(0, 22, 0, 22)
 hideBtn.Position = UDim2.new(1, -52, 0, -3)
@@ -577,9 +516,10 @@ hideBtn.BorderSizePixel = 0
 hideBtn.Parent = box
 Instance.new("UICorner", hideBtn).CornerRadius = UDim.new(1, 0)
 
+-- ===== HÌNH CHỮ V Ở GÓC DƯỚI PHẢI, TRONG UI =====
 local resizeBtn = Instance.new("TextButton")
 resizeBtn.Size = UDim2.new(0, 22, 0, 22)
-resizeBtn.Position = UDim2.new(0, -2, 1, -2)
+resizeBtn.Position = UDim2.new(1, -24, 1, -24)
 resizeBtn.BackgroundTransparency = 1
 resizeBtn.Text = ""
 resizeBtn.BorderSizePixel = 0
@@ -607,6 +547,7 @@ vR.Rotation = 45
 vR.Parent = resizeBtn
 Instance.new("UICorner", vR).CornerRadius = UDim.new(1, 0)
 
+-- Nút hiện ⚡
 local showGui = Instance.new("ScreenGui")
 showGui.Name = "KudoToggle"
 showGui.ResetOnSpawn = false
@@ -644,6 +585,7 @@ closeBtn.MouseButton1Click:Connect(function()
     end)
 end)
 
+-- ===== DRAG =====
 local dragging = false
 local dragStart, startPos
 
@@ -673,6 +615,8 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
+-- ===== RESIZE (kéo góc dưới phải) =====
+-- Kéo sang phải/xuống = tăng size
 local resizing = false
 local resizeStart, resizeStartSize
 
@@ -688,8 +632,8 @@ end)
 UserInputService.InputChanged:Connect(function(input)
     if resizing then
         local delta = input.Position - resizeStart
-        local newX = math.max(130, resizeStartSize.X.Offset + delta.X)
-        local newY = math.max(90, resizeStartSize.Y.Offset + delta.Y)
+        local newX = math.max(120, resizeStartSize.X.Offset + delta.X)
+        local newY = math.max(80, resizeStartSize.Y.Offset + delta.Y)
         box.Size = UDim2.new(0, newX, 0, newY)
     end
 end)

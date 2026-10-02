@@ -654,9 +654,9 @@ sliderKnob.ZIndex = 23
 sliderKnob.Parent = sliderBg
 Instance.new("UICorner", sliderKnob).CornerRadius = UDim.new(1, 0)
 
--- KÝ TỰ ∟ GÓC TRÁI DƯỚI (khai báo TRƯỚC hàm applyOpacity để tránh lỗi)
+-- KÝ TỰ ∟ GÓC TRÁI DƯỚI - DÙNG TEXTLABEL ĐỂ TRÁNH KHỐI TRẮNG
 local cornerL = Instance.new("TextButton")
-cornerL.Size = UDim2.new(0, 20, 0, 20)
+cornerL.Size = UDim2.new(0, 22, 0, 22)
 cornerL.Position = UDim2.new(0, 0, 1, 0)
 cornerL.AnchorPoint = Vector2.new(0, 1)
 cornerL.BackgroundTransparency = 1
@@ -665,29 +665,20 @@ cornerL.BorderSizePixel = 0
 cornerL.ZIndex = 10
 cornerL.Parent = box
 
-local vertLine = Instance.new("Frame")
-vertLine.Size = UDim2.new(0, 2, 0, 16)
-vertLine.Position = UDim2.new(0, 1, 1, 0)
-vertLine.AnchorPoint = Vector2.new(0, 1)
-vertLine.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-vertLine.BackgroundTransparency = 0.3
-vertLine.BorderSizePixel = 0
-vertLine.ZIndex = 11
-vertLine.Parent = cornerL
-Instance.new("UICorner", vertLine).CornerRadius = UDim.new(1, 0)
+local cornerSymbol = Instance.new("TextLabel")
+cornerSymbol.Size = UDim2.new(1, 0, 1, 0)
+cornerSymbol.BackgroundTransparency = 1
+cornerSymbol.Text = "∟"
+cornerSymbol.Font = Enum.Font.GothamBold
+cornerSymbol.TextSize = 16
+cornerSymbol.TextColor3 = Color3.fromRGB(255, 255, 255)
+cornerSymbol.TextTransparency = 0.3
+cornerSymbol.TextXAlignment = Enum.TextXAlignment.Left
+cornerSymbol.TextYAlignment = Enum.TextYAlignment.Bottom
+cornerSymbol.ZIndex = 11
+cornerSymbol.Parent = cornerL
 
-local horizLine = Instance.new("Frame")
-horizLine.Size = UDim2.new(0, 16, 0, 2)
-horizLine.Position = UDim2.new(0, 1, 1, 0)
-horizLine.AnchorPoint = Vector2.new(0, 1)
-horizLine.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-horizLine.BackgroundTransparency = 0.3
-horizLine.BorderSizePixel = 0
-horizLine.ZIndex = 11
-horizLine.Parent = cornerL
-Instance.new("UICorner", horizLine).CornerRadius = UDim.new(1, 0)
-
--- HÀM ÁP DỤNG ĐỘ MỜ (bỏ qua cornerL và sliderPanel)
+-- HÀM ÁP DỤNG ĐỘ MỜ (BỎ QUA cornerL VÀ sliderPanel)
 local function applyOpacity(value)
     local transparency = 1 - value
     box.BackgroundTransparency = math.clamp(0.1 + transparency * 0.85, 0, 1)
@@ -695,7 +686,6 @@ local function applyOpacity(value)
     bxStroke.Transparency = math.clamp(0.4 + transparency * 0.55, 0, 1)
     
     for _, child in ipairs(box:GetDescendants()) do
-        -- Bỏ qua mọi thứ nằm trong cornerL hoặc sliderPanel
         local skip = false
         local parent = child.Parent
         while parent do

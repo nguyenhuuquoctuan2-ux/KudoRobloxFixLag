@@ -30,86 +30,83 @@ popup.BackgroundColor3 = Color3.fromRGB(18, 18, 24)
 popup.BackgroundTransparency = 0.05
 popup.BorderSizePixel = 0
 popup.ZIndex = 1000
-popup.ClipsDescendants = false
 popup.Parent = popupGui
 Instance.new("UICorner", popup).CornerRadius = UDim.new(0, 12)
 
--- Đường viền đỏ RGB chạy quanh
-local borderFrame = Instance.new("Frame")
-borderFrame.Size = UDim2.new(1, 4, 1, 4)
-borderFrame.Position = UDim2.new(0, -2, 0, -2)
-borderFrame.BackgroundTransparency = 1
-borderFrame.ZIndex = 999
-borderFrame.Parent = popup
-Instance.new("UICorner", borderFrame).CornerRadius = UDim.new(0, 13)
+local borderTop = Instance.new("Frame")
+borderTop.Size = UDim2.new(1, 4, 0, 2)
+borderTop.Position = UDim2.new(0, -2, 0, -2)
+borderTop.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+borderTop.BorderSizePixel = 0
+borderTop.ZIndex = 999
+borderTop.Parent = popup
 
-local borderStroke = Instance.new("UIStroke")
-borderStroke.Color = Color3.fromRGB(255, 60, 60)
-borderStroke.Thickness = 2
-borderStroke.Transparency = 0
-borderStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-borderStroke.Parent = borderFrame
+local borderBottom = Instance.new("Frame")
+borderBottom.Size = UDim2.new(1, 4, 0, 2)
+borderBottom.Position = UDim2.new(0, -2, 1, 0)
+borderBottom.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+borderBottom.BorderSizePixel = 0
+borderBottom.ZIndex = 999
+borderBottom.Parent = popup
 
--- Animation chạy màu RGB quanh viền
+local borderLeft = Instance.new("Frame")
+borderLeft.Size = UDim2.new(0, 2, 1, 4)
+borderLeft.Position = UDim2.new(0, -2, 0, -2)
+borderLeft.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+borderLeft.BorderSizePixel = 0
+borderLeft.ZIndex = 999
+borderLeft.Parent = popup
+
+local borderRight = Instance.new("Frame")
+borderRight.Size = UDim2.new(0, 2, 1, 4)
+borderRight.Position = UDim2.new(1, 0, 0, -2)
+borderRight.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+borderRight.BorderSizePixel = 0
+borderRight.ZIndex = 999
+borderRight.Parent = popup
+
+local rgbRun = true
 task.spawn(function()
     local hue = 0
-    while borderStroke.Parent do
-        hue = (hue + 0.008) % 1
-        borderStroke.Color = Color3.fromHSV(hue, 1, 1)
-        task.wait(0.03)
+    while rgbRun do
+        hue = (hue + 0.02) % 1
+        local c = Color3.fromHSV(hue, 1, 1)
+        borderTop.BackgroundColor3 = c
+        borderBottom.BackgroundColor3 = c
+        borderLeft.BackgroundColor3 = c
+        borderRight.BackgroundColor3 = c
+        task.wait(0.05)
     end
 end)
 
--- Accent bar bên trái (giữ nguyên nhưng đồng bộ màu)
 local accentBar = Instance.new("Frame")
 accentBar.Size = UDim2.new(0, 3, 1, -16)
-accentBar.Position = UDim2.new(0, 0, 0, 8)
+accentBar.Position = UDim2.new(0, 2, 0, 8)
 accentBar.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
 accentBar.BorderSizePixel = 0
 accentBar.ZIndex = 1001
 accentBar.Parent = popup
 Instance.new("UICorner", accentBar).CornerRadius = UDim.new(0, 2)
 
-local gearFrame = Instance.new("Frame")
-gearFrame.Size = UDim2.new(0, 36, 0, 36)
-gearFrame.Position = UDim2.new(0, 14, 0.5, -18)
-gearFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 36)
-gearFrame.BorderSizePixel = 0
-gearFrame.ZIndex = 1001
-gearFrame.Parent = popup
-Instance.new("UICorner", gearFrame).CornerRadius = UDim.new(0, 8)
-
 local gearLabel = Instance.new("TextLabel")
-gearLabel.Size = UDim2.new(1, 0, 1, 0)
-gearLabel.BackgroundTransparency = 1
+gearLabel.Size = UDim2.new(0, 36, 0, 36)
+gearLabel.Position = UDim2.new(0, 14, 0.5, -18)
+gearLabel.BackgroundColor3 = Color3.fromRGB(28, 28, 36)
 gearLabel.Text = "⚙"
 gearLabel.Font = Enum.Font.GothamBold
 gearLabel.TextSize = 22
 gearLabel.TextColor3 = Color3.fromRGB(255, 70, 70)
-gearLabel.ZIndex = 1002
-gearLabel.Parent = gearFrame
+gearLabel.ZIndex = 1001
+gearLabel.Parent = popup
+Instance.new("UICorner", gearLabel).CornerRadius = UDim.new(0, 8)
 
-local ring = Instance.new("Frame")
-ring.Size = UDim2.new(0, 40, 0, 40)
-ring.Position = UDim2.new(0, -2, 0, -2)
-ring.BackgroundTransparency = 1
-ring.ZIndex = 1003
-ring.Parent = gearFrame
-Instance.new("UICorner", ring).CornerRadius = UDim.new(0, 20)
-
-local ringStroke = Instance.new("UIStroke")
-ringStroke.Color = Color3.fromRGB(255, 60, 60)
-ringStroke.Thickness = 1
-ringStroke.Transparency = 0.5
-ringStroke.Parent = ring
-
+local gearRun = true
 task.spawn(function()
-    while gearLabel.Parent do
-        for i = 0, 360, 20 do
-            if not gearLabel.Parent then break end
+    while gearRun do
+        for i = 0, 360, 30 do
+            if not gearRun then break end
             gearLabel.Rotation = i
-            ring.Rotation = -i * 0.5
-            task.wait(0.03)
+            task.wait(0.06)
         end
     end
 end)
@@ -144,6 +141,8 @@ TweenService:Create(popup, TweenInfo.new(0.45, Enum.EasingStyle.Back, Enum.Easin
 
 task.delay(3.5, function()
     pcall(function()
+        rgbRun = false
+        gearRun = false
         local out = TweenService:Create(popup, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
             Position = UDim2.new(1, 20, 0.35, -31),
             BackgroundTransparency = 1
@@ -151,18 +150,19 @@ task.delay(3.5, function()
         out:Play()
         TweenService:Create(popupTitle, TweenInfo.new(0.4), {TextTransparency = 1}):Play()
         TweenService:Create(popupSub, TweenInfo.new(0.4), {TextTransparency = 1}):Play()
-        TweenService:Create(gearLabel, TweenInfo.new(0.4), {TextTransparency = 1}):Play()
-        TweenService:Create(gearFrame, TweenInfo.new(0.4), {BackgroundTransparency = 1}):Play()
-        TweenService:Create(borderStroke, TweenInfo.new(0.4), {Transparency = 1}):Play()
+        TweenService:Create(gearLabel, TweenInfo.new(0.4), {TextTransparency = 1, BackgroundTransparency = 1}):Play()
         TweenService:Create(accentBar, TweenInfo.new(0.4), {BackgroundTransparency = 1}):Play()
-        TweenService:Create(ringStroke, TweenInfo.new(0.4), {Transparency = 1}):Play()
+        for _, b in ipairs({borderTop, borderBottom, borderLeft, borderRight}) do
+            TweenService:Create(b, TweenInfo.new(0.4), {BackgroundTransparency = 1}):Play()
+        end
         out.Completed:Wait()
         popupGui:Destroy()
     end)
 end)
 
--- ==================== FFLAG ====================
+-- ==================== FFLAG — TỐI ƯU NETWORK + GRAPHICS ====================
 pcall(function()
+    -- FPS unlimited
     setfflag("DFIntTaskSchedulerTargetFps", "9999")
     setfflag("DFIntFrameRateCap", "9999")
     setfflag("DFIntMaxFrameRate", "9999")
@@ -175,6 +175,35 @@ pcall(function()
     setfflag("DFIntMaxFramesInFlight", "1")
     setfflag("FFlagDisableFrameLimiter", "True")
 
+    -- ===== NETWORK TỐI ƯU (giảm ping spike) =====
+    setfflag("DFIntConnectionMTUSize", "1400")
+    setfflag("DFIntS2PhysicsSenderRate", "1")
+    setfflag("DFIntClientPhysicsSendRate", "1")
+    setfflag("DFIntPhysicsSenderRate", "1")
+    setfflag("DFIntNetworkClusterPacketCache", "0")
+    setfflag("FFlagEnableNetworkClusterPacketCache", "False")
+    setfflag("DFIntNetworkPacketBufferSize", "2048")
+    setfflag("DFIntNetworkReceiveBufferSize", "2048")
+    setfflag("DFIntNetworkSendBufferSize", "2048")
+    setfflag("DFFlagEnableNetworkPingOptimization", "True")
+    setfflag("DFFlagEnableNetworkPacketCoalescing", "True")
+    setfflag("FFlagEnableNetworkPacketCoalescing", "True")
+    setfflag("DFIntNetworkPacketCoalescingWindow", "1")
+    setfflag("FFlagEnableNetworkPrioritySystem", "True")
+    setfflag("DFIntNetworkPriorityBoost", "1")
+    setfflag("DFFlagEnableNetworkCompression", "True")
+    setfflag("FFlagEnableNetworkCompression", "True")
+    setfflag("DFFlagEnableNetworkEncryptionOptimization", "True")
+    setfflag("DFIntDataPingUpdateInterval", "5")
+    setfflag("DFIntNetworkTimeout", "30")
+    setfflag("DFIntNetworkRetryCount", "3")
+    setfflag("DFIntReplicationDataCompressionLevel", "1")
+    setfflag("DFFlagEnableReplicationCompression", "True")
+    setfflag("DFIntReplicationRate", "30")
+    setfflag("DFIntReplicationQueueSize", "512")
+    setfflag("DFFlagPrioritizeReplication", "True")
+
+    -- ===== GRAPHICS =====
     setfflag("DFIntDebugFRMQualityLevelOverride", "1")
     setfflag("DFIntTextureQualityOverride", "0")
     setfflag("DFFlagTextureQualityOverrideEnabled", "True")
@@ -192,8 +221,6 @@ pcall(function()
     setfflag("FFlagDisableMetalnessMap", "True")
     setfflag("FFlagDisableEmissiveMap", "True")
     setfflag("FFlagDisableReflectionMap", "True")
-    setfflag("DFFlagDisableTextureAnisotropy", "True")
-    setfflag("DFIntTextureAnisotropy", "1")
 
     setfflag("DFFlagDisableSSAO", "True")
     setfflag("FFlagDisableSSAO", "True")
@@ -237,17 +264,16 @@ pcall(function()
     setfflag("DFFlagDebugRenderForceTechnologyVoxel", "True")
     setfflag("FFlagDebugPauseVoxelizer", "True")
     setfflag("DFFlagSkipHighResolutionEnvironment", "True")
-    setfflag("FFlagRenderDisableForwardLights", "True")
 
+    -- ===== PHYSICS =====
     setfflag("DFIntSolverSpringDamping", "0")
     setfflag("DFIntPhysicsSendRate", "1")
     setfflag("DFIntMaxSimultaneousPhysicsJobs", "1")
     setfflag("DFIntPhysicsStepPerFrame", "1")
     setfflag("DFIntMaximumCollisionIterations", "1")
     setfflag("DFIntSolverConvergenceIterations", "1")
-    setfflag("FFlagDisableRaycastFiltering", "True")
-    setfflag("DFFlagSkipRaycastFiltering", "True")
 
+    -- ===== RENDER =====
     setfflag("DFIntFrameBufferPoolSize", "1")
     setfflag("DFIntRenderMeshMaxBones", "1")
     setfflag("DFIntDebugEngineOptimizationLevel", "3")
@@ -258,7 +284,6 @@ pcall(function()
     setfflag("FFlagDisableParticleEffects", "True")
     setfflag("FFlagDisableTrails", "True")
     setfflag("FFlagDisableBeams", "True")
-    setfflag("FFlagDisableBillboards", "True")
     setfflag("FFlagDisableDecals", "True")
     setfflag("FFlagDisableReflections", "True")
     setfflag("FFlagDisableGlassRefraction", "True")
@@ -267,37 +292,27 @@ pcall(function()
     setfflag("FFlagDisableHDR", "True")
     setfflag("FFlagDisableToneMapping", "True")
 
+    -- ===== ANIMATION =====
     setfflag("FFlagDisableAnimationBlending", "True")
     setfflag("DFFlagSkipAnimationBlending", "True")
     setfflag("FFlagDisableFacialAnimation", "True")
 
+    -- ===== GC (chạy nền, không block) =====
     setfflag("DFFlagGCEnableIncremental", "True")
-    setfflag("DFIntGCIncrementalPause", "2")
-    setfflag("DFIntGCIncrementalStepMul", "3000")
-    setfflag("DFIntGCIncrementalStepSizeKb", "64")
+    setfflag("DFIntGCIncrementalPause", "8")
+    setfflag("DFIntGCIncrementalStepMul", "5000")
+    setfflag("DFIntGCIncrementalStepSizeKb", "128")
 
-    setfflag("DFIntConnectionMTUSize", "1400")
-    setfflag("DFIntS2PhysicsSenderRate", "1")
+    -- ===== ASSET DOWNLOAD =====
+    setfflag("DFIntAssetRequestBatchSize", "8")
+    setfflag("DFIntMaxAssetDownloadConcurrency", "4")
+    setfflag("DFFlagThrottleAssetDownloads", "False")
+    setfflag("DFIntAssetDownloadThrottleMs", "0")
+    setfflag("FFlagPrioritizeCriticalAssets", "True")
 
+    -- ===== MISC =====
     setfflag("FFlagDebugGraphicsDisableDirect3D11", "True")
     setfflag("FFlagDebugGraphicsPreferOpenGL", "True")
-
-    setfflag("DFIntNumberOfRenderPasses", "1")
-    setfflag("DFIntMaxConcurrentRenderPasses", "1")
-    setfflag("DFIntRenderPassSortMode", "0")
-
-    setfflag("DFIntAssetRequestBatchSize", "1")
-    setfflag("DFIntMaxAssetDownloadConcurrency", "1")
-    setfflag("DFFlagThrottleAssetDownloads", "True")
-    setfflag("DFIntAssetDownloadThrottleMs", "50")
-
-    setfflag("DFIntMaxPartCacheSize", "1")
-    setfflag("DFIntPartCacheLimit", "1")
-
-    setfflag("DFIntTerrainLODBias", "8")
-    setfflag("FFlagDisableTerrainLODTransitions", "True")
-
-    setfflag("FFlagDisableCharacterSounds", "True")
     setfflag("FFlagDisableCharacterEmotes", "True")
     setfflag("FFlagDisableDefaultLoadingScreen", "True")
 end)
@@ -319,8 +334,8 @@ task.spawn(function()
             Camera.CameraType = Enum.CameraType.Custom
         end
         Workspace.StreamingEnabled = true
-        Workspace.StreamingTargetRadius = 96
-        Workspace.StreamingMinRadius = 48
+        Workspace.StreamingTargetRadius = 80
+        Workspace.StreamingMinRadius = 40
         Workspace.StreamOutBehavior = Enum.StreamOutBehavior.Opportunistic
     end)
 end)
@@ -345,19 +360,6 @@ pcall(function()
     Lighting.ClockTime = 14
     Lighting.ExposureCompensation = 0
     Lighting.ShadowSoftness = 0
-end)
-
-Lighting.DescendantAdded:Connect(function(v)
-    task.defer(function()
-        pcall(function()
-            if v:IsA("Sky") or v:IsA("Atmosphere") or v:IsA("Clouds") 
-                or v:IsA("Skybox") or v:IsA("BloomEffect") or v:IsA("BlurEffect")
-                or v:IsA("SunRaysEffect") or v:IsA("DepthOfFieldEffect")
-                or v:IsA("ColorCorrectionEffect") then
-                v:Destroy()
-            end
-        end)
-    end)
 end)
 
 -- ==================== NƯỚC ====================
@@ -431,97 +433,39 @@ local function handleObject(v)
     end
 end
 
+-- ==================== BULK XỬ LÝ ====================
 local descendants = Workspace:GetDescendants()
 local total = #descendants
 
 for i = 1, total do
     handleObject(descendants[i])
-    if i % 800 == 0 then task.wait() end
+    if i % 400 == 0 then task.wait() end
+end
+
+-- ==================== QUEUE XỬ LÝ OBJECT MỚI ====================
+local pendingQueue = {}
+local processing = false
+
+local function processQueue()
+    if processing then return end
+    processing = true
+    task.spawn(function()
+        while #pendingQueue > 0 do
+            local obj = table.remove(pendingQueue, 1)
+            if obj and obj.Parent then
+                pcall(function() handleObject(obj) end)
+            end
+            if #pendingQueue % 50 == 0 then
+                task.wait()
+            end
+        end
+        processing = false
+    end)
 end
 
 Workspace.DescendantAdded:Connect(function(v)
-    task.defer(function()
-        pcall(function() handleObject(v) end)
-    end)
-end)
-
--- ==================== CULLING ====================
-local CULL_DIST_SQ = 80 * 80
-local culled = {}
-local cullIndex = 1
-local cullList = {}
-
-task.spawn(function()
-    while uiParent.Parent do
-        task.wait(5)
-        local list = {}
-        for _, v in ipairs(Workspace:GetDescendants()) do
-            if v:IsA("BasePart") and not isChar(v) then
-                list[#list + 1] = v
-            end
-        end
-        cullList = list
-        cullIndex = 1
-    end
-end)
-
-task.spawn(function()
-    while uiParent.Parent do
-        task.wait(0.1)
-        pcall(function()
-            if not Camera then return end
-            local camPos = Camera.CFrame.Position
-            local list = cullList
-            local n = #list
-            if n == 0 then return end
-            
-            local startIdx = cullIndex
-            local chunk = math.ceil(n / 5)
-            local endIdx = math.min(startIdx + chunk, n)
-            
-            for i = startIdx, endIdx do
-                local v = list[i]
-                if v and v.Parent then
-                    local pos = v.Position
-                    if pos.Y < camPos.Y - 3 then
-                        if culled[v] then
-                            culled[v] = false
-                            pcall(function() v.LocalTransparencyModifier = 0 end)
-                        end
-                    else
-                        local dx = pos.X - camPos.X
-                        local dy = pos.Y - camPos.Y
-                        local dz = pos.Z - camPos.Z
-                        local distSq = dx*dx + dy*dy + dz*dz
-                        local shouldHide = distSq > CULL_DIST_SQ
-
-                        if shouldHide and not culled[v] then
-                            culled[v] = true
-                            pcall(function() v.LocalTransparencyModifier = 1 end)
-                        elseif not shouldHide and culled[v] then
-                            culled[v] = false
-                            pcall(function() v.LocalTransparencyModifier = 0 end)
-                        end
-                    end
-                end
-            end
-            
-            cullIndex = endIdx + 1
-            if cullIndex > n then cullIndex = 1 end
-        end)
-    end
-end)
-
--- ==================== GC ====================
-task.spawn(function()
-    while uiParent.Parent do
-        task.wait(30)
-        pcall(function()
-            if RunService:IsRunning() then
-                collectgarbage("collect")
-            end
-        end)
-    end
+    table.insert(pendingQueue, v)
+    processQueue()
 end)
 
 -- ==================== UI FPS + PING ====================
@@ -608,6 +552,8 @@ pingValue.Parent = box
 
 local frames = 0
 local lastTime = tick()
+local pingHistory = {}
+local pingIndex = 1
 
 task.spawn(function()
     RunService.RenderStepped:Connect(function()
@@ -636,16 +582,30 @@ task.spawn(function()
         end
         fpsValue.TextColor3 = fpsColor
 
+        -- Ping đo trung bình 5 mẫu để hiển thị mượt
         local ping = 0
         pcall(function()
             ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
         end)
-        pingValue.Text = ping .. "ms"
+        
+        pingHistory[pingIndex] = ping
+        pingIndex = pingIndex + 1
+        if pingIndex > 5 then pingIndex = 1 end
+        
+        local sum = 0
+        local count = 0
+        for _, p in pairs(pingHistory) do
+            sum = sum + p
+            count = count + 1
+        end
+        local avgPing = math.floor(sum / count)
+
+        pingValue.Text = avgPing .. "ms"
 
         local pingColor
-        if ping <= 27 then
+        if avgPing <= 27 then
             pingColor = Color3.fromRGB(0, 255, 120)
-        elseif ping <= 110 then
+        elseif avgPing <= 110 then
             pingColor = Color3.fromRGB(255, 200, 60)
         else
             pingColor = Color3.fromRGB(255, 60, 60)

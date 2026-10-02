@@ -276,7 +276,6 @@ popup.ClipsDescendants = true
 popup.Parent = sg
 Instance.new("UICorner", popup).CornerRadius = UDim.new(0, 14)
 
--- Viền đỏ mỏng bo tròn
 local borderHolder = Instance.new("Frame")
 borderHolder.Name = "BorderHolder"
 borderHolder.Size = UDim2.new(1, -4, 1, -4)
@@ -302,7 +301,6 @@ task.spawn(function()
     end
 end)
 
--- ICON
 local iconWrap = Instance.new("Frame")
 iconWrap.Size = UDim2.new(0, 52, 0, 52)
 iconWrap.Position = UDim2.new(0, 20, 0, 22)
@@ -656,6 +654,40 @@ sliderKnob.ZIndex = 23
 sliderKnob.Parent = sliderBg
 Instance.new("UICorner", sliderKnob).CornerRadius = UDim.new(1, 0)
 
+-- KÝ TỰ ∟ GÓC TRÁI DƯỚI (khai báo TRƯỚC hàm applyOpacity để tránh lỗi)
+local cornerL = Instance.new("TextButton")
+cornerL.Size = UDim2.new(0, 20, 0, 20)
+cornerL.Position = UDim2.new(0, 0, 1, 0)
+cornerL.AnchorPoint = Vector2.new(0, 1)
+cornerL.BackgroundTransparency = 1
+cornerL.Text = ""
+cornerL.BorderSizePixel = 0
+cornerL.ZIndex = 10
+cornerL.Parent = box
+
+local vertLine = Instance.new("Frame")
+vertLine.Size = UDim2.new(0, 2, 0, 16)
+vertLine.Position = UDim2.new(0, 1, 1, 0)
+vertLine.AnchorPoint = Vector2.new(0, 1)
+vertLine.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+vertLine.BackgroundTransparency = 0.3
+vertLine.BorderSizePixel = 0
+vertLine.ZIndex = 11
+vertLine.Parent = cornerL
+Instance.new("UICorner", vertLine).CornerRadius = UDim.new(1, 0)
+
+local horizLine = Instance.new("Frame")
+horizLine.Size = UDim2.new(0, 16, 0, 2)
+horizLine.Position = UDim2.new(0, 1, 1, 0)
+horizLine.AnchorPoint = Vector2.new(0, 1)
+horizLine.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+horizLine.BackgroundTransparency = 0.3
+horizLine.BorderSizePixel = 0
+horizLine.ZIndex = 11
+horizLine.Parent = cornerL
+Instance.new("UICorner", horizLine).CornerRadius = UDim.new(1, 0)
+
+-- HÀM ÁP DỤNG ĐỘ MỜ (bỏ qua cornerL và sliderPanel)
 local function applyOpacity(value)
     local transparency = 1 - value
     box.BackgroundTransparency = math.clamp(0.1 + transparency * 0.85, 0, 1)
@@ -663,11 +695,25 @@ local function applyOpacity(value)
     bxStroke.Transparency = math.clamp(0.4 + transparency * 0.55, 0, 1)
     
     for _, child in ipairs(box:GetDescendants()) do
-        if child:IsA("TextLabel") then
-            child.TextTransparency = math.clamp(transparency * 0.9, 0, 1)
-        elseif child:IsA("TextButton") then
-            child.BackgroundTransparency = math.clamp(transparency * 0.5, 0, 0.7)
-            child.TextTransparency = math.clamp(transparency * 0.7, 0, 0.8)
+        -- Bỏ qua mọi thứ nằm trong cornerL hoặc sliderPanel
+        local skip = false
+        local parent = child.Parent
+        while parent do
+            if parent == cornerL or parent == sliderPanel then
+                skip = true
+                break
+            end
+            if parent == box then break end
+            parent = parent.Parent
+        end
+        
+        if not skip then
+            if child:IsA("TextLabel") then
+                child.TextTransparency = math.clamp(transparency * 0.9, 0, 1)
+            elseif child:IsA("TextButton") then
+                child.BackgroundTransparency = math.clamp(transparency * 0.5, 0, 0.7)
+                child.TextTransparency = math.clamp(transparency * 0.7, 0, 0.8)
+            end
         end
     end
 end
@@ -702,45 +748,6 @@ opacityB.MouseButton1Click:Connect(function()
     sliderVisible = not sliderVisible
     sliderPanel.Visible = sliderVisible
 end)
-
-applyOpacity(0.5)
-
--- ===== KÍ TỰ ∟ SÁT GÓC TRÁI DƯỚI =====
--- vertLine và horizLine dùng AnchorPoint (0,1) để neo góc dưới trái của chính đường
--- sau đó đặt Position (0,0,1,0) để đầu dưới/đầu trái chạm chính xác mép box
-local cornerL = Instance.new("TextButton")
-cornerL.Size = UDim2.new(0, 20, 0, 20)
-cornerL.Position = UDim2.new(0, 0, 1, 0)
-cornerL.AnchorPoint = Vector2.new(0, 1)
-cornerL.BackgroundTransparency = 1
-cornerL.Text = ""
-cornerL.BorderSizePixel = 0
-cornerL.ZIndex = 10
-cornerL.Parent = box
-
--- Đường dọc của ∟ - đầu dưới chạm đáy box
-local vertLine = Instance.new("Frame")
-vertLine.Size = UDim2.new(0, 2, 0, 16)
-vertLine.Position = UDim2.new(0, 1, 1, 0)
-vertLine.AnchorPoint = Vector2.new(0, 1)
-vertLine.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-vertLine.BackgroundTransparency = 0.3
-vertLine.BorderSizePixel = 0
-vertLine.ZIndex = 11
-vertLine.Parent = cornerL
-Instance.new("UICorner", vertLine).CornerRadius = UDim.new(1, 0)
-
--- Đường ngang của ∟ - đầu trái chạm mép trái box, đáy sát đáy
-local horizLine = Instance.new("Frame")
-horizLine.Size = UDim2.new(0, 16, 0, 2)
-horizLine.Position = UDim2.new(0, 1, 1, 0)
-horizLine.AnchorPoint = Vector2.new(0, 1)
-horizLine.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-horizLine.BackgroundTransparency = 0.3
-horizLine.BorderSizePixel = 0
-horizLine.ZIndex = 11
-horizLine.Parent = cornerL
-Instance.new("UICorner", horizLine).CornerRadius = UDim.new(1, 0)
 
 -- NÚT HIỆN
 local showSg = Instance.new("ScreenGui")
@@ -869,5 +876,9 @@ task.spawn(function()
         end
     end
 end)
+
+-- Khởi tạo opacity sau khi mọi element đã tồn tại
+task.wait(0.1)
+applyOpacity(0.5)
 
 print("✅ fix lag + anti-afk v1.0 by kudo29001 loaded")

@@ -18,12 +18,12 @@ if not uiParent then uiParent = playerGui end
 -- Xoá UI cũ
 pcall(function()
     for _, v in pairs(game:GetService("CoreGui"):GetChildren()) do
-        if v.Name == "KudoPopup" or v.Name == "KudoStats" then v:Destroy() end
+        if v.Name == "KudoPopup" or v.Name == "KudoStats" or v.Name == "KudoToggle" then v:Destroy() end
     end
 end)
 pcall(function()
     for _, v in pairs(playerGui:GetChildren()) do
-        if v.Name == "KudoPopup" or v.Name == "KudoStats" then v:Destroy() end
+        if v.Name == "KudoPopup" or v.Name == "KudoStats" or v.Name == "KudoToggle" then v:Destroy() end
     end
 end)
 
@@ -521,8 +521,8 @@ statsGui.DisplayOrder = 2147483647
 statsGui.Parent = uiParent
 
 local box = Instance.new("Frame")
-box.Size = UDim2.new(0, 130, 0, 78)
-box.Position = UDim2.new(1, -140, 1, -88)
+box.Size = UDim2.new(0, 130, 0, 62)
+box.Position = UDim2.new(1, -140, 1, -72)
 box.BackgroundColor3 = Color3.fromRGB(14, 14, 20)
 box.BackgroundTransparency = 0.4
 box.BorderSizePixel = 0
@@ -536,7 +536,6 @@ boxStroke.Thickness = 1
 boxStroke.Transparency = 0.6
 boxStroke.Parent = box
 
--- Header kéo
 local header = Instance.new("Frame")
 header.Size = UDim2.new(1, 0, 0, 16)
 header.Position = UDim2.new(0, 0, 0, 0)
@@ -555,7 +554,6 @@ dragHint.BorderSizePixel = 0
 dragHint.Parent = header
 Instance.new("UICorner", dragHint).CornerRadius = UDim.new(1, 0)
 
--- FPS row
 local fpsTitle = Instance.new("TextLabel")
 fpsTitle.Size = UDim2.new(0, 35, 0, 18)
 fpsTitle.Position = UDim2.new(0, 10, 0, 20)
@@ -578,7 +576,6 @@ fpsValue.TextColor3 = Color3.fromRGB(0, 255, 120)
 fpsValue.TextXAlignment = Enum.TextXAlignment.Right
 fpsValue.Parent = box
 
--- PING row
 local pingTitle = Instance.new("TextLabel")
 pingTitle.Size = UDim2.new(0, 35, 0, 18)
 pingTitle.Position = UDim2.new(0, 10, 0, 38)
@@ -601,18 +598,6 @@ pingValue.TextColor3 = Color3.fromRGB(0, 255, 120)
 pingValue.TextXAlignment = Enum.TextXAlignment.Right
 pingValue.Parent = box
 
--- Credit dưới cùng
-local creditLabel = Instance.new("TextLabel")
-creditLabel.Size = UDim2.new(1, -10, 0, 14)
-creditLabel.Position = UDim2.new(0, 5, 1, -16)
-creditLabel.BackgroundTransparency = 1
-creditLabel.Text = "@script by kudo29001"
-creditLabel.Font = Enum.Font.Gotham
-creditLabel.TextSize = 9
-creditLabel.TextColor3 = Color3.fromRGB(140, 140, 155)
-creditLabel.TextXAlignment = Enum.TextXAlignment.Center
-creditLabel.Parent = box
-
 -- Nút X tròn
 local closeBtn = Instance.new("TextButton")
 closeBtn.Size = UDim2.new(0, 22, 0, 22)
@@ -627,8 +612,117 @@ closeBtn.ZIndex = 10
 closeBtn.Parent = box
 Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(1, 0)
 
+-- Nút ẩn (—) nằm cạnh nút X
+local hideBtn = Instance.new("TextButton")
+hideBtn.Size = UDim2.new(0, 22, 0, 22)
+hideBtn.Position = UDim2.new(1, -52, 0, -3)
+hideBtn.BackgroundColor3 = Color3.fromRGB(255, 150, 50)
+hideBtn.Text = "—"
+hideBtn.Font = Enum.Font.GothamBold
+hideBtn.TextSize = 13
+hideBtn.TextColor3 = Color3.new(1, 1, 1)
+hideBtn.BorderSizePixel = 0
+hideBtn.ZIndex = 10
+hideBtn.Parent = box
+Instance.new("UICorner", hideBtn).CornerRadius = UDim.new(1, 0)
+
+-- Credit ngoài UI
+local creditLabel = Instance.new("TextLabel")
+creditLabel.Size = UDim2.new(0, 140, 0, 16)
+creditLabel.Position = UDim2.new(1, 4, 1, -18)
+creditLabel.BackgroundTransparency = 1
+creditLabel.Text = "@script by kudo29001"
+creditLabel.Font = Enum.Font.GothamBold
+creditLabel.TextSize = 12
+creditLabel.TextColor3 = Color3.fromRGB(255, 90, 90)
+creditLabel.TextTransparency = 0.35
+creditLabel.TextXAlignment = Enum.TextXAlignment.Left
+creditLabel.ZIndex = 1
+creditLabel.Parent = box
+
+-- Resize hình chữ V
+local resizeBtn = Instance.new("TextButton")
+resizeBtn.Size = UDim2.new(0, 22, 0, 22)
+resizeBtn.Position = UDim2.new(1, -2, 1, -2)
+resizeBtn.BackgroundTransparency = 1
+resizeBtn.Text = ""
+resizeBtn.BorderSizePixel = 0
+resizeBtn.ZIndex = 9
+resizeBtn.Parent = box
+
+local vLeft = Instance.new("Frame")
+vLeft.Size = UDim2.new(0, 2, 0, 12)
+vLeft.Position = UDim2.new(0, 6, 0, 10)
+vLeft.AnchorPoint = Vector2.new(0.5, 0.5)
+vLeft.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+vLeft.BackgroundTransparency = 0.4
+vLeft.BorderSizePixel = 0
+vLeft.Rotation = -45
+vLeft.ZIndex = 10
+vLeft.Parent = resizeBtn
+Instance.new("UICorner", vLeft).CornerRadius = UDim.new(1, 0)
+
+local vRight = Instance.new("Frame")
+vRight.Size = UDim2.new(0, 2, 0, 12)
+vRight.Position = UDim2.new(0, 16, 0, 10)
+vRight.AnchorPoint = Vector2.new(0.5, 0.5)
+vRight.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+vRight.BackgroundTransparency = 0.4
+vRight.BorderSizePixel = 0
+vRight.Rotation = 45
+vRight.ZIndex = 10
+vRight.Parent = resizeBtn
+Instance.new("UICorner", vRight).CornerRadius = UDim.new(1, 0)
+
+-- ===== NÚT HIỆN UI (chỉ hiện khi UI bị ẩn) =====
+local showGui = Instance.new("ScreenGui")
+showGui.Name = "KudoToggle"
+showGui.ResetOnSpawn = false
+showGui.IgnoreGuiInset = true
+showGui.DisplayOrder = 2147483647
+showGui.Parent = uiParent
+
+local showBtn = Instance.new("TextButton")
+showBtn.Size = UDim2.new(0, 40, 0, 40)
+showBtn.Position = UDim2.new(1, -50, 1, -50)
+showBtn.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+showBtn.Text = "⚡"
+showBtn.Font = Enum.Font.GothamBold
+showBtn.TextSize = 20
+showBtn.TextColor3 = Color3.new(1, 1, 1)
+showBtn.BorderSizePixel = 0
+showBtn.Visible = false
+showBtn.Parent = showGui
+Instance.new("UICorner", showBtn).CornerRadius = UDim.new(1, 0)
+
+local showStroke = Instance.new("UIStroke")
+showStroke.Color = Color3.fromRGB(255, 100, 100)
+showStroke.Thickness = 1.5
+showStroke.Transparency = 0.3
+showStroke.Parent = showBtn
+
+-- Ẩn UI: hide box + credit, hiện nút show
+hideBtn.MouseButton1Click:Connect(function()
+    pcall(function()
+        box.Visible = false
+        showBtn.Visible = true
+    end)
+end)
+
+-- Hiện UI: hiện box + credit, ẩn nút show
+showBtn.MouseButton1Click:Connect(function()
+    pcall(function()
+        box.Visible = true
+        showBtn.Visible = false
+    end)
+end)
+
+-- Nút X = tắt hẳn cả 2 GUI
 closeBtn.MouseButton1Click:Connect(function()
-    pcall(function() statsGui:Destroy() end)
+    pcall(function()
+        statsGui:Destroy()
+        showGui:Destroy()
+    end)
 end)
 
 -- Kéo bằng header
@@ -650,114 +744,4 @@ UserInputService.InputChanged:Connect(function(input)
         local delta = input.Position - dragStart
         box.Position = UDim2.new(
             startPos.X.Scale, startPos.X.Offset + delta.X,
-            startPos.Y.Scale, startPos.Y.Offset + delta.Y
-        )
-    end
-end)
-
-UserInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.Touch 
-        or input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = false
-    end
-end)
-
--- Resize bằng hình chữ V
-local resizeBtn = Instance.new("TextButton")
-resizeBtn.Size = UDim2.new(0, 24, 0, 24)
-resizeBtn.Position = UDim2.new(1, -26, 1, -26)
-resizeBtn.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
-resizeBtn.BackgroundTransparency = 0.4
-resizeBtn.Text = ""
-resizeBtn.BorderSizePixel = 0
-resizeBtn.ZIndex = 9
-resizeBtn.Parent = box
-Instance.new("UICorner", resizeBtn).CornerRadius = UDim.new(0, 6)
-
-local vLeft = Instance.new("Frame")
-vLeft.Size = UDim2.new(0, 2, 0, 9)
-vLeft.Position = UDim2.new(0, 7, 0, 9)
-vLeft.AnchorPoint = Vector2.new(0.5, 0.5)
-vLeft.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-vLeft.BorderSizePixel = 0
-vLeft.Rotation = -45
-vLeft.ZIndex = 10
-vLeft.Parent = resizeBtn
-Instance.new("UICorner", vLeft).CornerRadius = UDim.new(1, 0)
-
-local vRight = Instance.new("Frame")
-vRight.Size = UDim2.new(0, 2, 0, 9)
-vRight.Position = UDim2.new(0, 15, 0, 9)
-vRight.AnchorPoint = Vector2.new(0.5, 0.5)
-vRight.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-vRight.BorderSizePixel = 0
-vRight.Rotation = 45
-vRight.ZIndex = 10
-vRight.Parent = resizeBtn
-Instance.new("UICorner", vRight).CornerRadius = UDim.new(1, 0)
-
-local resizing = false
-local resizeStart, resizeStartSize
-
-resizeBtn.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.Touch 
-        or input.UserInputType == Enum.UserInputType.MouseButton1 then
-        resizing = true
-        resizeStart = input.Position
-        resizeStartSize = box.Size
-    end
-end)
-
-UserInputService.InputChanged:Connect(function(input)
-    if resizing and (input.UserInputType == Enum.UserInputType.Touch 
-        or input.UserInputType == Enum.UserInputType.MouseMovement) then
-        local delta = input.Position - resizeStart
-        local newX = math.max(110, resizeStartSize.X.Offset + delta.X)
-        local newY = math.max(70, resizeStartSize.Y.Offset + delta.Y)
-        box.Size = UDim2.new(0, newX, 0, newY)
-    end
-end)
-
-UserInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.Touch 
-        or input.UserInputType == Enum.UserInputType.MouseButton1 then
-        resizing = false
-    end
-end)
-
-local frames = 0
-local lastTime = tick()
-
-task.spawn(function()
-    RunService.RenderStepped:Connect(function()
-        frames = frames + 1
-    end)
-    while statsGui.Parent do
-        task.wait(0.5)
-        local now = tick()
-        local dt = now - lastTime
-        lastTime = now
-        local currentFPS = math.floor(frames / dt + 0.5)
-        frames = 0
-
-        fpsValue.Text = tostring(currentFPS)
-        if currentFPS < 40 then
-            fpsValue.TextColor3 = Color3.fromRGB(255, 60, 60)
-        else
-            fpsValue.TextColor3 = Color3.fromRGB(0, 255, 120)
-        end
-
-        local ping = 0
-        pcall(function()
-            ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
-        end)
-        pingValue.Text = ping .. "ms"
-        if ping <= 100 then
-            pingValue.TextColor3 = Color3.fromRGB(0, 255, 120)
-        else
-            pingValue.TextColor3 = Color3.fromRGB(255, 60, 60)
-        end
-    end
-end)
-
-print("✅ fix lag v1.0 by kudo29001")
+            startPos.Y.Scale, start

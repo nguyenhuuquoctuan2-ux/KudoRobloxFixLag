@@ -744,4 +744,82 @@ UserInputService.InputChanged:Connect(function(input)
         local delta = input.Position - dragStart
         box.Position = UDim2.new(
             startPos.X.Scale, startPos.X.Offset + delta.X,
-            startPos.Y.Scale, start
+            startPos.Y.Scale, startPos.Y.Offset + delta.Y
+        )
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch 
+        or input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = false
+    end
+end)
+
+-- Resize
+local resizing = false
+local resizeStart, resizeStartSize
+
+resizeBtn.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch 
+        or input.UserInputType == Enum.UserInputType.MouseButton1 then
+        resizing = true
+        resizeStart = input.Position
+        resizeStartSize = box.Size
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if resizing and (input.UserInputType == Enum.UserInputType.Touch 
+        or input.UserInputType == Enum.UserInputType.MouseMovement) then
+        local delta = input.Position - resizeStart
+        local newX = math.max(110, resizeStartSize.X.Offset + delta.X)
+        local newY = math.max(55, resizeStartSize.Y.Offset + delta.Y)
+        box.Size = UDim2.new(0, newX, 0, newY)
+        creditLabel.Position = UDim2.new(1, 4, 1, -18)
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch 
+        or input.UserInputType == Enum.UserInputType.MouseButton1 then
+        resizing = false
+    end
+end)
+
+local frames = 0
+local lastTime = tick()
+
+task.spawn(function()
+    RunService.RenderStepped:Connect(function()
+        frames = frames + 1
+    end)
+    while statsGui.Parent do
+        task.wait(0.5)
+        local now = tick()
+        local dt = now - lastTime
+        lastTime = now
+        local currentFPS = math.floor(frames / dt + 0.5)
+        frames = 0
+
+        fpsValue.Text = tostring(currentFPS)
+        if currentFPS < 40 then
+            fpsValue.TextColor3 = Color3.fromRGB(255, 60, 60)
+        else
+            fpsValue.TextColor3 = Color3.fromRGB(0, 255, 120)
+        end
+
+        local ping = 0
+        pcall(function()
+            ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
+        end)
+        pingValue.Text = ping .. "ms"
+        if ping <= 100 then
+            pingValue.TextColor3 = Color3.fromRGB(0, 255, 120)
+        else
+            pingValue.TextColor3 = Color3.fromRGB(255, 60, 60)
+        end
+    end
+end)
+
+print("✅ fix lag v1.0 by kudo29001")

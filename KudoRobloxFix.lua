@@ -4,6 +4,7 @@ local Lighting = game:GetService("Lighting")
 local Workspace = game:GetService("Workspace")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
 local Terrain = Workspace:FindFirstChildOfClass("Terrain")
 local Camera = Workspace.CurrentCamera
 local Stats = game:GetService("Stats")
@@ -14,7 +15,7 @@ pcall(function()
 end)
 if not uiParent then uiParent = playerGui end
 
--- ==================== POPUP ĐƠN GIẢN ====================
+-- ==================== POPUP ====================
 local popupGui = Instance.new("ScreenGui")
 popupGui.Name = "KudoPopup"
 popupGui.ResetOnSpawn = false
@@ -46,7 +47,6 @@ icon.TextSize = 20
 icon.TextColor3 = Color3.fromRGB(255, 80, 80)
 icon.Parent = popup
 
--- Bánh răng quay
 task.spawn(function()
     local r = 0
     while icon.Parent do
@@ -454,7 +454,7 @@ task.spawn(function()
     end
 end)
 
--- ==================== UI FPS + PING ====================
+-- ==================== UI FPS + PING (KÉO + RESIZE) ====================
 local statsGui = Instance.new("ScreenGui")
 statsGui.Name = "KudoStats"
 statsGui.ResetOnSpawn = false
@@ -466,8 +466,10 @@ local box = Instance.new("Frame")
 box.Size = UDim2.new(0, 100, 0, 46)
 box.Position = UDim2.new(1, -110, 1, -56)
 box.BackgroundColor3 = Color3.fromRGB(14, 14, 20)
-box.BackgroundTransparency = 0.45
+box.BackgroundTransparency = 0.4
 box.BorderSizePixel = 0
+box.Active = true
+box.Draggable = true
 box.Parent = statsGui
 Instance.new("UICorner", box).CornerRadius = UDim.new(0, 8)
 
@@ -529,20 +531,93 @@ pingValue.TextColor3 = Color3.fromRGB(0, 255, 120)
 pingValue.TextXAlignment = Enum.TextXAlignment.Right
 pingValue.Parent = box
 
+-- Nút X hình tròn
 local closeBtn = Instance.new("TextButton")
-closeBtn.Size = UDim2.new(0, 16, 0, 16)
-closeBtn.Position = UDim2.new(1, -22, 0, 4)
+closeBtn.Size = UDim2.new(0, 18, 0, 18)
+closeBtn.Position = UDim2.new(1, -24, 0, 4)
 closeBtn.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
-closeBtn.Text = "✕"
+closeBtn.Text = "x"
 closeBtn.Font = Enum.Font.GothamBold
-closeBtn.TextSize = 10
+closeBtn.TextSize = 12
 closeBtn.TextColor3 = Color3.new(1, 1, 1)
 closeBtn.BorderSizePixel = 0
 closeBtn.Parent = box
-Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 4)
+Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(1, 0)
 
 closeBtn.MouseButton1Click:Connect(function()
     pcall(function() statsGui:Destroy() end)
+end)
+
+-- Kéo di chuyển bằng touch (mobile)
+local dragging = false
+local dragStart, startPos
+
+box.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch 
+        or input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = box.Position
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if dragging and (input.UserInputType == Enum.UserInputType.Touch 
+        or input.UserInputType == Enum.UserInputType.MouseMovement) then
+        local delta = input.Position - dragStart
+        box.Position = UDim2.new(
+            startPos.X.Scale, startPos.X.Offset + delta.X,
+            startPos.Y.Scale, startPos.Y.Offset + delta.Y
+        )
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch 
+        or input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = false
+    end
+end)
+
+-- Resize bằng cách kéo góc dưới phải
+local resizeHandle = Instance.new("TextButton")
+resizeHandle.Size = UDim2.new(0, 12, 0, 12)
+resizeHandle.Position = UDim2.new(1, -14, 1, -14)
+resizeHandle.BackgroundTransparency = 1
+resizeHandle.Text = ""
+resizeHandle.Parent = box
+
+local resizing = false
+local resizeStart, resizeStartSize
+
+resizeHandle.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch 
+        or input.UserInputType == Enum.UserInputType.MouseButton1 then
+        resizing = true
+        resizeStart = input.Position
+        resizeStartSize = box.Size
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if resizing and (input.UserInputType == Enum.UserInputType.Touch 
+        or input.UserInputType == Enum.UserInputType.MouseMovement) then
+        local delta = input.Position - resizeStart
+        local newX = math.max(80, resizeStartSize.X.Offset + delta.X)
+        local newY = math.max(40, resizeStartSize.Y.Offset + delta.Y)
+        box.Size = UDim2.new(0, newX, 0, newY)
+        -- Cập nhật vị trí các element theo size mới
+        sep.Position = UDim2.new(0, 8, 0.5, 0)
+        pingTitle.Position = UDim2.new(0, 6, 0.5, 0)
+        pingValue.Position = UDim2.new(1, -62, 0.5, 0)
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Touch 
+        or input.UserInputType == Enum.UserInputType.MouseButton1 then
+        resizing = false
+    end
 end)
 
 local frames = 0

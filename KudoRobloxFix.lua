@@ -44,7 +44,6 @@ popup.ClipsDescendants = false
 popup.Parent = popupGui
 Instance.new("UICorner", popup).CornerRadius = UDim.new(0, 16)
 
--- Viền RGB chạy
 local border = Instance.new("UIStroke")
 border.Color = Color3.fromRGB(255, 60, 60)
 border.Thickness = 1.8
@@ -61,7 +60,6 @@ task.spawn(function()
     end
 end)
 
--- Lớp gradient nền
 local bgGradient = Instance.new("UIGradient")
 bgGradient.Color = ColorSequence.new({
     ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 15, 20)),
@@ -71,7 +69,6 @@ bgGradient.Color = ColorSequence.new({
 bgGradient.Rotation = 135
 bgGradient.Parent = popup
 
--- Accent bar bên trái
 local accentBar = Instance.new("Frame")
 accentBar.Size = UDim2.new(0, 4, 1, -24)
 accentBar.Position = UDim2.new(0, 0, 0, 12)
@@ -89,7 +86,6 @@ accentGradient.Color = ColorSequence.new({
 accentGradient.Rotation = 90
 accentGradient.Parent = accentBar
 
--- Icon bánh răng
 local iconWrap = Instance.new("Frame")
 iconWrap.Size = UDim2.new(0, 48, 0, 48)
 iconWrap.Position = UDim2.new(0, 20, 0.5, -24)
@@ -130,7 +126,6 @@ task.spawn(function()
     end
 end)
 
--- Pulse ring phát sáng quanh icon
 task.spawn(function()
     while iconWrap.Parent do
         local ring = Instance.new("Frame")
@@ -164,7 +159,6 @@ task.spawn(function()
     end
 end)
 
--- Text
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, -100, 0, 24)
 title.Position = UDim2.new(0, 82, 0, 20)
@@ -197,7 +191,6 @@ sub.TextColor3 = Color3.fromRGB(150, 150, 165)
 sub.TextXAlignment = Enum.TextXAlignment.Left
 sub.Parent = popup
 
--- Progress bar chạy dưới đáy
 local progressBar = Instance.new("Frame")
 progressBar.Size = UDim2.new(0, 0, 0, 2)
 progressBar.Position = UDim2.new(0, 20, 1, -2)
@@ -213,7 +206,6 @@ progressGradient.Color = ColorSequence.new({
 })
 progressGradient.Parent = progressBar
 
--- ANIMATION MỞ
 popup.BackgroundTransparency = 1
 iconWrap.BackgroundTransparency = 1
 icon.TextTransparency = 1
@@ -244,7 +236,6 @@ TweenService:Create(progressBar, TweenInfo.new(3, Enum.EasingStyle.Linear), {
     Size = UDim2.new(1, -40, 0, 2)
 }):Play()
 
--- ANIMATION TẮT
 task.delay(3.5, function()
     pcall(function()
         TweenService:Create(sub, TweenInfo.new(0.2), {TextTransparency = 1}):Play()
@@ -633,8 +624,8 @@ statsGui.DisplayOrder = 2147483647
 statsGui.Parent = uiParent
 
 local box = Instance.new("Frame")
-box.Size = UDim2.new(0, 140, 0, 66)
-box.Position = UDim2.new(1, -150, 1, -76)
+box.Size = UDim2.new(0, 150, 0, 84)
+box.Position = UDim2.new(1, -160, 1, -94)
 box.BackgroundColor3 = Color3.fromRGB(14, 14, 20)
 box.BackgroundTransparency = 0.35
 box.BorderSizePixel = 0
@@ -669,8 +660,8 @@ Instance.new("UICorner", dragHint).CornerRadius = UDim.new(1, 0)
 
 -- FPS
 local fpsTitle = Instance.new("TextLabel")
-fpsTitle.Size = UDim2.new(0, 40, 0, 18)
-fpsTitle.Position = UDim2.new(0, 10, 0, 22)
+fpsTitle.Size = UDim2.new(0, 40, 0, 16)
+fpsTitle.Position = UDim2.new(0, 10, 0, 20)
 fpsTitle.BackgroundTransparency = 1
 fpsTitle.Text = "FPS"
 fpsTitle.Font = Enum.Font.GothamBold
@@ -680,8 +671,8 @@ fpsTitle.TextXAlignment = Enum.TextXAlignment.Left
 fpsTitle.Parent = box
 
 local fpsValue = Instance.new("TextLabel")
-fpsValue.Size = UDim2.new(0, 70, 0, 18)
-fpsValue.Position = UDim2.new(1, -80, 0, 22)
+fpsValue.Size = UDim2.new(0, 70, 0, 16)
+fpsValue.Position = UDim2.new(1, -80, 0, 20)
 fpsValue.BackgroundTransparency = 1
 fpsValue.Text = "--"
 fpsValue.Font = Enum.Font.GothamBold
@@ -692,8 +683,8 @@ fpsValue.Parent = box
 
 -- PING
 local pingTitle = Instance.new("TextLabel")
-pingTitle.Size = UDim2.new(0, 40, 0, 18)
-pingTitle.Position = UDim2.new(0, 10, 0, 42)
+pingTitle.Size = UDim2.new(0, 40, 0, 16)
+pingTitle.Position = UDim2.new(0, 10, 0, 38)
 pingTitle.BackgroundTransparency = 1
 pingTitle.Text = "PING"
 pingTitle.Font = Enum.Font.GothamBold
@@ -703,8 +694,8 @@ pingTitle.TextXAlignment = Enum.TextXAlignment.Left
 pingTitle.Parent = box
 
 local pingValue = Instance.new("TextLabel")
-pingValue.Size = UDim2.new(0, 70, 0, 18)
-pingValue.Position = UDim2.new(1, -80, 0, 42)
+pingValue.Size = UDim2.new(0, 70, 0, 16)
+pingValue.Position = UDim2.new(1, -80, 0, 38)
 pingValue.BackgroundTransparency = 1
 pingValue.Text = "--"
 pingValue.Font = Enum.Font.GothamBold
@@ -713,7 +704,43 @@ pingValue.TextColor3 = Color3.fromRGB(0, 255, 120)
 pingValue.TextXAlignment = Enum.TextXAlignment.Right
 pingValue.Parent = box
 
--- Nút X (đóng hẳn)
+-- TIME
+local timeTitle = Instance.new("TextLabel")
+timeTitle.Size = UDim2.new(0, 40, 0, 16)
+timeTitle.Position = UDim2.new(0, 10, 0, 56)
+timeTitle.BackgroundTransparency = 1
+timeTitle.Text = "TIME"
+timeTitle.Font = Enum.Font.GothamBold
+timeTitle.TextSize = 10
+timeTitle.TextColor3 = Color3.fromRGB(180, 180, 180)
+timeTitle.TextXAlignment = Enum.TextXAlignment.Left
+timeTitle.Parent = box
+
+local timeValue = Instance.new("TextLabel")
+timeValue.Size = UDim2.new(0, 70, 0, 16)
+timeValue.Position = UDim2.new(1, -80, 0, 56)
+timeValue.BackgroundTransparency = 1
+timeValue.Text = "00:00"
+timeValue.Font = Enum.Font.GothamBold
+timeValue.TextSize = 12
+timeValue.TextColor3 = Color3.fromRGB(255, 100, 100)
+timeValue.TextXAlignment = Enum.TextXAlignment.Right
+timeValue.Parent = box
+
+-- Credit trong UI
+local creditLabel = Instance.new("TextLabel")
+creditLabel.Size = UDim2.new(1, -10, 0, 12)
+creditLabel.Position = UDim2.new(0, 5, 1, -14)
+creditLabel.BackgroundTransparency = 1
+creditLabel.Text = "@script by kudo29001"
+creditLabel.Font = Enum.Font.GothamBold
+creditLabel.TextSize = 10
+creditLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+creditLabel.TextTransparency = 0.3
+creditLabel.TextXAlignment = Enum.TextXAlignment.Center
+creditLabel.Parent = box
+
+-- Nút X
 local closeBtn = Instance.new("TextButton")
 closeBtn.Size = UDim2.new(0, 22, 0, 22)
 closeBtn.Position = UDim2.new(1, -26, 0, -3)
@@ -727,7 +754,7 @@ closeBtn.ZIndex = 10
 closeBtn.Parent = box
 Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(1, 0)
 
--- Nút ẩn (-)
+-- Nút ẩn
 local hideBtn = Instance.new("TextButton")
 hideBtn.Size = UDim2.new(0, 22, 0, 22)
 hideBtn.Position = UDim2.new(1, -52, 0, -3)
@@ -741,23 +768,9 @@ hideBtn.ZIndex = 10
 hideBtn.Parent = box
 Instance.new("UICorner", hideBtn).CornerRadius = UDim.new(1, 0)
 
--- Credit ngoài UI
-local creditLabel = Instance.new("TextLabel")
-creditLabel.Size = UDim2.new(0, 140, 0, 16)
-creditLabel.Position = UDim2.new(1, 4, 1, -18)
-creditLabel.BackgroundTransparency = 1
-creditLabel.Text = "@script by kudo29001"
-creditLabel.Font = Enum.Font.GothamBold
-creditLabel.TextSize = 12
-creditLabel.TextColor3 = Color3.fromRGB(255, 90, 90)
-creditLabel.TextTransparency = 0.35
-creditLabel.TextXAlignment = Enum.TextXAlignment.Left
-creditLabel.ZIndex = 1
-creditLabel.Parent = box
-
--- Resize hình chữ V
+-- Resize hình chữ V sát mép UI, xoay 45 độ trái
 local resizeBtn = Instance.new("TextButton")
-resizeBtn.Size = UDim2.new(0, 22, 0, 22)
+resizeBtn.Size = UDim2.new(0, 20, 0, 20)
 resizeBtn.Position = UDim2.new(1, -2, 1, -2)
 resizeBtn.BackgroundTransparency = 1
 resizeBtn.Text = ""
@@ -765,12 +778,13 @@ resizeBtn.BorderSizePixel = 0
 resizeBtn.ZIndex = 9
 resizeBtn.Parent = box
 
+-- Chữ V xoay 45 độ trái (dùng 2 đường kẻ chéo)
 local vLeft = Instance.new("Frame")
-vLeft.Size = UDim2.new(0, 2, 0, 12)
-vLeft.Position = UDim2.new(0, 6, 0, 10)
+vLeft.Size = UDim2.new(0, 2, 0, 10)
+vLeft.Position = UDim2.new(0, 5, 0, 9)
 vLeft.AnchorPoint = Vector2.new(0.5, 0.5)
 vLeft.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-vLeft.BackgroundTransparency = 0.4
+vLeft.BackgroundTransparency = 0.3
 vLeft.BorderSizePixel = 0
 vLeft.Rotation = -45
 vLeft.ZIndex = 10
@@ -778,18 +792,18 @@ vLeft.Parent = resizeBtn
 Instance.new("UICorner", vLeft).CornerRadius = UDim.new(1, 0)
 
 local vRight = Instance.new("Frame")
-vRight.Size = UDim2.new(0, 2, 0, 12)
-vRight.Position = UDim2.new(0, 16, 0, 10)
+vRight.Size = UDim2.new(0, 2, 0, 10)
+vRight.Position = UDim2.new(0, 13, 0, 9)
 vRight.AnchorPoint = Vector2.new(0.5, 0.5)
 vRight.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-vRight.BackgroundTransparency = 0.4
+vRight.BackgroundTransparency = 0.3
 vRight.BorderSizePixel = 0
 vRight.Rotation = 45
 vRight.ZIndex = 10
 vRight.Parent = resizeBtn
 Instance.new("UICorner", vRight).CornerRadius = UDim.new(1, 0)
 
--- ===== SCREEN GUI RIÊNG CHO NÚT HIỆN =====
+-- ===== NÚT HIỆN ⚡ =====
 local showGui = Instance.new("ScreenGui")
 showGui.Name = "KudoToggle"
 showGui.ResetOnSpawn = false
@@ -816,7 +830,6 @@ showStroke.Thickness = 1.5
 showStroke.Transparency = 0.3
 showStroke.Parent = showBtn
 
--- Ẩn UI
 hideBtn.MouseButton1Click:Connect(function()
     pcall(function()
         box.Visible = false
@@ -824,7 +837,6 @@ hideBtn.MouseButton1Click:Connect(function()
     end)
 end)
 
--- Hiện UI
 showBtn.MouseButton1Click:Connect(function()
     pcall(function()
         box.Visible = true
@@ -832,7 +844,6 @@ showBtn.MouseButton1Click:Connect(function()
     end)
 end)
 
--- Đóng hẳn
 closeBtn.MouseButton1Click:Connect(function()
     pcall(function()
         statsGui:Destroy()
@@ -888,10 +899,9 @@ UserInputService.InputChanged:Connect(function(input)
     if resizing and (input.UserInputType == Enum.UserInputType.Touch 
         or input.UserInputType == Enum.UserInputType.MouseMovement) then
         local delta = input.Position - resizeStart
-        local newX = math.max(120, resizeStartSize.X.Offset + delta.X)
-        local newY = math.max(66, resizeStartSize.Y.Offset + delta.Y)
+        local newX = math.max(130, resizeStartSize.X.Offset + delta.X)
+        local newY = math.max(80, resizeStartSize.Y.Offset + delta.Y)
         box.Size = UDim2.new(0, newX, 0, newY)
-        creditLabel.Position = UDim2.new(1, 4, 1, -18)
     end
 end)
 
@@ -899,6 +909,19 @@ UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.Touch 
         or input.UserInputType == Enum.UserInputType.MouseButton1 then
         resizing = false
+    end
+end)
+
+-- Bộ đếm thời gian đã chạy
+local startTime = tick()
+
+task.spawn(function()
+    while statsGui.Parent do
+        task.wait(1)
+        local elapsed = math.floor(tick() - startTime)
+        local mins = math.floor(elapsed / 60)
+        local secs = elapsed % 60
+        timeValue.Text = string.format("%02d:%02d", mins, secs)
     end
 end)
 

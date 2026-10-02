@@ -26,7 +26,7 @@ pcall(function()
     end
 end)
 
--- ==================== POPUP ====================
+-- ==================== POPUP GIỮA MÀN HÌNH ====================
 local popupGui = Instance.new("ScreenGui")
 popupGui.Name = "KudoPopup"
 popupGui.ResetOnSpawn = false
@@ -34,18 +34,30 @@ popupGui.IgnoreGuiInset = true
 popupGui.DisplayOrder = 2147483647
 popupGui.Parent = uiParent
 
+-- Overlay tối mờ toàn màn hình
+local overlay = Instance.new("Frame")
+overlay.Size = UDim2.new(1, 0, 1, 0)
+overlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+overlay.BackgroundTransparency = 1
+overlay.BorderSizePixel = 0
+overlay.ZIndex = 500
+overlay.Parent = popupGui
+
 local popup = Instance.new("Frame")
-popup.Size = UDim2.new(0, 340, 0, 96)
-popup.Position = UDim2.new(1, 360, 0.42, -48)
+popup.Size = UDim2.new(0, 380, 0, 160)
+popup.Position = UDim2.new(0.5, -190, 0.5, -80)
 popup.BackgroundColor3 = Color3.fromRGB(8, 8, 12)
+popup.BackgroundTransparency = 1
 popup.BorderSizePixel = 0
+popup.ZIndex = 1000
 popup.Parent = popupGui
 Instance.new("UICorner", popup).CornerRadius = UDim.new(0, 18)
 
+-- Viền RGB
 local border = Instance.new("UIStroke")
 border.Color = Color3.fromRGB(255, 60, 60)
 border.Thickness = 2
-border.Transparency = 0
+border.Transparency = 1
 border.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 border.Parent = popup
 
@@ -58,6 +70,7 @@ task.spawn(function()
     end
 end)
 
+-- Gradient nền
 local bgGradient = Instance.new("UIGradient")
 bgGradient.Color = ColorSequence.new({
     ColorSequenceKeypoint.new(0, Color3.fromRGB(35, 12, 20)),
@@ -67,11 +80,13 @@ bgGradient.Color = ColorSequence.new({
 bgGradient.Rotation = 135
 bgGradient.Parent = popup
 
+-- Accent bar trái
 local accentBar = Instance.new("Frame")
 accentBar.Size = UDim2.new(0, 5, 1, -30)
 accentBar.Position = UDim2.new(0, 0, 0, 15)
 accentBar.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
 accentBar.BorderSizePixel = 0
+accentBar.BackgroundTransparency = 1
 accentBar.Parent = popup
 Instance.new("UICorner", accentBar).CornerRadius = UDim.new(0, 3)
 
@@ -84,11 +99,13 @@ accentGradient.Color = ColorSequence.new({
 accentGradient.Rotation = 90
 accentGradient.Parent = accentBar
 
+-- Icon bánh răng
 local iconWrap = Instance.new("Frame")
-iconWrap.Size = UDim2.new(0, 56, 0, 56)
-iconWrap.Position = UDim2.new(0, 24, 0.5, -28)
+iconWrap.Size = UDim2.new(0, 64, 0, 64)
+iconWrap.Position = UDim2.new(0, 28, 0, 20)
 iconWrap.BackgroundColor3 = Color3.fromRGB(32, 14, 20)
 iconWrap.BorderSizePixel = 0
+iconWrap.BackgroundTransparency = 1
 iconWrap.Parent = popup
 Instance.new("UICorner", iconWrap).CornerRadius = UDim.new(1, 0)
 
@@ -103,7 +120,7 @@ iconGradient.Parent = iconWrap
 local iconStroke = Instance.new("UIStroke")
 iconStroke.Color = Color3.fromRGB(255, 80, 80)
 iconStroke.Thickness = 1.5
-iconStroke.Transparency = 0.2
+iconStroke.Transparency = 1
 iconStroke.Parent = iconWrap
 
 local glow = Instance.new("ImageLabel")
@@ -130,8 +147,9 @@ icon.Size = UDim2.new(1, 0, 1, 0)
 icon.BackgroundTransparency = 1
 icon.Text = "⚙"
 icon.Font = Enum.Font.GothamBold
-icon.TextSize = 30
+icon.TextSize = 34
 icon.TextColor3 = Color3.fromRGB(255, 110, 110)
+icon.TextTransparency = 1
 icon.ZIndex = 2
 icon.Parent = iconWrap
 
@@ -147,7 +165,7 @@ end)
 task.spawn(function()
     while iconWrap.Parent do
         local ring = Instance.new("Frame")
-        ring.Size = UDim2.new(0, 56, 0, 56)
+        ring.Size = UDim2.new(0, 64, 0, 64)
         ring.Position = UDim2.new(0, 0, 0, 0)
         ring.BackgroundTransparency = 1
         ring.ZIndex = 1
@@ -161,8 +179,8 @@ task.spawn(function()
         ringStroke.Parent = ring
         
         TweenService:Create(ring, TweenInfo.new(1.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            Size = UDim2.new(0, 100, 0, 100),
-            Position = UDim2.new(0, -22, 0, -22)
+            Size = UDim2.new(0, 110, 0, 110),
+            Position = UDim2.new(0, -23, 0, -23)
         }):Play()
         TweenService:Create(ringStroke, TweenInfo.new(1.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
             Transparency = 1,
@@ -177,102 +195,150 @@ task.spawn(function()
     end
 end)
 
+-- Text
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, -110, 0, 28)
-title.Position = UDim2.new(0, 96, 0, 22)
+title.Size = UDim2.new(1, -120, 0, 30)
+title.Position = UDim2.new(0, 108, 0, 30)
 title.BackgroundTransparency = 1
 title.Text = "fix lag v1.0"
 title.Font = Enum.Font.GothamBold
-title.TextSize = 20
+title.TextSize = 22
 title.TextColor3 = Color3.fromRGB(255, 100, 100)
+title.TextTransparency = 1
 title.TextXAlignment = Enum.TextXAlignment.Left
 title.ZIndex = 2
 title.Parent = popup
 
 local check = Instance.new("TextLabel")
-check.Size = UDim2.new(0, 30, 0, 28)
-check.Position = UDim2.new(1, -40, 0, 22)
+check.Size = UDim2.new(0, 30, 0, 30)
+check.Position = UDim2.new(1, -44, 0, 30)
 check.BackgroundTransparency = 1
 check.Text = "✓"
 check.Font = Enum.Font.GothamBold
-check.TextSize = 20
+check.TextSize = 22
 check.TextColor3 = Color3.fromRGB(80, 255, 130)
+check.TextTransparency = 1
 check.ZIndex = 2
 check.Parent = popup
 
 local sub = Instance.new("TextLabel")
-sub.Size = UDim2.new(1, -110, 0, 20)
-sub.Position = UDim2.new(0, 96, 0, 52)
+sub.Size = UDim2.new(1, -120, 0, 20)
+sub.Position = UDim2.new(0, 108, 0, 62)
 sub.BackgroundTransparency = 1
 sub.Text = "by kudo29001 ⚡"
 sub.Font = Enum.Font.Gotham
-sub.TextSize = 12
+sub.TextSize = 13
 sub.TextColor3 = Color3.fromRGB(150, 150, 165)
+sub.TextTransparency = 1
 sub.TextXAlignment = Enum.TextXAlignment.Left
 sub.ZIndex = 2
 sub.Parent = popup
 
-local progressBar = Instance.new("Frame")
-progressBar.Size = UDim2.new(0, 0, 0, 3)
-progressBar.Position = UDim2.new(0, 24, 1, -3)
-progressBar.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
-progressBar.BorderSizePixel = 0
-progressBar.ZIndex = 3
-progressBar.Parent = popup
-Instance.new("UICorner", progressBar).CornerRadius = UDim.new(1, 0)
+-- Số % load
+local percentLabel = Instance.new("TextLabel")
+percentLabel.Size = UDim2.new(1, -40, 0, 24)
+percentLabel.Position = UDim2.new(0, 20, 0, 100)
+percentLabel.BackgroundTransparency = 1
+percentLabel.Text = "0%"
+percentLabel.Font = Enum.Font.GothamBold
+percentLabel.TextSize = 16
+percentLabel.TextColor3 = Color3.fromRGB(255, 120, 120)
+percentLabel.TextTransparency = 1
+percentLabel.ZIndex = 3
+percentLabel.Parent = popup
+
+-- Progress bar
+local progressBg = Instance.new("Frame")
+progressBg.Size = UDim2.new(1, -40, 0, 6)
+progressBg.Position = UDim2.new(0, 20, 0, 130)
+progressBg.BackgroundColor3 = Color3.fromRGB(30, 20, 25)
+progressBg.BorderSizePixel = 0
+progressBg.BackgroundTransparency = 1
+progressBg.ZIndex = 2
+progressBg.Parent = popup
+Instance.new("UICorner", progressBg).CornerRadius = UDim.new(1, 0)
+
+local progressFill = Instance.new("Frame")
+progressFill.Size = UDim2.new(0, 0, 1, 0)
+progressFill.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
+progressFill.BorderSizePixel = 0
+progressFill.ZIndex = 3
+progressFill.Parent = progressBg
+Instance.new("UICorner", progressFill).CornerRadius = UDim.new(1, 0)
 
 local progressGradient = Instance.new("UIGradient")
 progressGradient.Color = ColorSequence.new({
     ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 60, 60)),
     ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 170, 80))
 })
-progressGradient.Parent = progressBar
+progressGradient.Parent = progressFill
 
+-- ==================== ANIMATION MỞ ====================
+-- Overlay tối dần
+TweenService:Create(overlay, TweenInfo.new(0.3), {BackgroundTransparency = 0.5}):Play()
+
+-- Popup hiện với scale nhỏ → to
+popup.Size = UDim2.new(0, 0, 0, 0)
+popup.Position = UDim2.new(0.5, 0, 0.5, 0)
 popup.BackgroundTransparency = 1
-iconWrap.BackgroundTransparency = 1
-icon.TextTransparency = 1
-title.TextTransparency = 1
-check.TextTransparency = 1
-sub.TextTransparency = 1
-border.Transparency = 1
-accentBar.BackgroundTransparency = 1
-progressBar.BackgroundTransparency = 1
 
-TweenService:Create(popup, TweenInfo.new(0.65, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-    Position = UDim2.new(1, -360, 0.42, -48),
+TweenService:Create(popup, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+    Size = UDim2.new(0, 380, 0, 160),
+    Position = UDim2.new(0.5, -190, 0.5, -80),
     BackgroundTransparency = 0
 }):Play()
 TweenService:Create(border, TweenInfo.new(0.4), {Transparency = 0}):Play()
 TweenService:Create(iconWrap, TweenInfo.new(0.4), {BackgroundTransparency = 0}):Play()
+TweenService:Create(iconStroke, TweenInfo.new(0.4), {Transparency = 0.2}):Play()
 TweenService:Create(accentBar, TweenInfo.new(0.4), {BackgroundTransparency = 0}):Play()
 
-task.wait(0.25)
+task.wait(0.3)
 TweenService:Create(icon, TweenInfo.new(0.3), {TextTransparency = 0}):Play()
 TweenService:Create(title, TweenInfo.new(0.3), {TextTransparency = 0}):Play()
 task.wait(0.1)
 TweenService:Create(check, TweenInfo.new(0.3), {TextTransparency = 0}):Play()
 TweenService:Create(sub, TweenInfo.new(0.3), {TextTransparency = 0}):Play()
-task.wait(0.1)
-TweenService:Create(progressBar, TweenInfo.new(0.3), {BackgroundTransparency = 0}):Play()
-TweenService:Create(progressBar, TweenInfo.new(3, Enum.EasingStyle.Linear), {
-    Size = UDim2.new(1, -48, 0, 3)
-}):Play()
+TweenService:Create(percentLabel, TweenInfo.new(0.3), {TextTransparency = 0}):Play()
+TweenService:Create(progressBg, TweenInfo.new(0.3), {BackgroundTransparency = 0}):Play()
 
+-- ==================== LOAD 0% → 100% ====================
+local loadDuration = 3.0
+local startTime = tick()
+
+task.spawn(function()
+    while tick() - startTime < loadDuration do
+        local t = (tick() - startTime) / loadDuration
+        if t > 1 then t = 1 end
+        local current = math.floor(t * 100)
+        percentLabel.Text = current .. "%"
+        progressFill.Size = UDim2.new(t, 0, 1, 0)
+        task.wait(0.03)
+    end
+    percentLabel.Text = "100%"
+    progressFill.Size = UDim2.new(1, 0, 1, 0)
+end)
+
+-- ==================== ANIMATION TẮT ====================
 task.delay(3.5, function()
     pcall(function()
         TweenService:Create(sub, TweenInfo.new(0.2), {TextTransparency = 1}):Play()
         TweenService:Create(check, TweenInfo.new(0.2), {TextTransparency = 1}):Play()
-        TweenService:Create(progressBar, TweenInfo.new(0.2), {BackgroundTransparency = 1}):Play()
-        task.wait(0.1)
+        TweenService:Create(percentLabel, TweenInfo.new(0.2), {TextTransparency = 1}):Play()
+        TweenService:Create(progressBg, TweenInfo.new(0.2), {BackgroundTransparency = 1}):Play()
+        TweenService:Create(progressFill, TweenInfo.new(0.2), {BackgroundTransparency = 1}):Play()
+        task.wait(0.15)
         TweenService:Create(title, TweenInfo.new(0.2), {TextTransparency = 1}):Play()
         TweenService:Create(icon, TweenInfo.new(0.2), {TextTransparency = 1}):Play()
         task.wait(0.1)
         TweenService:Create(iconWrap, TweenInfo.new(0.25), {BackgroundTransparency = 1}):Play()
         TweenService:Create(accentBar, TweenInfo.new(0.25), {BackgroundTransparency = 1}):Play()
         TweenService:Create(border, TweenInfo.new(0.25), {Transparency = 1}):Play()
-        task.wait(0.1)
+        TweenService:Create(iconStroke, TweenInfo.new(0.25), {Transparency = 1}):Play()
+        TweenService:Create(overlay, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
+        task.wait(0.15)
         TweenService:Create(popup, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-            Position = UDim2.new(1, 360, 0.42, -48),
+            Size = UDim2.new(0, 0, 0, 0),
+            Position = UDim2.new(0.5, 0, 0.5, 0),
             BackgroundTransparency = 1
         }):Play()
         task.wait(0.5)
@@ -778,17 +844,15 @@ hideBtn.ZIndex = 10
 hideBtn.Parent = box
 Instance.new("UICorner", hideBtn).CornerRadius = UDim.new(1, 0)
 
--- ===== HÌNH CHỮ V Ở GÓC DƯỚI TRÁI, XOAY KHỚP GÓC =====
 local resizeBtn = Instance.new("TextButton")
 resizeBtn.Size = UDim2.new(0, 22, 0, 22)
-resizeBtn.Position = UDim2.new(0, -2, 1, -2)  -- Góc dưới TRÁI
+resizeBtn.Position = UDim2.new(0, -2, 1, -2)
 resizeBtn.BackgroundTransparency = 1
 resizeBtn.Text = ""
 resizeBtn.BorderSizePixel = 0
 resizeBtn.ZIndex = 9
 resizeBtn.Parent = box
 
--- Đường chéo trái của chữ V (xoay -45°)
 local vLeft = Instance.new("Frame")
 vLeft.Size = UDim2.new(0, 2, 0, 12)
 vLeft.Position = UDim2.new(0, 6, 0, 10)
@@ -801,7 +865,6 @@ vLeft.ZIndex = 10
 vLeft.Parent = resizeBtn
 Instance.new("UICorner", vLeft).CornerRadius = UDim.new(1, 0)
 
--- Đường chéo phải của chữ V (xoay 45°)
 local vRight = Instance.new("Frame")
 vRight.Size = UDim2.new(0, 2, 0, 12)
 vRight.Position = UDim2.new(0, 14, 0, 10)
@@ -891,7 +954,6 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
--- ===== RESIZE + SCALE CHỮ V THEO =====
 local resizing = false
 local resizeStart, resizeStartSize
 
@@ -912,7 +974,6 @@ UserInputService.InputChanged:Connect(function(input)
         local newY = math.max(90, resizeStartSize.Y.Offset + delta.Y)
         box.Size = UDim2.new(0, newX, 0, newY)
 
-        -- Scale chữ V theo kích thước box
         local vScale = math.clamp(newX / 150, 1, 2.2)
         local vLength = math.floor(12 * vScale)
         vLeft.Size = UDim2.new(0, 2, 0, vLength)

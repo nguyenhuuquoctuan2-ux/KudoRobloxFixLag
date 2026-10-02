@@ -17,8 +17,9 @@ pcall(function()
     if gethui then uiParent = gethui() end
 end)
 
--- ===== XOÁ TRIỆT ĐỂ UI CŨ =====
+-- ===== XOÁ TRIỆT ĐỂ UI CŨ MỖI LẦN CHẠY LẠI =====
 local function destroyOldUI()
+    -- Quét PlayerGui
     for _, v in pairs(pg:GetChildren()) do
         if v:IsA("ScreenGui") then
             local n = v.Name:lower()
@@ -27,6 +28,7 @@ local function destroyOldUI()
             end
         end
     end
+    -- Quét CoreGui
     pcall(function()
         for _, v in pairs(game:GetService("CoreGui"):GetChildren()) do
             if v:IsA("ScreenGui") then
@@ -37,6 +39,7 @@ local function destroyOldUI()
             end
         end
     end)
+    -- Quét ScreenGui có chứa element đặc trưng
     local function scanContainer(container)
         if not container then return end
         for _, v in pairs(container:GetChildren()) do
@@ -52,7 +55,9 @@ local function destroyOldUI()
 end
 
 destroyOldUI()
-task.wait(0.2)
+task.wait(0.15)
+destroyOldUI()
+task.wait(0.15)
 destroyOldUI()
 
 pcall(function()
@@ -654,31 +659,7 @@ sliderKnob.ZIndex = 23
 sliderKnob.Parent = sliderBg
 Instance.new("UICorner", sliderKnob).CornerRadius = UDim.new(1, 0)
 
--- KÝ TỰ ∟ GÓC TRÁI DƯỚI - DÙNG TEXTLABEL ĐỂ TRÁNH KHỐI TRẮNG
-local cornerL = Instance.new("TextButton")
-cornerL.Size = UDim2.new(0, 22, 0, 22)
-cornerL.Position = UDim2.new(0, 0, 1, 0)
-cornerL.AnchorPoint = Vector2.new(0, 1)
-cornerL.BackgroundTransparency = 1
-cornerL.Text = ""
-cornerL.BorderSizePixel = 0
-cornerL.ZIndex = 10
-cornerL.Parent = box
-
-local cornerSymbol = Instance.new("TextLabel")
-cornerSymbol.Size = UDim2.new(1, 0, 1, 0)
-cornerSymbol.BackgroundTransparency = 1
-cornerSymbol.Text = "∟"
-cornerSymbol.Font = Enum.Font.GothamBold
-cornerSymbol.TextSize = 16
-cornerSymbol.TextColor3 = Color3.fromRGB(255, 255, 255)
-cornerSymbol.TextTransparency = 0.3
-cornerSymbol.TextXAlignment = Enum.TextXAlignment.Left
-cornerSymbol.TextYAlignment = Enum.TextYAlignment.Bottom
-cornerSymbol.ZIndex = 11
-cornerSymbol.Parent = cornerL
-
--- HÀM ÁP DỤNG ĐỘ MỜ (BỎ QUA cornerL VÀ sliderPanel)
+-- HÀM ÁP DỤNG ĐỘ MỜ
 local function applyOpacity(value)
     local transparency = 1 - value
     box.BackgroundTransparency = math.clamp(0.1 + transparency * 0.85, 0, 1)
@@ -689,7 +670,7 @@ local function applyOpacity(value)
         local skip = false
         local parent = child.Parent
         while parent do
-            if parent == cornerL or parent == sliderPanel then
+            if parent == sliderPanel then
                 skip = true
                 break
             end
@@ -775,7 +756,7 @@ closeB.MouseButton1Click:Connect(function()
     showSg:Destroy()
 end)
 
--- DRAG
+-- DRAG (chỉ khi chưa lock)
 local dragging = false
 local ds, sp
 
@@ -801,34 +782,7 @@ UIS.InputEnded:Connect(function(i)
     end
 end)
 
--- RESIZE
-local resizing = false
-local rs, rss
-cornerL.InputBegan:Connect(function(i)
-    if locked then return end
-    if i.UserInputType == Enum.UserInputType.Touch or i.UserInputType == Enum.UserInputType.MouseButton1 then
-        resizing = true
-        rs = i.Position
-        rss = box.Size
-        dragging = false
-    end
-end)
-
-UIS.InputChanged:Connect(function(i)
-    if resizing and not locked then
-        local d = i.Position - rs
-        local nx = math.max(120, rss.X.Offset - d.X)
-        local ny = math.max(80, rss.Y.Offset + d.Y)
-        box.Size = UDim2.new(0, nx, 0, ny)
-    end
-end)
-
-UIS.InputEnded:Connect(function(i)
-    if i.UserInputType == Enum.UserInputType.Touch or i.UserInputType == Enum.UserInputType.MouseButton1 then
-        resizing = false
-    end
-end)
-
+-- TIMER
 local st = tick()
 task.spawn(function()
     while stats.Parent do
@@ -838,6 +792,7 @@ task.spawn(function()
     end
 end)
 
+-- FPS COUNTER
 local fr = 0
 RS.RenderStepped:Connect(function()
     fr = fr + 1
@@ -867,7 +822,7 @@ task.spawn(function()
     end
 end)
 
--- Khởi tạo opacity sau khi mọi element đã tồn tại
+-- Khởi tạo opacity
 task.wait(0.1)
 applyOpacity(0.5)
 

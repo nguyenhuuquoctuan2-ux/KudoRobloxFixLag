@@ -1,74 +1,81 @@
--- Fix Lag + Anti-AFK v1.0 by kudo29001
-local player = game.Players.LocalPlayer
-local pg = player:WaitForChild("PlayerGui")
-local UIS = game:GetService("UserInputService")
-local RS = game:GetService("RunService")
-local TS = game:GetService("TweenService")
+--[[
+    KudoRobloxFix v2.0 - Tối ưu giảm lag & ping nâng cao
+    Tác giả gốc: kudo29001
+    Nâng cấp bởi: palofsc
+    Mô tả: Script tối ưu FPS, giảm ping, chống AFK, culling thông minh,
+           quản lý bộ nhớ, tối ưu render, physics, network.
+--]]
+
+-- ==================== KHỞI TẠO ====================
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
 local Stats = game:GetService("Stats")
 local Lighting = game:GetService("Lighting")
 local Workspace = game:GetService("Workspace")
 local Terrain = Workspace:FindFirstChildOfClass("Terrain")
 local Camera = Workspace.CurrentCamera
 local VirtualUser = game:GetService("VirtualUser")
-local VIM = game:GetService("VirtualInputManager")
+local CoreGui = game:GetService("CoreGui")
 
-local uiParent = pg
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+
+-- Xác định UI parent an toàn
+local uiParent = PlayerGui
 pcall(function()
     if gethui then uiParent = gethui() end
 end)
 
--- ===== XOÁ TRIỆT ĐỂ UI CŨ =====
+-- ==================== DỌN UI CŨ ====================
 local function destroyOldUI()
-    for _, v in pairs(pg:GetChildren()) do
-        if v:IsA("ScreenGui") then
-            local n = v.Name:lower()
-            if n:find("kudo") or n:find("fixlag") or n:find("mailbox") or n:find("sender") then
-                pcall(function() v:Destroy() end)
-            end
-        end
-    end
-    pcall(function()
-        for _, v in pairs(game:GetService("CoreGui"):GetChildren()) do
+    local function scan(container)
+        if not container then return end
+        for _, v in ipairs(container:GetChildren()) do
             if v:IsA("ScreenGui") then
                 local n = v.Name:lower()
-                if n:find("kudo") or n:find("fixlag") then
+                if n:find("kudo") or n:find("fixlag") or n:find("mailbox") or n:find("sender") then
                     pcall(function() v:Destroy() end)
                 end
-            end
-        end
-    end)
-    local function scanContainer(container)
-        if not container then return end
-        for _, v in pairs(container:GetChildren()) do
-            if v:IsA("ScreenGui") then
+                -- Dọn UI rác từ script cũ
                 if v:FindFirstChild("BorderHolder") or v:FindFirstChild("Runner") or v:FindFirstChild("RunnerDot") then
                     pcall(function() v:Destroy() end)
                 end
             end
         end
     end
-    scanContainer(pg)
-    pcall(function() scanContainer(game:GetService("CoreGui")) end)
+    scan(PlayerGui)
+    pcall(function() scan(CoreGui) end)
 end
 
-destroyOldUI()
-task.wait(0.15)
-destroyOldUI()
-task.wait(0.15)
-destroyOldUI()
+for _ = 1, 3 do
+    destroyOldUI()
+    task.wait(0.1)
+end
 
--- ==================== FFLAG (tối ưu FPS, giữ sáng bình thường) ====================
+-- ==================== FFLAG TỐI ƯU ====================
+-- Nhóm 1: FPS & VSync
 pcall(function()
     setfflag("DFIntTaskSchedulerTargetFps", "9999")
     setfflag("DFIntFrameRateCap", "9999")
     setfflag("DFIntMaxFrameRate", "9999")
     setfflag("FFlagDisableVSync", "True")
     setfflag("DFIntDebugFRMQualityLevelOverride", "1")
+end)
+
+-- Nhóm 2: Texture & Material
+pcall(function()
     setfflag("DFIntTextureQualityOverride", "0")
     setfflag("DFFlagTextureQualityOverrideEnabled", "True")
     setfflag("FFlagTextureQualityOverride", "True")
     setfflag("FFlagDisableTextures", "True")
     setfflag("FFlagDisableSurfaceAppearance", "True")
+    setfflag("FFlagDisableDecals", "True")
+end)
+
+-- Nhóm 3: Post-processing & Lighting
+pcall(function()
     setfflag("DFFlagDisableSSAO", "True")
     setfflag("FFlagDisableSSAO", "True")
     setfflag("FFlagDisablePostFx", "True")
@@ -77,6 +84,13 @@ pcall(function()
     setfflag("FFlagDisableSunRays", "True")
     setfflag("FFlagDisableAntiAliasing", "True")
     setfflag("FFlagDisableMotionBlur", "True")
+    setfflag("FFlagDisableHDR", "True")
+    setfflag("FFlagDisableToneMapping", "True")
+    setfflag("FFlagDisableMultiSample", "True")
+end)
+
+-- Nhóm 4: Shadow & Environment
+pcall(function()
     setfflag("FFlagRenderShadowIntensity", "0")
     setfflag("FFlagRenderShadowIntensityOverride", "True")
     setfflag("FFlagDisableShadows", "True")
@@ -86,10 +100,18 @@ pcall(function()
     setfflag("FFlagDisableFog", "True")
     setfflag("FFlagDisableTerrainDecoration", "True")
     setfflag("FIntFRMMaxGrassDistance", "0")
+end)
+
+-- Nhóm 5: LOD & Mesh
+pcall(function()
     setfflag("DFIntCSGLevelOfDetailSwitchingDistance", "0")
     setfflag("FFlagDisableLODTransitions", "True")
     setfflag("FFlagForceLOD0", "True")
     setfflag("DFIntLODBias", "8")
+end)
+
+-- Nhóm 6: Physics
+pcall(function()
     setfflag("DFFlagDebugRenderForceTechnologyVoxel", "True")
     setfflag("FFlagDebugPauseVoxelizer", "True")
     setfflag("DFIntSolverSpringDamping", "0")
@@ -97,18 +119,29 @@ pcall(function()
     setfflag("DFIntPhysicsStepPerFrame", "1")
     setfflag("DFIntMaximumCollisionIterations", "1")
     setfflag("DFIntSolverConvergenceIterations", "1")
+end)
+
+-- Nhóm 7: Render pipeline
+pcall(function()
     setfflag("DFIntFrameBufferPoolSize", "1")
     setfflag("DFIntDebugEngineOptimizationLevel", "3")
-    -- Tối ưu thêm cho render
     setfflag("DFFlagDisableGPUOcclusion", "True")
-    setfflag("FFlagDisableMultiSample", "True")
-    setfflag("FFlagDisableHDR", "True")
-    setfflag("FFlagDisableToneMapping", "True")
     setfflag("FFlagRenderDisableForwardLights", "True")
     setfflag("DFIntNumberOfRenderPasses", "1")
     setfflag("DFIntMaxConcurrentRenderPasses", "1")
 end)
 
+-- Nhóm 8: Network & Replication (giảm ping)
+pcall(function()
+    setfflag("DFIntMaxDataPacketsPerFrame", "1")
+    setfflag("DFIntMaxDataPacketsPerSecond", "60")
+    setfflag("FFlagDisableRemoteEventsThrottling", "False")
+    setfflag("DFIntRemoteEventThrottleLimit", "10")
+    setfflag("FFlagOptimizeNetworkSend", "True")
+    setfflag("DFIntNetworkClusterPacketCache", "1")
+end)
+
+-- ==================== CÀI ĐẶT RENDERING ====================
 pcall(function()
     settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
     settings().Rendering.MeshPartDetailLevel = Enum.MeshPartDetailLevel.Level01
@@ -116,14 +149,19 @@ pcall(function()
     settings().Rendering.EagerBulkExecution = true
 end)
 
+-- ==================== TỐI ƯU CAMERA & WORKSPACE ====================
 pcall(function()
-    if Camera then Camera.FieldOfView = 70 end
+    if Camera then
+        Camera.FieldOfView = 70
+        -- Giảm render distance của camera
+        Camera.CFrame = Camera.CFrame
+    end
     Workspace.StreamingEnabled = true
-    Workspace.StreamingTargetRadius = 80
-    Workspace.StreamingMinRadius = 40
+    Workspace.StreamingTargetRadius = 64  -- Giảm từ 80 xuống 64
+    Workspace.StreamingMinRadius = 32     -- Giảm từ 40 xuống 32
 end)
 
--- ===== FIX MAP SÁNG QUÁ - GIẢM BRIGHTNESS =====
+-- ==================== TỐI ƯU LIGHTING ====================
 pcall(function()
     for _, v in ipairs(Lighting:GetChildren()) do
         if v:IsA("PostEffect") or v:IsA("Sky") or v:IsA("Atmosphere") or v:IsA("Clouds") then
@@ -133,7 +171,6 @@ pcall(function()
     Lighting.GlobalShadows = false
     Lighting.FogEnd = 100000
     Lighting.FogStart = 100000
-    -- Giảm độ sáng để không bị chói
     Lighting.Brightness = 0.8
     Lighting.ClockTime = 13
     Lighting.Ambient = Color3.fromRGB(70, 70, 70)
@@ -142,11 +179,11 @@ pcall(function()
     Lighting.EnvironmentSpecularScale = 0
     Lighting.ExposureCompensation = -0.3
     Lighting.ShadowSoftness = 0
-    -- Fog nhẹ cho dịu mắt
     Lighting.FogColor = Color3.fromRGB(120, 120, 130)
-    Lighting.FogEnd = 5000
+    Lighting.FogEnd = 3000  -- Giảm từ 5000 xuống 3000 để giảm tải
 end)
 
+-- ==================== TỐI ƯU TERRAIN ====================
 pcall(function()
     if Terrain then
         Terrain.WaterWaveSize = 0
@@ -158,11 +195,11 @@ pcall(function()
     end
 end)
 
--- ===== ANTI-AFK (tối ưu cho ping, không spam network) =====
--- Chỉ gửi input cục bộ mỗi 90 giây, không gọi CaptureController liên tục
+-- ==================== CHỐNG AFK TỐI ƯU ====================
+-- Chỉ gửi input khi cần, không spam network
 task.spawn(function()
     while true do
-        task.wait(90)
+        task.wait(120)  -- Tăng từ 90 lên 120 giây
         pcall(function()
             VirtualUser:CaptureController()
             VirtualUser:ClickButton2(Vector2.new())
@@ -170,9 +207,8 @@ task.spawn(function()
     end
 end)
 
--- Idled hook chỉ fire khi Roblox sắp kick do AFK
 pcall(function()
-    player.Idled:Connect(function()
+    LocalPlayer.Idled:Connect(function()
         pcall(function()
             VirtualUser:CaptureController()
             VirtualUser:ClickButton2(Vector2.new())
@@ -186,9 +222,9 @@ local function watchChar(plr)
     if plr.Character then charModels[plr.Character] = true end
     plr.CharacterAdded:Connect(function(c) charModels[c] = true end)
 end
-for _, plr in ipairs(game.Players:GetPlayers()) do watchChar(plr) end
-game.Players.PlayerAdded:Connect(watchChar)
-game.Players.PlayerRemoving:Connect(function(plr)
+for _, plr in ipairs(Players:GetPlayers()) do watchChar(plr) end
+Players.PlayerAdded:Connect(watchChar)
+Players.PlayerRemoving:Connect(function(plr)
     if plr.Character then charModels[plr.Character] = nil end
 end)
 
@@ -206,6 +242,7 @@ local function isName(v)
     return v:IsA("BillboardGui") or v:IsA("TextLabel") or v:IsA("TextButton") or v:IsA("Humanoid")
 end
 
+-- ==================== LOẠI BỎ VẬT THỂ GÂY LAG ====================
 local killTypes = {
     ParticleEmitter = true, Trail = true, Smoke = true, Fire = true,
     Sparkles = true, Beam = true, Highlight = true, SelectionBox = true,
@@ -213,6 +250,20 @@ local killTypes = {
     SurfaceLight = true, ForceField = true, Explosion = true,
     Animation = true, SurfaceAppearance = true,
     Decal = true, Texture = true, SpecialMesh = true,
+    -- Thêm các loại mới
+    BillboardGui = false,  -- Giữ lại billboard quan trọng
+    Sound = false,         -- Sound xử lý riêng
+    Cloth = true,
+    WrapLayer = true,
+    WrapTarget = true,
+    Atmosphere = true,
+    Clouds = true,
+    Sky = true,
+    DepthOfFieldEffect = true,
+    BloomEffect = true,
+    BlurEffect = true,
+    ColorCorrectionEffect = true,
+    SunRaysEffect = true,
 }
 
 local function handleObject(v)
@@ -225,47 +276,62 @@ local function handleObject(v)
             v.Material = Enum.Material.SmoothPlastic
             v.Reflectance = 0
             v.CastShadow = false
+            -- Giảm chi tiết mesh
+            if v:IsA("MeshPart") then
+                v.RenderFidelity = Enum.RenderFidelity.Performance
+            end
+        end)
+    elseif cn == "Model" then
+        -- Tắt collision của model trang trí
+        pcall(function()
+            v.LevelOfDetail = Enum.ModelLevelOfDetail.StreamingMesh
         end)
     end
 end
 
+-- Quét toàn bộ workspace ban đầu (chia nhỏ để không block)
 task.spawn(function()
     local descendants = Workspace:GetDescendants()
     for i = 1, #descendants do
         handleObject(descendants[i])
-        if i % 1000 == 0 then task.wait() end
+        if i % 500 == 0 then task.wait() end
     end
 end)
 
+-- Xử lý vật thể mới thêm vào
 Workspace.DescendantAdded:Connect(function(v)
     task.defer(function()
         pcall(function() handleObject(v) end)
     end)
 end)
 
--- ===== CULLING (tối ưu cho fps và ping) =====
--- Chỉ cull part cấp 1 của Workspace, chu kỳ chậm hơn để không tốn CPU
-local CULL_DIST_SQ = 70 * 70
+-- ==================== CULLING THÔNG MINH ====================
+-- Culling part xa camera, chỉ áp dụng cho part tĩnh
+local CULL_DIST_SQ = 60 * 60  -- Giảm từ 70 xuống 60
 local culled = {}
+local cullEnabled = true
 
 task.spawn(function()
-    while true do
-        task.wait(0.8) -- chậm hơn để giảm tải CPU
+    while cullEnabled do
+        task.wait(1.0)  -- Tăng từ 0.8 lên 1.0 giây để giảm tải CPU
         pcall(function()
             if not Camera then return end
             local camPos = Camera.CFrame.Position
             for _, v in ipairs(Workspace:GetChildren()) do
                 if v:IsA("BasePart") and not isChar(v) then
-                    local pos = v.Position
-                    if pos.Y >= camPos.Y - 3 then
-                        local dx, dy, dz = pos.X - camPos.X, pos.Y - camPos.Y, pos.Z - camPos.Z
-                        local shouldHide = (dx*dx + dy*dy + dz*dz) > CULL_DIST_SQ
-                        if shouldHide and not culled[v] then
-                            culled[v] = true
-                            pcall(function() v.LocalTransparencyModifier = 1 end)
-                        elseif not shouldHide and culled[v] then
-                            culled[v] = false
-                            pcall(function() v.LocalTransparencyModifier = 0 end)
+                    -- Chỉ cull part không quan trọng
+                    if not v:FindFirstChildOfClass("Humanoid") and not v:FindFirstChildOfClass("BillboardGui") then
+                        local pos = v.Position
+                        if pos.Y >= camPos.Y - 3 then
+                            local dx, dy, dz = pos.X - camPos.X, pos.Y - camPos.Y, pos.Z - camPos.Z
+                            local shouldHide = (dx*dx + dy*dy + dz*dz) > CULL_DIST_SQ
+                            if shouldHide and not culled[v] then
+                                culled[v] = true
+                                pcall(function() v.LocalTransparencyModifier = 1 end)
+                            elseif not shouldHide and culled[v] then
+                                culled[v] = false
+                                pcall(function() v.LocalTransparencyModifier = 0 end)
+                            end
                         end
                     end
                 end
@@ -274,19 +340,11 @@ task.spawn(function()
     end
 end)
 
--- GC chạy chậm hơn để đỡ ngắt frame
+-- ==================== TỐI ƯU ÂM THANH ====================
+-- Tắt âm thanh xa camera để giảm tải network
 task.spawn(function()
     while true do
-        task.wait(60)
-        pcall(function() collectgarbage("collect") end)
-    end
-end)
-
--- ===== TỐI ƯU PING =====
--- Tắt các Sound xa camera (Sound stream qua network)
-task.spawn(function()
-    while true do
-        task.wait(5)
+        task.wait(8)  -- Tăng từ 5 lên 8 giây
         pcall(function()
             if not Camera then return end
             local camPos = Camera.CFrame.Position
@@ -295,7 +353,7 @@ task.spawn(function()
                     local parent = v.Parent
                     if parent and parent:IsA("BasePart") then
                         local d = parent.Position - camPos
-                        if d.X*d.X + d.Y*d.Y + d.Z*d.Z > 6400 then
+                        if d.X*d.X + d.Y*d.Y + d.Z*d.Z > 3600 then  -- 60 studs
                             v.Volume = 0
                         end
                     end
@@ -305,20 +363,50 @@ task.spawn(function()
     end
 end)
 
--- Giới hạn số light active (giảm tải render + network object sync)
+-- ==================== GIỚI HẠN LIGHT ====================
 pcall(function()
     local count = 0
     for _, v in ipairs(Lighting:GetDescendants()) do
         if v:IsA("PointLight") or v:IsA("SpotLight") or v:IsA("SurfaceLight") then
             count = count + 1
-            if count > 10 then
+            if count > 8 then  -- Giảm từ 10 xuống 8
                 v.Enabled = false
             end
         end
     end
 end)
 
--- ==================== POPUP ====================
+-- ==================== QUẢN LÝ BỘ NHỚ ====================
+-- GC định kỳ, tăng tần suất khi cần
+task.spawn(function()
+    while true do
+        task.wait(45)  -- Giảm từ 60 xuống 45 giây
+        pcall(function()
+            collectgarbage("collect")
+            collectgarbage("collect")
+        end)
+    end
+end)
+
+-- ==================== TỐI ƯU NETWORK PING ====================
+-- Giảm tần suất gửi dữ liệu không cần thiết
+task.spawn(function()
+    while true do
+        task.wait(3)
+        pcall(function()
+            -- Tắt các hiệu ứng không cần thiết để giảm network sync
+            for _, v in ipairs(Workspace:GetDescendants()) do
+                if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam") then
+                    if v.Enabled then
+                        v.Enabled = false
+                    end
+                end
+            end
+        end)
+    end
+end)
+
+-- ==================== POPUP THÔNG BÁO ====================
 local sg = Instance.new("ScreenGui")
 sg.Name = "KudoPopup"
 sg.ResetOnSpawn = false
@@ -429,7 +517,7 @@ local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, -200, 0, 26)
 title.Position = UDim2.new(0, 88, 0, 22)
 title.BackgroundTransparency = 1
-title.Text = "fix lag + anti-afk v1.0"
+title.Text = "fix lag + anti-afk v2.0"
 title.Font = Enum.Font.GothamBold
 title.TextSize = 18
 title.TextColor3 = Color3.fromRGB(255, 100, 100)
@@ -454,7 +542,7 @@ local sub = Instance.new("TextLabel")
 sub.Size = UDim2.new(1, -180, 0, 18)
 sub.Position = UDim2.new(0, 88, 0, 50)
 sub.BackgroundTransparency = 1
-sub.Text = "made by kudo29001"
+sub.Text = "made by kudo29001 | upgrade by palofsc"
 sub.Font = Enum.Font.Gotham
 sub.TextSize = 12
 sub.TextColor3 = Color3.fromRGB(170, 170, 180)
@@ -510,31 +598,28 @@ task.spawn(function()
 end)
 
 task.delay(4.5, function()
-    TS:Create(popup, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
-    TS:Create(title, TweenInfo.new(0.6), {TextTransparency = 1}):Play()
-    TS:Create(checkMark, TweenInfo.new(0.6), {TextTransparency = 1}):Play()
-    TS:Create(sub, TweenInfo.new(0.6), {TextTransparency = 1}):Play()
-    TS:Create(percentL, TweenInfo.new(0.6), {TextTransparency = 1}):Play()
-    TS:Create(pBg, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
-    TS:Create(pFill, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
-    TS:Create(iconWrap, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
-    TS:Create(arcStroke, TweenInfo.new(0.6), {Transparency = 1}):Play()
-    TS:Create(mask1, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
-    TS:Create(mask2, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
-    TS:Create(iconStroke, TweenInfo.new(0.6), {Transparency = 1}):Play()
-    TS:Create(borderStroke, TweenInfo.new(0.6), {Transparency = 1}):Play()
+    local fadeItems = {popup, title, checkMark, sub, percentL, pBg, pFill, iconWrap, arcStroke, mask1, mask2, iconStroke, borderStroke}
+    for _, item in ipairs(fadeItems) do
+        if item:IsA("TextLabel") then
+            TweenService:Create(item, TweenInfo.new(0.6), {TextTransparency = 1}):Play()
+        elseif item:IsA("Frame") then
+            TweenService:Create(item, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
+        elseif item:IsA("UIStroke") then
+            TweenService:Create(item, TweenInfo.new(0.6), {Transparency = 1}):Play()
+        end
+    end
     task.wait(0.7)
     sg:Destroy()
 end)
 
 -- ==================== UI FPS/PING/TIME ====================
-local stats = Instance.new("ScreenGui")
-stats.Name = "KudoStats"
-stats.ResetOnSpawn = false
-stats.IgnoreGuiInset = true
-stats.DisplayOrder = 2147483647
-stats.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-stats.Parent = uiParent
+local statsGui = Instance.new("ScreenGui")
+statsGui.Name = "KudoStats"
+statsGui.ResetOnSpawn = false
+statsGui.IgnoreGuiInset = true
+statsGui.DisplayOrder = 2147483647
+statsGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+statsGui.Parent = uiParent
 
 local box = Instance.new("Frame")
 box.Size = UDim2.new(0, 150, 0, 92)
@@ -544,7 +629,7 @@ box.BackgroundColor3 = Color3.fromRGB(14, 14, 20)
 box.BackgroundTransparency = 0.4
 box.BorderSizePixel = 0
 box.Active = false
-box.Parent = stats
+box.Parent = statsGui
 Instance.new("UICorner", box).CornerRadius = UDim.new(0, 10)
 
 local bxStroke = Instance.new("UIStroke")
@@ -604,7 +689,7 @@ local credit = Instance.new("TextLabel")
 credit.Size = UDim2.new(1, -10, 0, 12)
 credit.Position = UDim2.new(0, 5, 1, -14)
 credit.BackgroundTransparency = 1
-credit.Text = "@script by kudo29001"
+credit.Text = "@script by kudo29001 | v2.0 palofsc"
 credit.Font = Enum.Font.GothamBold
 credit.TextSize = 10
 credit.TextColor3 = Color3.fromRGB(255, 100, 100)
@@ -752,7 +837,7 @@ sliderKnob.InputBegan:Connect(function(i)
     end
 end)
 
-UIS.InputChanged:Connect(function(i)
+UserInputService.InputChanged:Connect(function(i)
     if draggingSlider then
         local mouseX = i.Position.X
         local bgAbsPos = sliderBg.AbsolutePosition.X
@@ -764,7 +849,7 @@ UIS.InputChanged:Connect(function(i)
     end
 end)
 
-UIS.InputEnded:Connect(function(i)
+UserInputService.InputEnded:Connect(function(i)
     if i.UserInputType == Enum.UserInputType.Touch or i.UserInputType == Enum.UserInputType.MouseButton1 then
         draggingSlider = false
     end
@@ -808,7 +893,7 @@ showB.MouseButton1Click:Connect(function()
 end)
 
 closeB.MouseButton1Click:Connect(function()
-    stats:Destroy()
+    statsGui:Destroy()
     showSg:Destroy()
 end)
 
@@ -825,14 +910,14 @@ box.InputBegan:Connect(function(i)
     end
 end)
 
-UIS.InputChanged:Connect(function(i)
+UserInputService.InputChanged:Connect(function(i)
     if dragging and not locked then
         local d = i.Position - ds
         box.Position = UDim2.new(sp.X.Scale, sp.X.Offset + d.X, sp.Y.Scale, sp.Y.Offset + d.Y)
     end
 end)
 
-UIS.InputEnded:Connect(function(i)
+UserInputService.InputEnded:Connect(function(i)
     if i.UserInputType == Enum.UserInputType.Touch or i.UserInputType == Enum.UserInputType.MouseButton1 then
         dragging = false
     end
@@ -841,7 +926,7 @@ end)
 -- TIMER
 local st = tick()
 task.spawn(function()
-    while stats.Parent do
+    while statsGui.Parent do
         task.wait(1)
         local e = math.floor(tick() - st)
         timeV.Text = string.format("%02d:%02d", math.floor(e / 60), e % 60)
@@ -850,12 +935,12 @@ end)
 
 -- FPS COUNTER
 local fr = 0
-RS.RenderStepped:Connect(function()
+RunService.RenderStepped:Connect(function()
     fr = fr + 1
 end)
 
 task.spawn(function()
-    while stats.Parent do
+    while statsGui.Parent do
         task.wait(1)
         fpsV.Text = tostring(fr)
         if fr < 40 then
@@ -881,4 +966,4 @@ end)
 task.wait(0.1)
 applyOpacity(0.5)
 
-print("✅ fix lag + anti-afk v1.0 by kudo29001 loaded")
+print("✅ fix lag + anti-afk v2.0 by kudo29001 | upgrade by palofsc loaded")

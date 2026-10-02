@@ -217,24 +217,75 @@ border.Color = Color3.fromRGB(255, 60, 60)
 border.Thickness = 2
 border.Parent = popup
 
--- MẶT TRĂNG (dùng text)
-local moonLabel = Instance.new("TextLabel")
-moonLabel.Size = UDim2.new(0, 52, 0, 52)
-moonLabel.Position = UDim2.new(0, 20, 0, 22)
-moonLabel.BackgroundTransparency = 1
-moonLabel.Text = "🌙"
-moonLabel.Font = Enum.Font.GothamBold
-moonLabel.TextSize = 40
-moonLabel.TextColor3 = Color3.fromRGB(255, 220, 130)
-moonLabel.Parent = popup
+-- ===== NGỌN LỬA TRẮNG =====
+local flameWrap = Instance.new("Frame")
+flameWrap.Size = UDim2.new(0, 52, 0, 52)
+flameWrap.Position = UDim2.new(0, 20, 0, 22)
+flameWrap.BackgroundTransparency = 1
+flameWrap.Parent = popup
 
--- Moon pulse
+-- 3 lớp lửa với kích thước và độ trong suốt khác nhau
+local flame1 = Instance.new("TextLabel")
+flame1.Size = UDim2.new(1, 0, 1, 0)
+flame1.BackgroundTransparency = 1
+flame1.Text = "🔥"
+flame1.Font = Enum.Font.GothamBold
+flame1.TextSize = 36
+flame1.TextColor3 = Color3.fromRGB(255, 255, 255)
+flame1.Parent = flameWrap
+
+local flame2 = Instance.new("TextLabel")
+flame2.Size = UDim2.new(1, 0, 1, 0)
+flame2.Position = UDim2.new(0, -4, 0, 0)
+flame2.BackgroundTransparency = 1
+flame2.Text = "🔥"
+flame2.Font = Enum.Font.GothamBold
+flame2.TextSize = 30
+flame2.TextColor3 = Color3.fromRGB(255, 230, 230)
+flame2.TextTransparency = 0.4
+flame2.Parent = flameWrap
+
+local flame3 = Instance.new("TextLabel")
+flame3.Size = UDim2.new(1, 0, 1, 0)
+flame3.Position = UDim2.new(0, 4, 0, -3)
+flame3.BackgroundTransparency = 1
+flame3.Text = "🔥"
+flame3.Font = Enum.Font.GothamBold
+flame3.TextSize = 26
+flame3.TextColor3 = Color3.fromRGB(255, 255, 255)
+flame3.TextTransparency = 0.6
+flame3.Parent = flameWrap
+
+-- Animation lửa nhấp nhô
 task.spawn(function()
-    while moonLabel.Parent do
-        TS:Create(moonLabel, TweenInfo.new(1.2), {TextTransparency = 0.3}):Play()
-        task.wait(1.2)
-        TS:Create(moonLabel, TweenInfo.new(1.2), {TextTransparency = 0}):Play()
-        task.wait(1.2)
+    while flameWrap.Parent do
+        TS:Create(flame1, TweenInfo.new(0.4), {
+            TextTransparency = 0.3,
+            Rotation = 5
+        }):Play()
+        TS:Create(flame2, TweenInfo.new(0.5), {
+            TextTransparency = 0.7,
+            Rotation = -8
+        }):Play()
+        TS:Create(flame3, TweenInfo.new(0.3), {
+            TextTransparency = 0.4,
+            Rotation = 10
+        }):Play()
+        task.wait(0.4)
+        
+        TS:Create(flame1, TweenInfo.new(0.4), {
+            TextTransparency = 0,
+            Rotation = -5
+        }):Play()
+        TS:Create(flame2, TweenInfo.new(0.5), {
+            TextTransparency = 0.4,
+            Rotation = 6
+        }):Play()
+        TS:Create(flame3, TweenInfo.new(0.3), {
+            TextTransparency = 0.6,
+            Rotation = -7
+        }):Play()
+        task.wait(0.4)
     end
 end)
 
@@ -285,7 +336,6 @@ pFill.BorderSizePixel = 0
 pFill.Parent = pBg
 Instance.new("UICorner", pFill).CornerRadius = UDim.new(1, 0)
 
--- Load + fade out
 task.spawn(function()
     local st = tick()
     while tick() - st < 3 do
@@ -302,18 +352,20 @@ task.spawn(function()
     pFill.BackgroundColor3 = Color3.fromRGB(80, 255, 130)
 end)
 
--- Fade out sau 4.5 giây
+-- Fade out toàn bộ popup
 task.delay(4.5, function()
     pcall(function()
-        TS:Create(popup, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
-        TS:Create(border, TweenInfo.new(0.5), {Transparency = 1}):Play()
-        TS:Create(title, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
-        TS:Create(sub, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
-        TS:Create(percentL, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
-        TS:Create(pBg, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
-        TS:Create(pFill, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
-        TS:Create(moonLabel, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
-        task.wait(0.6)
+        TS:Create(popup, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
+        TS:Create(border, TweenInfo.new(0.6), {Transparency = 1}):Play()
+        TS:Create(title, TweenInfo.new(0.6), {TextTransparency = 1}):Play()
+        TS:Create(sub, TweenInfo.new(0.6), {TextTransparency = 1}):Play()
+        TS:Create(percentL, TweenInfo.new(0.6), {TextTransparency = 1}):Play()
+        TS:Create(pBg, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
+        TS:Create(pFill, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
+        TS:Create(flame1, TweenInfo.new(0.6), {TextTransparency = 1}):Play()
+        TS:Create(flame2, TweenInfo.new(0.6), {TextTransparency = 1}):Play()
+        TS:Create(flame3, TweenInfo.new(0.6), {TextTransparency = 1}):Play()
+        task.wait(0.7)
         sg:Destroy()
     end)
 end)
@@ -512,9 +564,8 @@ UIS.InputEnded:Connect(function(i)
     end
 end)
 
--- ===== RESIZE TÍNH TỪ GÓC TRÁI DƯỚI =====
--- Kéo sang phải = tăng width, kéo xuống = tăng height
--- Neo vẫn ở trên-trái, size tăng về bên phải
+-- ===== RESIZE NGƯỢC LẠI (kéo trái = tăng, kéo phải = giảm) =====
+-- Nếu bạn thấy hướng kéo ngược, đây là fix: đảo dấu delta
 local resizing = false
 local rs, rss
 resizeB.InputBegan:Connect(function(i)
@@ -528,9 +579,9 @@ end)
 UIS.InputChanged:Connect(function(i)
     if resizing then
         local d = i.Position - rs
-        -- Kéo phải d.X dương -> tăng width
-        -- Kéo xuống d.Y dương -> tăng height
-        local nx = math.max(120, rss.X.Offset + d.X)
+        -- ĐẢO DẤU: kéo sang trái = tăng size, kéo sang phải = giảm size
+        -- Kéo xuống vẫn tăng (không đảo Y)
+        local nx = math.max(120, rss.X.Offset - d.X)
         local ny = math.max(80, rss.Y.Offset + d.Y)
         box.Size = UDim2.new(0, nx, 0, ny)
     end

@@ -1,4 +1,4 @@
--- Fix Lag v1.0 by kudo29001 - Lightweight for Xeno
+-- Fix Lag v1.0 by kudo29001 - Xeno compatible (with gear spin + Done)
 local player = game.Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 local Lighting = game:GetService("Lighting")
@@ -196,7 +196,6 @@ local function handleObject(v)
     end
 end
 
--- Chỉ xử lý 1 lần khi bắt đầu, chia chunk để không spike
 task.spawn(function()
     local descendants = Workspace:GetDescendants()
     for i = 1, #descendants do
@@ -205,7 +204,6 @@ task.spawn(function()
     end
 end)
 
--- Chỉ lắng nghe object mới
 Workspace.DescendantAdded:Connect(function(v)
     task.defer(function()
         pcall(function() handleObject(v) end)
@@ -213,7 +211,6 @@ Workspace.DescendantAdded:Connect(function(v)
 end)
 
 -- ==================== CULLING SIÊU NHẸ ====================
--- Chỉ cull part cấp 1 của Workspace (không quét folder con)
 local CULL_DIST_SQ = 80 * 80
 local culled = {}
 
@@ -248,7 +245,6 @@ task.spawn(function()
     end
 end)
 
--- ==================== GC ====================
 task.spawn(function()
     while true do
         task.wait(60)
@@ -265,8 +261,8 @@ popupGui.DisplayOrder = 1000
 popupGui.Parent = playerGui
 
 local popup = Instance.new("Frame")
-popup.Size = UDim2.new(0, 380, 0, 160)
-popup.Position = UDim2.new(0.5, -190, 0.4, -80)
+popup.Size = UDim2.new(0, 380, 0, 170)
+popup.Position = UDim2.new(0.5, -190, 0.4, -85)
 popup.BackgroundColor3 = Color3.fromRGB(15, 15, 22)
 popup.BorderSizePixel = 0
 popup.Parent = popupGui
@@ -277,43 +273,58 @@ border.Color = Color3.fromRGB(255, 60, 60)
 border.Thickness = 2
 border.Parent = popup
 
--- Bánh răng
-local iconWrap = Instance.new("Frame")
-iconWrap.Size = UDim2.new(0, 48, 0, 48)
-iconWrap.Position = UDim2.new(0, 20, 0, 20)
-iconWrap.BackgroundColor3 = Color3.fromRGB(30, 18, 24)
-iconWrap.BorderSizePixel = 0
-iconWrap.Parent = popup
-Instance.new("UICorner", iconWrap).CornerRadius = UDim.new(1, 0)
+-- ===== BÁNH RĂNG (dùng ImageLabel xoay) =====
+local gearWrap = Instance.new("Frame")
+gearWrap.Size = UDim2.new(0, 52, 0, 52)
+gearWrap.Position = UDim2.new(0, 20, 0, 22)
+gearWrap.BackgroundColor3 = Color3.fromRGB(30, 18, 24)
+gearWrap.BorderSizePixel = 0
+gearWrap.Parent = popup
+Instance.new("UICorner", gearWrap).CornerRadius = UDim.new(1, 0)
 
-local iconStroke = Instance.new("UIStroke")
-iconStroke.Color = Color3.fromRGB(255, 80, 80)
-iconStroke.Thickness = 1.5
-iconStroke.Transparency = 0.3
-iconStroke.Parent = iconWrap
+local gearStroke = Instance.new("UIStroke")
+gearStroke.Color = Color3.fromRGB(255, 80, 80)
+gearStroke.Thickness = 1.5
+gearStroke.Transparency = 0.3
+gearStroke.Parent = gearWrap
 
-local gear = Instance.new("TextLabel")
-gear.Size = UDim2.new(1, 0, 1, 0)
-gear.BackgroundTransparency = 1
-gear.Text = "⚙"
-gear.Font = Enum.Font.GothamBold
-gear.TextSize = 28
-gear.TextColor3 = Color3.fromRGB(255, 110, 110)
-gear.Parent = iconWrap
+-- Dùng ImageLabel để xoay mượt (không bị lỗi font trên Xeno)
+local gearImg = Instance.new("ImageLabel")
+gearImg.Size = UDim2.new(0.7, 0, 0.7, 0)
+gearImg.Position = UDim2.new(0.15, 0, 0.15, 0)
+gearImg.BackgroundTransparency = 1
+gearImg.Image = "rbxassetid://7820784555"  -- icon bánh răng
+gearImg.ImageColor3 = Color3.fromRGB(255, 110, 110)
+gearImg.Parent = gearWrap
 
+-- Nếu asset không load, hiện chữ ⚙ thay thế
+local gearText = Instance.new("TextLabel")
+gearText.Size = UDim2.new(1, 0, 1, 0)
+gearText.BackgroundTransparency = 1
+gearText.Text = "⚙"
+gearText.Font = Enum.Font.GothamBold
+gearText.TextSize = 30
+gearText.TextColor3 = Color3.fromRGB(255, 110, 110)
+gearText.TextTransparency = 0.5  -- mờ để không tranh với image
+gearText.Parent = gearWrap
+
+-- Xoay bánh răng liên tục (dùng 2 cách để chắc chắn chạy)
 task.spawn(function()
     local rot = 0
-    while gear.Parent do
-        rot = (rot + 8) % 360
-        gear.Rotation = rot
-        task.wait(0.05)
+    while gearWrap.Parent do
+        rot = (rot + 5) % 360
+        pcall(function()
+            gearImg.Rotation = rot
+            gearText.Rotation = rot
+        end)
+        task.wait(0.03)
     end
 end)
 
--- Dấu tích
+-- ===== DẤU TÍCH =====
 local checkWrap = Instance.new("Frame")
-checkWrap.Size = UDim2.new(0, 48, 0, 48)
-checkWrap.Position = UDim2.new(1, -68, 0, 20)
+checkWrap.Size = UDim2.new(0, 52, 0, 52)
+checkWrap.Position = UDim2.new(1, -72, 0, 22)
 checkWrap.BackgroundColor3 = Color3.fromRGB(20, 35, 25)
 checkWrap.BorderSizePixel = 0
 checkWrap.Parent = popup
@@ -330,14 +341,24 @@ check.Size = UDim2.new(1, 0, 1, 0)
 check.BackgroundTransparency = 1
 check.Text = "✓"
 check.Font = Enum.Font.GothamBold
-check.TextSize = 30
+check.TextSize = 32
 check.TextColor3 = Color3.fromRGB(80, 255, 130)
 check.Parent = checkWrap
 
--- Text
+-- Check nhấp nhô nhẹ
+task.spawn(function()
+    while check.Parent do
+        TweenService:Create(check, TweenInfo.new(0.7), {TextTransparency = 0.2}):Play()
+        task.wait(0.7)
+        TweenService:Create(check, TweenInfo.new(0.7), {TextTransparency = 0}):Play()
+        task.wait(0.7)
+    end
+end)
+
+-- ===== TEXT =====
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, -180, 0, 26)
-title.Position = UDim2.new(0, 82, 0, 22)
+title.Size = UDim2.new(1, -200, 0, 26)
+title.Position = UDim2.new(0, 86, 0, 24)
 title.BackgroundTransparency = 1
 title.Text = "fix lag v1.0"
 title.Font = Enum.Font.GothamBold
@@ -347,8 +368,8 @@ title.TextXAlignment = Enum.TextXAlignment.Left
 title.Parent = popup
 
 local sub = Instance.new("TextLabel")
-sub.Size = UDim2.new(1, -180, 0, 18)
-sub.Position = UDim2.new(0, 82, 0, 50)
+sub.Size = UDim2.new(1, -200, 0, 18)
+sub.Position = UDim2.new(0, 86, 0, 52)
 sub.BackgroundTransparency = 1
 sub.Text = "by kudo29001 ⚡"
 sub.Font = Enum.Font.Gotham
@@ -357,19 +378,21 @@ sub.TextColor3 = Color3.fromRGB(160, 160, 170)
 sub.TextXAlignment = Enum.TextXAlignment.Left
 sub.Parent = popup
 
+-- ===== % LOAD =====
 local percentLabel = Instance.new("TextLabel")
-percentLabel.Size = UDim2.new(1, -40, 0, 22)
-percentLabel.Position = UDim2.new(0, 20, 0, 84)
+percentLabel.Size = UDim2.new(1, -40, 0, 24)
+percentLabel.Position = UDim2.new(0, 20, 0, 88)
 percentLabel.BackgroundTransparency = 1
 percentLabel.Text = "0%"
 percentLabel.Font = Enum.Font.GothamBold
-percentLabel.TextSize = 16
+percentLabel.TextSize = 17
 percentLabel.TextColor3 = Color3.fromRGB(255, 130, 100)
 percentLabel.Parent = popup
 
+-- ===== PROGRESS BAR =====
 local progressBg = Instance.new("Frame")
 progressBg.Size = UDim2.new(1, -40, 0, 8)
-progressBg.Position = UDim2.new(0, 20, 0, 118)
+progressBg.Position = UDim2.new(0, 20, 0, 122)
 progressBg.BackgroundColor3 = Color3.fromRGB(40, 30, 35)
 progressBg.BorderSizePixel = 0
 progressBg.Parent = popup
@@ -382,21 +405,41 @@ progressFill.BorderSizePixel = 0
 progressFill.Parent = progressBg
 Instance.new("UICorner", progressFill).CornerRadius = UDim.new(1, 0)
 
--- Load 0→100%
+-- ===== DONE LABEL (ẩn ban đầu) =====
+local doneLabel = Instance.new("TextLabel")
+doneLabel.Size = UDim2.new(1, -40, 0, 20)
+doneLabel.Position = UDim2.new(0, 20, 0, 145)
+doneLabel.BackgroundTransparency = 1
+doneLabel.Text = "✓ DONE"
+doneLabel.Font = Enum.Font.GothamBold
+doneLabel.TextSize = 14
+doneLabel.TextColor3 = Color3.fromRGB(80, 255, 130)
+doneLabel.TextTransparency = 1
+doneLabel.Parent = popup
+
+-- ===== LOAD ANIMATION 0 → 100% =====
 task.spawn(function()
     local startTick = tick()
-    while tick() - startTick < 3 do
-        local t = (tick() - startTick) / 3
+    local duration = 3
+    while tick() - startTick < duration do
+        local t = (tick() - startTick) / duration
         if t > 1 then t = 1 end
         percentLabel.Text = math.floor(t * 100) .. "%"
         progressFill.Size = UDim2.new(t, 0, 1, 0)
-        task.wait(0.08)
+        task.wait(0.05)
     end
     percentLabel.Text = "100%"
     progressFill.Size = UDim2.new(1, 0, 1, 0)
+    
+    -- Hiện DONE với hiệu ứng
+    TweenService:Create(doneLabel, TweenInfo.new(0.3), {TextTransparency = 0}):Play()
+    TweenService:Create(progressFill, TweenInfo.new(0.2), {
+        BackgroundColor3 = Color3.fromRGB(80, 255, 130)
+    }):Play()
 end)
 
-task.delay(3.5, function()
+-- Auto close sau 5s (đủ thời gian thấy DONE)
+task.delay(5, function()
     pcall(function() popupGui:Destroy() end)
 end)
 
@@ -658,7 +701,6 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
--- Timer
 local startTime = tick()
 task.spawn(function()
     while statsGui.Parent do
@@ -670,7 +712,6 @@ task.spawn(function()
     end
 end)
 
--- FPS
 local frames = 0
 task.spawn(function()
     RunService.RenderStepped:Connect(function()
@@ -700,4 +741,4 @@ task.spawn(function()
     end
 end)
 
-print("✅ fix lag v1.0 by kudo29001 - Lightweight loaded")
+print("✅ fix lag v1.0 by kudo29001 loaded")

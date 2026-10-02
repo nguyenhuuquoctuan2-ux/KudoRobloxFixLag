@@ -27,7 +27,7 @@ pcall(function()
     end
 end)
 
--- ==================== POPUP ====================
+-- ==================== POPUP NGẦU ====================
 local popupGui = Instance.new("ScreenGui")
 popupGui.Name = "KudoPopup"
 popupGui.ResetOnSpawn = false
@@ -36,31 +36,80 @@ popupGui.DisplayOrder = 2147483647
 popupGui.Parent = uiParent
 
 local popup = Instance.new("Frame")
-popup.Size = UDim2.new(0, 300, 0, 72)
-popup.Position = UDim2.new(1, -320, 0.4, -36)
-popup.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+popup.Size = UDim2.new(0, 320, 0, 84)
+popup.Position = UDim2.new(1, 340, 0.4, -42)
+popup.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
 popup.BorderSizePixel = 0
+popup.ClipsDescendants = false
 popup.Parent = popupGui
-Instance.new("UICorner", popup).CornerRadius = UDim.new(0, 14)
+Instance.new("UICorner", popup).CornerRadius = UDim.new(0, 16)
 
+-- Viền RGB chạy
 local border = Instance.new("UIStroke")
 border.Color = Color3.fromRGB(255, 60, 60)
-border.Thickness = 1.5
-border.Transparency = 0.2
+border.Thickness = 1.8
+border.Transparency = 0
+border.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 border.Parent = popup
 
+task.spawn(function()
+    local hue = 0
+    while border.Parent do
+        hue = (hue + 0.008) % 1
+        border.Color = Color3.fromHSV(hue, 0.9, 1)
+        task.wait(0.03)
+    end
+end)
+
+-- Lớp gradient nền
+local bgGradient = Instance.new("UIGradient")
+bgGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 15, 20)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(14, 14, 20)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(10, 10, 15))
+})
+bgGradient.Rotation = 135
+bgGradient.Parent = popup
+
+-- Accent bar bên trái
+local accentBar = Instance.new("Frame")
+accentBar.Size = UDim2.new(0, 4, 1, -24)
+accentBar.Position = UDim2.new(0, 0, 0, 12)
+accentBar.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+accentBar.BorderSizePixel = 0
+accentBar.Parent = popup
+Instance.new("UICorner", accentBar).CornerRadius = UDim.new(0, 3)
+
+local accentGradient = Instance.new("UIGradient")
+accentGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 60, 60)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 150, 100)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 60, 60))
+})
+accentGradient.Rotation = 90
+accentGradient.Parent = accentBar
+
+-- Icon bánh răng
 local iconWrap = Instance.new("Frame")
-iconWrap.Size = UDim2.new(0, 44, 0, 44)
-iconWrap.Position = UDim2.new(0, 16, 0.5, -22)
-iconWrap.BackgroundColor3 = Color3.fromRGB(25, 18, 22)
+iconWrap.Size = UDim2.new(0, 48, 0, 48)
+iconWrap.Position = UDim2.new(0, 20, 0.5, -24)
+iconWrap.BackgroundColor3 = Color3.fromRGB(28, 15, 20)
 iconWrap.BorderSizePixel = 0
 iconWrap.Parent = popup
 Instance.new("UICorner", iconWrap).CornerRadius = UDim.new(1, 0)
 
+local iconGradient = Instance.new("UIGradient")
+iconGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(60, 20, 30)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(25, 15, 20))
+})
+iconGradient.Rotation = 45
+iconGradient.Parent = iconWrap
+
 local iconStroke = Instance.new("UIStroke")
 iconStroke.Color = Color3.fromRGB(255, 80, 80)
-iconStroke.Thickness = 1.2
-iconStroke.Transparency = 0.3
+iconStroke.Thickness = 1.5
+iconStroke.Transparency = 0.2
 iconStroke.Parent = iconWrap
 
 local icon = Instance.new("TextLabel")
@@ -68,51 +117,103 @@ icon.Size = UDim2.new(1, 0, 1, 0)
 icon.BackgroundTransparency = 1
 icon.Text = "⚙"
 icon.Font = Enum.Font.GothamBold
-icon.TextSize = 24
-icon.TextColor3 = Color3.fromRGB(255, 90, 90)
+icon.TextSize = 26
+icon.TextColor3 = Color3.fromRGB(255, 100, 100)
 icon.Parent = iconWrap
 
 task.spawn(function()
     local r = 0
     while icon.Parent do
-        r = (r + 5) % 360
+        r = (r + 6) % 360
         icon.Rotation = r
         task.wait(0.03)
     end
 end)
 
+-- Pulse ring phát sáng quanh icon
+task.spawn(function()
+    while iconWrap.Parent do
+        local ring = Instance.new("Frame")
+        ring.Size = UDim2.new(0, 48, 0, 48)
+        ring.Position = UDim2.new(0, 0, 0, 0)
+        ring.BackgroundTransparency = 1
+        ring.ZIndex = -1
+        ring.Parent = iconWrap
+        Instance.new("UICorner", ring).CornerRadius = UDim.new(1, 0)
+        
+        local ringStroke = Instance.new("UIStroke")
+        ringStroke.Color = Color3.fromRGB(255, 80, 80)
+        ringStroke.Thickness = 2
+        ringStroke.Transparency = 0.2
+        ringStroke.Parent = ring
+        
+        TweenService:Create(ring, TweenInfo.new(1.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+            Size = UDim2.new(0, 84, 0, 84),
+            Position = UDim2.new(0, -18, 0, -18)
+        }):Play()
+        TweenService:Create(ringStroke, TweenInfo.new(1.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+            Transparency = 1,
+            Thickness = 0.5
+        }):Play()
+        
+        task.delay(1.4, function()
+            pcall(function() ring:Destroy() end)
+        end)
+        
+        task.wait(0.7)
+    end
+end)
+
+-- Text
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, -90, 0, 22)
-title.Position = UDim2.new(0, 74, 0, 16)
+title.Size = UDim2.new(1, -100, 0, 24)
+title.Position = UDim2.new(0, 82, 0, 20)
 title.BackgroundTransparency = 1
 title.Text = "fix lag v1.0"
 title.Font = Enum.Font.GothamBold
-title.TextSize = 15
-title.TextColor3 = Color3.fromRGB(255, 90, 90)
+title.TextSize = 17
+title.TextColor3 = Color3.fromRGB(255, 100, 100)
 title.TextXAlignment = Enum.TextXAlignment.Left
 title.Parent = popup
 
 local check = Instance.new("TextLabel")
-check.Size = UDim2.new(0, 22, 0, 22)
-check.Position = UDim2.new(1, -30, 0, 16)
+check.Size = UDim2.new(0, 26, 0, 24)
+check.Position = UDim2.new(1, -34, 0, 20)
 check.BackgroundTransparency = 1
 check.Text = "✓"
 check.Font = Enum.Font.GothamBold
-check.TextSize = 15
+check.TextSize = 17
 check.TextColor3 = Color3.fromRGB(80, 255, 130)
 check.Parent = popup
 
 local sub = Instance.new("TextLabel")
-sub.Size = UDim2.new(1, -90, 0, 18)
-sub.Position = UDim2.new(0, 74, 0, 40)
+sub.Size = UDim2.new(1, -100, 0, 18)
+sub.Position = UDim2.new(0, 82, 0, 46)
 sub.BackgroundTransparency = 1
 sub.Text = "by kudo29001 ⚡"
 sub.Font = Enum.Font.Gotham
 sub.TextSize = 11
-sub.TextColor3 = Color3.fromRGB(160, 160, 170)
+sub.TextColor3 = Color3.fromRGB(150, 150, 165)
 sub.TextXAlignment = Enum.TextXAlignment.Left
 sub.Parent = popup
 
+-- Progress bar chạy dưới đáy
+local progressBar = Instance.new("Frame")
+progressBar.Size = UDim2.new(0, 0, 0, 2)
+progressBar.Position = UDim2.new(0, 20, 1, -2)
+progressBar.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
+progressBar.BorderSizePixel = 0
+progressBar.Parent = popup
+Instance.new("UICorner", progressBar).CornerRadius = UDim.new(1, 0)
+
+local progressGradient = Instance.new("UIGradient")
+progressGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 60, 60)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 150, 80))
+})
+progressGradient.Parent = progressBar
+
+-- ANIMATION MỞ
 popup.BackgroundTransparency = 1
 iconWrap.BackgroundTransparency = 1
 icon.TextTransparency = 1
@@ -120,34 +221,45 @@ title.TextTransparency = 1
 check.TextTransparency = 1
 sub.TextTransparency = 1
 border.Transparency = 1
+accentBar.BackgroundTransparency = 1
+progressBar.BackgroundTransparency = 1
 
-TweenService:Create(popup, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-    Position = UDim2.new(1, -320, 0.4, -36),
+TweenService:Create(popup, TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+    Position = UDim2.new(1, -340, 0.4, -42),
     BackgroundTransparency = 0
 }):Play()
-TweenService:Create(border, TweenInfo.new(0.4), {Transparency = 0.2}):Play()
+TweenService:Create(border, TweenInfo.new(0.4), {Transparency = 0}):Play()
 TweenService:Create(iconWrap, TweenInfo.new(0.4), {BackgroundTransparency = 0}):Play()
+TweenService:Create(accentBar, TweenInfo.new(0.4), {BackgroundTransparency = 0}):Play()
 
-task.wait(0.15)
+task.wait(0.2)
 TweenService:Create(icon, TweenInfo.new(0.3), {TextTransparency = 0}):Play()
 TweenService:Create(title, TweenInfo.new(0.3), {TextTransparency = 0}):Play()
 task.wait(0.1)
 TweenService:Create(check, TweenInfo.new(0.3), {TextTransparency = 0}):Play()
 TweenService:Create(sub, TweenInfo.new(0.3), {TextTransparency = 0}):Play()
+task.wait(0.1)
+TweenService:Create(progressBar, TweenInfo.new(0.3), {BackgroundTransparency = 0}):Play()
+TweenService:Create(progressBar, TweenInfo.new(3, Enum.EasingStyle.Linear), {
+    Size = UDim2.new(1, -40, 0, 2)
+}):Play()
 
+-- ANIMATION TẮT
 task.delay(3.5, function()
     pcall(function()
-        TweenService:Create(sub, TweenInfo.new(0.25), {TextTransparency = 1}):Play()
-        TweenService:Create(check, TweenInfo.new(0.25), {TextTransparency = 1}):Play()
+        TweenService:Create(sub, TweenInfo.new(0.2), {TextTransparency = 1}):Play()
+        TweenService:Create(check, TweenInfo.new(0.2), {TextTransparency = 1}):Play()
+        TweenService:Create(progressBar, TweenInfo.new(0.2), {BackgroundTransparency = 1}):Play()
         task.wait(0.1)
-        TweenService:Create(title, TweenInfo.new(0.25), {TextTransparency = 1}):Play()
-        TweenService:Create(icon, TweenInfo.new(0.25), {TextTransparency = 1}):Play()
+        TweenService:Create(title, TweenInfo.new(0.2), {TextTransparency = 1}):Play()
+        TweenService:Create(icon, TweenInfo.new(0.2), {TextTransparency = 1}):Play()
         task.wait(0.1)
-        TweenService:Create(iconWrap, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
-        TweenService:Create(border, TweenInfo.new(0.3), {Transparency = 1}):Play()
+        TweenService:Create(iconWrap, TweenInfo.new(0.25), {BackgroundTransparency = 1}):Play()
+        TweenService:Create(accentBar, TweenInfo.new(0.25), {BackgroundTransparency = 1}):Play()
+        TweenService:Create(border, TweenInfo.new(0.25), {Transparency = 1}):Play()
         task.wait(0.1)
         TweenService:Create(popup, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-            Position = UDim2.new(1, -20, 0.4, -36),
+            Position = UDim2.new(1, 340, 0.4, -42),
             BackgroundTransparency = 1
         }):Play()
         task.wait(0.5)
@@ -512,7 +624,7 @@ task.spawn(function()
     end
 end)
 
--- ==================== UI FPS + PING + CREDIT ====================
+-- ==================== UI FPS + PING ====================
 local statsGui = Instance.new("ScreenGui")
 statsGui.Name = "KudoStats"
 statsGui.ResetOnSpawn = false
@@ -521,10 +633,10 @@ statsGui.DisplayOrder = 2147483647
 statsGui.Parent = uiParent
 
 local box = Instance.new("Frame")
-box.Size = UDim2.new(0, 130, 0, 62)
-box.Position = UDim2.new(1, -140, 1, -72)
+box.Size = UDim2.new(0, 140, 0, 66)
+box.Position = UDim2.new(1, -150, 1, -76)
 box.BackgroundColor3 = Color3.fromRGB(14, 14, 20)
-box.BackgroundTransparency = 0.4
+box.BackgroundTransparency = 0.35
 box.BorderSizePixel = 0
 box.Active = true
 box.Parent = statsGui
@@ -536,6 +648,7 @@ boxStroke.Thickness = 1
 boxStroke.Transparency = 0.6
 boxStroke.Parent = box
 
+-- Header kéo
 local header = Instance.new("Frame")
 header.Size = UDim2.new(1, 0, 0, 16)
 header.Position = UDim2.new(0, 0, 0, 0)
@@ -554,9 +667,10 @@ dragHint.BorderSizePixel = 0
 dragHint.Parent = header
 Instance.new("UICorner", dragHint).CornerRadius = UDim.new(1, 0)
 
+-- FPS
 local fpsTitle = Instance.new("TextLabel")
-fpsTitle.Size = UDim2.new(0, 35, 0, 18)
-fpsTitle.Position = UDim2.new(0, 10, 0, 20)
+fpsTitle.Size = UDim2.new(0, 40, 0, 18)
+fpsTitle.Position = UDim2.new(0, 10, 0, 22)
 fpsTitle.BackgroundTransparency = 1
 fpsTitle.Text = "FPS"
 fpsTitle.Font = Enum.Font.GothamBold
@@ -567,7 +681,7 @@ fpsTitle.Parent = box
 
 local fpsValue = Instance.new("TextLabel")
 fpsValue.Size = UDim2.new(0, 70, 0, 18)
-fpsValue.Position = UDim2.new(1, -80, 0, 20)
+fpsValue.Position = UDim2.new(1, -80, 0, 22)
 fpsValue.BackgroundTransparency = 1
 fpsValue.Text = "--"
 fpsValue.Font = Enum.Font.GothamBold
@@ -576,9 +690,10 @@ fpsValue.TextColor3 = Color3.fromRGB(0, 255, 120)
 fpsValue.TextXAlignment = Enum.TextXAlignment.Right
 fpsValue.Parent = box
 
+-- PING
 local pingTitle = Instance.new("TextLabel")
-pingTitle.Size = UDim2.new(0, 35, 0, 18)
-pingTitle.Position = UDim2.new(0, 10, 0, 38)
+pingTitle.Size = UDim2.new(0, 40, 0, 18)
+pingTitle.Position = UDim2.new(0, 10, 0, 42)
 pingTitle.BackgroundTransparency = 1
 pingTitle.Text = "PING"
 pingTitle.Font = Enum.Font.GothamBold
@@ -589,7 +704,7 @@ pingTitle.Parent = box
 
 local pingValue = Instance.new("TextLabel")
 pingValue.Size = UDim2.new(0, 70, 0, 18)
-pingValue.Position = UDim2.new(1, -80, 0, 38)
+pingValue.Position = UDim2.new(1, -80, 0, 42)
 pingValue.BackgroundTransparency = 1
 pingValue.Text = "--"
 pingValue.Font = Enum.Font.GothamBold
@@ -598,7 +713,7 @@ pingValue.TextColor3 = Color3.fromRGB(0, 255, 120)
 pingValue.TextXAlignment = Enum.TextXAlignment.Right
 pingValue.Parent = box
 
--- Nút X tròn
+-- Nút X (đóng hẳn)
 local closeBtn = Instance.new("TextButton")
 closeBtn.Size = UDim2.new(0, 22, 0, 22)
 closeBtn.Position = UDim2.new(1, -26, 0, -3)
@@ -612,14 +727,14 @@ closeBtn.ZIndex = 10
 closeBtn.Parent = box
 Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(1, 0)
 
--- Nút ẩn (—) nằm cạnh nút X
+-- Nút ẩn (-)
 local hideBtn = Instance.new("TextButton")
 hideBtn.Size = UDim2.new(0, 22, 0, 22)
 hideBtn.Position = UDim2.new(1, -52, 0, -3)
 hideBtn.BackgroundColor3 = Color3.fromRGB(255, 150, 50)
-hideBtn.Text = "—"
+hideBtn.Text = "-"
 hideBtn.Font = Enum.Font.GothamBold
-hideBtn.TextSize = 13
+hideBtn.TextSize = 15
 hideBtn.TextColor3 = Color3.new(1, 1, 1)
 hideBtn.BorderSizePixel = 0
 hideBtn.ZIndex = 10
@@ -674,7 +789,7 @@ vRight.ZIndex = 10
 vRight.Parent = resizeBtn
 Instance.new("UICorner", vRight).CornerRadius = UDim.new(1, 0)
 
--- ===== NÚT HIỆN UI (chỉ hiện khi UI bị ẩn) =====
+-- ===== SCREEN GUI RIÊNG CHO NÚT HIỆN =====
 local showGui = Instance.new("ScreenGui")
 showGui.Name = "KudoToggle"
 showGui.ResetOnSpawn = false
@@ -683,12 +798,12 @@ showGui.DisplayOrder = 2147483647
 showGui.Parent = uiParent
 
 local showBtn = Instance.new("TextButton")
-showBtn.Size = UDim2.new(0, 40, 0, 40)
-showBtn.Position = UDim2.new(1, -50, 1, -50)
+showBtn.Size = UDim2.new(0, 44, 0, 44)
+showBtn.Position = UDim2.new(1, -54, 1, -54)
 showBtn.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
 showBtn.Text = "⚡"
 showBtn.Font = Enum.Font.GothamBold
-showBtn.TextSize = 20
+showBtn.TextSize = 22
 showBtn.TextColor3 = Color3.new(1, 1, 1)
 showBtn.BorderSizePixel = 0
 showBtn.Visible = false
@@ -701,7 +816,7 @@ showStroke.Thickness = 1.5
 showStroke.Transparency = 0.3
 showStroke.Parent = showBtn
 
--- Ẩn UI: hide box + credit, hiện nút show
+-- Ẩn UI
 hideBtn.MouseButton1Click:Connect(function()
     pcall(function()
         box.Visible = false
@@ -709,7 +824,7 @@ hideBtn.MouseButton1Click:Connect(function()
     end)
 end)
 
--- Hiện UI: hiện box + credit, ẩn nút show
+-- Hiện UI
 showBtn.MouseButton1Click:Connect(function()
     pcall(function()
         box.Visible = true
@@ -717,7 +832,7 @@ showBtn.MouseButton1Click:Connect(function()
     end)
 end)
 
--- Nút X = tắt hẳn cả 2 GUI
+-- Đóng hẳn
 closeBtn.MouseButton1Click:Connect(function()
     pcall(function()
         statsGui:Destroy()
@@ -773,8 +888,8 @@ UserInputService.InputChanged:Connect(function(input)
     if resizing and (input.UserInputType == Enum.UserInputType.Touch 
         or input.UserInputType == Enum.UserInputType.MouseMovement) then
         local delta = input.Position - resizeStart
-        local newX = math.max(110, resizeStartSize.X.Offset + delta.X)
-        local newY = math.max(55, resizeStartSize.Y.Offset + delta.Y)
+        local newX = math.max(120, resizeStartSize.X.Offset + delta.X)
+        local newY = math.max(66, resizeStartSize.Y.Offset + delta.Y)
         box.Size = UDim2.new(0, newX, 0, newY)
         creditLabel.Position = UDim2.new(1, 4, 1, -18)
     end
@@ -787,6 +902,7 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
+-- Đo FPS
 local frames = 0
 local lastTime = tick()
 

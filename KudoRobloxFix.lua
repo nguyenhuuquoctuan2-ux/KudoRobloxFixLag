@@ -213,7 +213,7 @@ border.Color = Color3.fromRGB(255, 60, 60)
 border.Thickness = 2
 border.Parent = popup
 
--- LOADING ICON — Vòng cung xoay bằng Frame (không dùng unicode)
+-- ===== LOADING ICON — VÒNG CUNG 3/4 ĐỀU =====
 local iconWrap = Instance.new("Frame")
 iconWrap.Size = UDim2.new(0, 52, 0, 52)
 iconWrap.Position = UDim2.new(0, 20, 0, 22)
@@ -227,37 +227,46 @@ iconStroke.Color = Color3.fromRGB(60, 40, 45)
 iconStroke.Thickness = 1.5
 iconStroke.Parent = iconWrap
 
--- Vòng cung trắng xoay — 3/4 đường tròn
+-- Vòng tròn đầy đủ + 2 nửa mask che đều 2 góc đối diện
 local arcHolder = Instance.new("Frame")
 arcHolder.Size = UDim2.new(0, 34, 0, 34)
 arcHolder.Position = UDim2.new(0.5, -17, 0.5, -17)
 arcHolder.BackgroundTransparency = 1
 arcHolder.Parent = iconWrap
 
--- 3/4 vòng cung trắng
-local arcFrame = Instance.new("Frame")
-arcFrame.Size = UDim2.new(1, 0, 1, 0)
-arcFrame.BackgroundTransparency = 1
-arcFrame.Parent = arcHolder
-Instance.new("UICorner", arcFrame).CornerRadius = UDim.new(1, 0)
+-- Vòng tròn trắng đầy đủ
+local arcRing = Instance.new("Frame")
+arcRing.Size = UDim2.new(1, 0, 1, 0)
+arcRing.BackgroundTransparency = 1
+arcRing.Parent = arcHolder
+Instance.new("UICorner", arcRing).CornerRadius = UDim.new(1, 0)
 
 local arcStroke = Instance.new("UIStroke")
 arcStroke.Color = Color3.fromRGB(255, 255, 255)
 arcStroke.Thickness = 3
-arcStroke.Parent = arcFrame
+arcStroke.Parent = arcRing
 
--- Che 1 phần để tạo 3/4 vòng cung
-local arcMask = Instance.new("Frame")
-arcMask.Size = UDim2.new(0, 18, 0, 18)
-arcMask.Position = UDim2.new(0.5, 0, 0.5, 0)
-arcMask.BackgroundColor3 = Color3.fromRGB(25, 15, 20)
-arcMask.BorderSizePixel = 0
-arcMask.Parent = arcHolder
-Instance.new("UICorner", arcMask).CornerRadius = UDim.new(0, 4)
+-- Mask 1: che góc trên trái
+local mask1 = Instance.new("Frame")
+mask1.Size = UDim2.new(0, 20, 0, 20)
+mask1.Position = UDim2.new(0, -3, 0, -3)
+mask1.BackgroundColor3 = Color3.fromRGB(25, 15, 20)
+mask1.BorderSizePixel = 0
+mask1.Parent = arcHolder
+Instance.new("UICorner", mask1).CornerRadius = UDim.new(0, 4)
+
+-- Mask 2: che góc dưới phải
+local mask2 = Instance.new("Frame")
+mask2.Size = UDim2.new(0, 20, 0, 20)
+mask2.Position = UDim2.new(1, -17, 1, -17)
+mask2.BackgroundColor3 = Color3.fromRGB(25, 15, 20)
+mask2.BorderSizePixel = 0
+mask2.Parent = arcHolder
+Instance.new("UICorner", mask2).CornerRadius = UDim.new(0, 4)
 
 task.spawn(function()
     while arcHolder.Parent do
-        arcHolder.Rotation = (arcHolder.Rotation + 14) % 360
+        arcHolder.Rotation = (arcHolder.Rotation + 12) % 360
         task.wait(0.03)
     end
 end)
@@ -335,7 +344,8 @@ task.delay(4.5, function()
     TS:Create(pFill, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
     TS:Create(iconWrap, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
     TS:Create(arcStroke, TweenInfo.new(0.6), {Transparency = 1}):Play()
-    TS:Create(arcMask, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
+    TS:Create(mask1, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
+    TS:Create(mask2, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
     TS:Create(iconStroke, TweenInfo.new(0.6), {Transparency = 1}):Play()
     task.wait(0.7)
     sg:Destroy()
@@ -352,8 +362,8 @@ stats.Parent = pg
 local box = Instance.new("Frame")
 box.Size = UDim2.new(0, 150, 0, 92)
 box.Position = UDim2.new(1, -160, 1, -102)
--- Neo giữa ngang (0.5, 0) để khi tăng size, box to ra cả 2 phía
-box.AnchorPoint = Vector2.new(0.5, 0)
+-- Neo 3/4 về phía phải để khi tăng size, box mở rộng lệch về bên trái
+box.AnchorPoint = Vector2.new(0.75, 0)
 box.BackgroundColor3 = Color3.fromRGB(14, 14, 20)
 box.BackgroundTransparency = 0.4
 box.BorderSizePixel = 0
@@ -536,10 +546,12 @@ UIS.InputEnded:Connect(function(i)
     end
 end)
 
--- ===== RESIZE MỞ RỘNG 2 PHÍA =====
--- Với AnchorPoint = (0.5, 0), box neo giữa ngang.
--- Khi Size.X.Offset tăng, box to ra cả 2 phía (trái và phải), mép trên đứng yên.
--- Chỉ cần đổi Size, không cần đổi Position.
+-- ===== RESIZE MỞ RỘNG LỆCH VỀ BÊN TRÁI =====
+-- AnchorPoint.X = 0.75 -> 75% box nằm về bên phải điểm neo, 25% về bên trái
+-- Khi Size.X tăng:
+--   - Mép trái dịch về bên trái = 75% delta
+--   - Mép phải dịch về bên phải = 25% delta
+-- => box mở rộng chủ yếu về bên trái, vẫn nở cả phải
 local resizing = false
 local rs, rss
 resizeB.InputBegan:Connect(function(i)
@@ -553,8 +565,7 @@ end)
 UIS.InputChanged:Connect(function(i)
     if resizing then
         local d = i.Position - rs
-        -- Kéo sang phải (d.X > 0) = tăng width; neo giữa tự mở 2 phía
-        -- Kéo xuống (d.Y > 0) = tăng height
+        -- Kéo sang phải = tăng
         local nx = math.max(120, rss.X.Offset + d.X)
         local ny = math.max(80, rss.Y.Offset + d.Y)
         box.Size = UDim2.new(0, nx, 0, ny)

@@ -1,14 +1,200 @@
+-- Fix Lag v1.0 by kudo29001
 local player = game.Players.LocalPlayer
 local pg = player:WaitForChild("PlayerGui")
 local UIS = game:GetService("UserInputService")
 local RS = game:GetService("RunService")
+local TS = game:GetService("TweenService")
 local Stats = game:GetService("Stats")
+local Lighting = game:GetService("Lighting")
+local Workspace = game:GetService("Workspace")
+local Terrain = Workspace:FindFirstChildOfClass("Terrain")
+local Camera = Workspace.CurrentCamera
 
 for _, v in pairs(pg:GetChildren()) do
     if v.Name == "KudoPopup" or v.Name == "KudoStats" or v.Name == "KudoToggle" then
         v:Destroy()
     end
 end
+
+-- ==================== FFLAG ====================
+pcall(function()
+    setfflag("DFIntTaskSchedulerTargetFps", "9999")
+    setfflag("DFIntFrameRateCap", "9999")
+    setfflag("DFIntMaxFrameRate", "9999")
+    setfflag("FFlagDisableVSync", "True")
+    setfflag("DFIntDebugFRMQualityLevelOverride", "1")
+    setfflag("DFIntTextureQualityOverride", "0")
+    setfflag("DFFlagTextureQualityOverrideEnabled", "True")
+    setfflag("FFlagTextureQualityOverride", "True")
+    setfflag("FFlagDisableTextures", "True")
+    setfflag("FFlagDisableSurfaceAppearance", "True")
+    setfflag("DFFlagDisableSSAO", "True")
+    setfflag("FFlagDisableSSAO", "True")
+    setfflag("FFlagDisablePostFx", "True")
+    setfflag("FFlagDisableBloom", "True")
+    setfflag("FFlagDisableDepthOfField", "True")
+    setfflag("FFlagDisableSunRays", "True")
+    setfflag("FFlagDisableAntiAliasing", "True")
+    setfflag("FFlagDisableMotionBlur", "True")
+    setfflag("FFlagRenderShadowIntensity", "0")
+    setfflag("FFlagRenderShadowIntensityOverride", "True")
+    setfflag("FFlagDisableShadows", "True")
+    setfflag("FFlagDebugSkyGray", "True")
+    setfflag("FFlagDisableAtmosphere", "True")
+    setfflag("FFlagDisableSky", "True")
+    setfflag("FFlagDisableFog", "True")
+    setfflag("FFlagDisableTerrainDecoration", "True")
+    setfflag("FIntFRMMaxGrassDistance", "0")
+    setfflag("DFIntCSGLevelOfDetailSwitchingDistance", "0")
+    setfflag("FFlagDisableLODTransitions", "True")
+    setfflag("FFlagForceLOD0", "True")
+    setfflag("DFIntLODBias", "8")
+    setfflag("DFFlagDebugRenderForceTechnologyVoxel", "True")
+    setfflag("FFlagDebugPauseVoxelizer", "True")
+    setfflag("DFIntSolverSpringDamping", "0")
+    setfflag("DFIntMaxSimultaneousPhysicsJobs", "1")
+    setfflag("DFIntPhysicsStepPerFrame", "1")
+    setfflag("DFIntMaximumCollisionIterations", "1")
+    setfflag("DFIntSolverConvergenceIterations", "1")
+    setfflag("DFIntFrameBufferPoolSize", "1")
+    setfflag("DFIntDebugEngineOptimizationLevel", "3")
+end)
+
+pcall(function()
+    settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+    settings().Rendering.MeshPartDetailLevel = Enum.MeshPartDetailLevel.Level01
+end)
+
+pcall(function()
+    if Camera then Camera.FieldOfView = 70 end
+    Workspace.StreamingEnabled = true
+    Workspace.StreamingTargetRadius = 96
+    Workspace.StreamingMinRadius = 48
+end)
+
+pcall(function()
+    for _, v in ipairs(Lighting:GetChildren()) do
+        if v:IsA("PostEffect") or v:IsA("Sky") or v:IsA("Atmosphere") or v:IsA("Clouds") then
+            v:Destroy()
+        end
+    end
+    Lighting.GlobalShadows = false
+    Lighting.FogEnd = 100000
+    Lighting.Brightness = 2
+    Lighting.ClockTime = 14
+end)
+
+pcall(function()
+    if Terrain then
+        Terrain.WaterWaveSize = 0
+        Terrain.WaterWaveSpeed = 0
+        Terrain.WaterReflectance = 0
+        Terrain.WaterTransparency = 0
+        Terrain.WaterColor = Color3.fromRGB(70, 140, 230)
+        Terrain.Decoration = false
+    end
+end)
+
+-- ==================== CACHE NHÂN VẬT ====================
+local charModels = {}
+for _, plr in ipairs(game.Players:GetPlayers()) do
+    if plr.Character then charModels[plr.Character] = true end
+    plr.CharacterAdded:Connect(function(c) charModels[c] = true end)
+end
+game.Players.PlayerAdded:Connect(function(plr)
+    plr.CharacterAdded:Connect(function(c) charModels[c] = true end)
+end)
+game.Players.PlayerRemoving:Connect(function(plr)
+    if plr.Character then charModels[plr.Character] = nil end
+end)
+
+local function isChar(v)
+    local cur = v
+    while cur do
+        if charModels[cur] then return true end
+        if cur:IsA("Accessory") or cur:IsA("Tool") then return true end
+        cur = cur.Parent
+    end
+    return false
+end
+
+local function isName(v)
+    return v:IsA("BillboardGui") or v:IsA("TextLabel") or v:IsA("TextButton") or v:IsA("Humanoid")
+end
+
+local killTypes = {
+    ParticleEmitter = true, Trail = true, Smoke = true, Fire = true,
+    Sparkles = true, Beam = true, Highlight = true, SelectionBox = true,
+    BoxHandleAdornment = true, PointLight = true, SpotLight = true,
+    SurfaceLight = true, ForceField = true, Explosion = true,
+    Animation = true, SurfaceAppearance = true,
+    Decal = true, Texture = true, SpecialMesh = true,
+}
+
+local function handleObject(v)
+    if isName(v) or isChar(v) then return end
+    local cn = v.ClassName
+    if killTypes[cn] then
+        pcall(function() v:Destroy() end)
+    elseif cn == "Part" or cn == "MeshPart" or cn == "UnionOperation" or cn == "WedgePart" then
+        pcall(function()
+            v.Material = Enum.Material.SmoothPlastic
+            v.Reflectance = 0
+            v.CastShadow = false
+        end)
+    end
+end
+
+task.spawn(function()
+    local descendants = Workspace:GetDescendants()
+    for i = 1, #descendants do
+        handleObject(descendants[i])
+        if i % 1000 == 0 then task.wait() end
+    end
+end)
+
+Workspace.DescendantAdded:Connect(function(v)
+    task.defer(function()
+        pcall(function() handleObject(v) end)
+    end)
+end)
+
+-- ==================== CULLING ====================
+local CULL_DIST_SQ = 80 * 80
+local culled = {}
+
+task.spawn(function()
+    while true do
+        task.wait(0.5)
+        pcall(function()
+            if not Camera then return end
+            local camPos = Camera.CFrame.Position
+            for _, v in ipairs(Workspace:GetChildren()) do
+                if v:IsA("BasePart") and not isChar(v) then
+                    local pos = v.Position
+                    if pos.Y >= camPos.Y - 3 then
+                        local dx, dy, dz = pos.X - camPos.X, pos.Y - camPos.Y, pos.Z - camPos.Z
+                        local shouldHide = (dx*dx + dy*dy + dz*dz) > CULL_DIST_SQ
+                        if shouldHide and not culled[v] then
+                            culled[v] = true
+                            pcall(function() v.LocalTransparencyModifier = 1 end)
+                        elseif not shouldHide and culled[v] then
+                            culled[v] = false
+                            pcall(function() v.LocalTransparencyModifier = 0 end)
+                        end
+                    end
+                end
+            end
+        end)
+    end
+end)
+
+task.spawn(function()
+    while true do
+        task.wait(60)
+        pcall(function() collectgarbage("collect") end)
+    end
+end)
 
 -- ==================== POPUP ====================
 local sg = Instance.new("ScreenGui")
@@ -31,41 +217,24 @@ border.Color = Color3.fromRGB(255, 60, 60)
 border.Thickness = 2
 border.Parent = popup
 
--- VÒNG TRÒN RỖNG, CHỈ CÓ VIỀN
-local spinWrap = Instance.new("Frame")
-spinWrap.Size = UDim2.new(0, 52, 0, 52)
-spinWrap.Position = UDim2.new(0, 20, 0, 22)
-spinWrap.BackgroundTransparency = 1
-spinWrap.Parent = popup
+-- MẶT TRĂNG (dùng text)
+local moonLabel = Instance.new("TextLabel")
+moonLabel.Size = UDim2.new(0, 52, 0, 52)
+moonLabel.Position = UDim2.new(0, 20, 0, 22)
+moonLabel.BackgroundTransparency = 1
+moonLabel.Text = "🌙"
+moonLabel.Font = Enum.Font.GothamBold
+moonLabel.TextSize = 40
+moonLabel.TextColor3 = Color3.fromRGB(255, 220, 130)
+moonLabel.Parent = popup
 
--- vòng nền xám mờ
-local baseRing = Instance.new("Frame")
-baseRing.Size = UDim2.new(1, 0, 1, 0)
-baseRing.BackgroundTransparency = 1
-baseRing.Parent = spinWrap
-Instance.new("UICorner", baseRing).CornerRadius = UDim.new(1, 0)
-
-local baseStroke = Instance.new("UIStroke")
-baseStroke.Color = Color3.fromRGB(60, 40, 45)
-baseStroke.Thickness = 2
-baseStroke.Parent = baseRing
-
--- vòng đỏ xoay (chỉ viền, rỗng)
-local spinRing = Instance.new("Frame")
-spinRing.Size = UDim2.new(1, 0, 1, 0)
-spinRing.BackgroundTransparency = 1
-spinRing.Parent = spinWrap
-Instance.new("UICorner", spinRing).CornerRadius = UDim.new(1, 0)
-
-local spinStroke = Instance.new("UIStroke")
-spinStroke.Color = Color3.fromRGB(255, 80, 80)
-spinStroke.Thickness = 3
-spinStroke.Parent = spinRing
-
+-- Moon pulse
 task.spawn(function()
-    while spinRing.Parent do
-        spinRing.Rotation = (spinRing.Rotation + 15) % 360
-        task.wait(0.03)
+    while moonLabel.Parent do
+        TS:Create(moonLabel, TweenInfo.new(1.2), {TextTransparency = 0.3}):Play()
+        task.wait(1.2)
+        TS:Create(moonLabel, TweenInfo.new(1.2), {TextTransparency = 0}):Play()
+        task.wait(1.2)
     end
 end)
 
@@ -116,6 +285,7 @@ pFill.BorderSizePixel = 0
 pFill.Parent = pBg
 Instance.new("UICorner", pFill).CornerRadius = UDim.new(1, 0)
 
+-- Load + fade out
 task.spawn(function()
     local st = tick()
     while tick() - st < 3 do
@@ -132,8 +302,20 @@ task.spawn(function()
     pFill.BackgroundColor3 = Color3.fromRGB(80, 255, 130)
 end)
 
-task.delay(5, function()
-    pcall(function() sg:Destroy() end)
+-- Fade out sau 4.5 giây
+task.delay(4.5, function()
+    pcall(function()
+        TS:Create(popup, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
+        TS:Create(border, TweenInfo.new(0.5), {Transparency = 1}):Play()
+        TS:Create(title, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
+        TS:Create(sub, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
+        TS:Create(percentL, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
+        TS:Create(pBg, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
+        TS:Create(pFill, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
+        TS:Create(moonLabel, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
+        task.wait(0.6)
+        sg:Destroy()
+    end)
 end)
 
 -- ==================== UI FPS/PING/TIME ====================
@@ -168,13 +350,12 @@ header.BorderSizePixel = 0
 header.Parent = box
 Instance.new("UICorner", header).CornerRadius = UDim.new(0, 10)
 
--- helper
-local function mkLabel(text, y)
+local function mkLabel(t, y)
     local l = Instance.new("TextLabel")
     l.Size = UDim2.new(0, 40, 0, 16)
     l.Position = UDim2.new(0, 10, 0, y)
     l.BackgroundTransparency = 1
-    l.Text = text
+    l.Text = t
     l.Font = Enum.Font.GothamBold
     l.TextSize = 10
     l.TextColor3 = Color3.fromRGB(180, 180, 180)
@@ -217,7 +398,6 @@ credit.TextTransparency = 0.3
 credit.TextXAlignment = Enum.TextXAlignment.Center
 credit.Parent = box
 
--- Nút X
 local closeB = Instance.new("TextButton")
 closeB.Size = UDim2.new(0, 22, 0, 22)
 closeB.Position = UDim2.new(1, -26, 0, -3)
@@ -230,7 +410,6 @@ closeB.BorderSizePixel = 0
 closeB.Parent = box
 Instance.new("UICorner", closeB).CornerRadius = UDim.new(1, 0)
 
--- Nút ẩn
 local hideB = Instance.new("TextButton")
 hideB.Size = UDim2.new(0, 22, 0, 22)
 hideB.Position = UDim2.new(1, -52, 0, -3)
@@ -243,7 +422,7 @@ hideB.BorderSizePixel = 0
 hideB.Parent = box
 Instance.new("UICorner", hideB).CornerRadius = UDim.new(1, 0)
 
--- Chữ V góc dưới trái TRONG UI
+-- Chữ V trong UI góc trái dưới
 local resizeB = Instance.new("TextButton")
 resizeB.Size = UDim2.new(0, 24, 0, 24)
 resizeB.Position = UDim2.new(0, 6, 1, -26)
@@ -274,7 +453,6 @@ vR.Rotation = 45
 vR.Parent = resizeB
 Instance.new("UICorner", vR).CornerRadius = UDim.new(1, 0)
 
--- Nút hiện
 local showSg = Instance.new("ScreenGui")
 showSg.Name = "KudoToggle"
 showSg.ResetOnSpawn = false
@@ -310,7 +488,7 @@ closeB.MouseButton1Click:Connect(function()
     showSg:Destroy()
 end)
 
--- ==================== DRAG ====================
+-- Drag
 local dragging = false
 local ds, sp
 header.InputBegan:Connect(function(i)
@@ -334,7 +512,9 @@ UIS.InputEnded:Connect(function(i)
     end
 end)
 
--- ==================== RESIZE ====================
+-- ===== RESIZE TÍNH TỪ GÓC TRÁI DƯỚI =====
+-- Kéo sang phải = tăng width, kéo xuống = tăng height
+-- Neo vẫn ở trên-trái, size tăng về bên phải
 local resizing = false
 local rs, rss
 resizeB.InputBegan:Connect(function(i)
@@ -348,6 +528,8 @@ end)
 UIS.InputChanged:Connect(function(i)
     if resizing then
         local d = i.Position - rs
+        -- Kéo phải d.X dương -> tăng width
+        -- Kéo xuống d.Y dương -> tăng height
         local nx = math.max(120, rss.X.Offset + d.X)
         local ny = math.max(80, rss.Y.Offset + d.Y)
         box.Size = UDim2.new(0, nx, 0, ny)
@@ -360,7 +542,6 @@ UIS.InputEnded:Connect(function(i)
     end
 end)
 
--- ==================== TIMER ====================
 local st = tick()
 task.spawn(function()
     while stats.Parent do
@@ -370,7 +551,6 @@ task.spawn(function()
     end
 end)
 
--- ==================== FPS ====================
 local fr = 0
 RS.RenderStepped:Connect(function()
     fr = fr + 1

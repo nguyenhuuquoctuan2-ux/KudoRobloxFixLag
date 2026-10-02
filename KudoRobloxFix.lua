@@ -15,6 +15,18 @@ pcall(function()
 end)
 if not uiParent then uiParent = playerGui end
 
+-- Xoá UI cũ
+pcall(function()
+    for _, v in pairs(game:GetService("CoreGui"):GetChildren()) do
+        if v.Name == "KudoPopup" or v.Name == "KudoStats" then v:Destroy() end
+    end
+end)
+pcall(function()
+    for _, v in pairs(playerGui:GetChildren()) do
+        if v.Name == "KudoPopup" or v.Name == "KudoStats" then v:Destroy() end
+    end
+end)
+
 -- ==================== POPUP ====================
 local popupGui = Instance.new("ScreenGui")
 popupGui.Name = "KudoPopup"
@@ -37,7 +49,6 @@ border.Thickness = 1.5
 border.Transparency = 0.2
 border.Parent = popup
 
--- Icon bên trái
 local iconWrap = Instance.new("Frame")
 iconWrap.Size = UDim2.new(0, 44, 0, 44)
 iconWrap.Position = UDim2.new(0, 16, 0.5, -22)
@@ -70,7 +81,6 @@ task.spawn(function()
     end
 end)
 
--- Text
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, -90, 0, 22)
 title.Position = UDim2.new(0, 74, 0, 16)
@@ -103,7 +113,6 @@ sub.TextColor3 = Color3.fromRGB(160, 160, 170)
 sub.TextXAlignment = Enum.TextXAlignment.Left
 sub.Parent = popup
 
--- Animation mở
 popup.BackgroundTransparency = 1
 iconWrap.BackgroundTransparency = 1
 icon.TextTransparency = 1
@@ -126,7 +135,6 @@ task.wait(0.1)
 TweenService:Create(check, TweenInfo.new(0.3), {TextTransparency = 0}):Play()
 TweenService:Create(sub, TweenInfo.new(0.3), {TextTransparency = 0}):Play()
 
--- Animation tắt
 task.delay(3.5, function()
     pcall(function()
         TweenService:Create(sub, TweenInfo.new(0.25), {TextTransparency = 1}):Play()
@@ -504,7 +512,7 @@ task.spawn(function()
     end
 end)
 
--- ==================== UI FPS + PING ====================
+-- ==================== UI FPS + PING + CREDIT ====================
 local statsGui = Instance.new("ScreenGui")
 statsGui.Name = "KudoStats"
 statsGui.ResetOnSpawn = false
@@ -513,107 +521,111 @@ statsGui.DisplayOrder = 2147483647
 statsGui.Parent = uiParent
 
 local box = Instance.new("Frame")
-box.Size = UDim2.new(0, 110, 0, 50)
-box.Position = UDim2.new(1, -120, 1, -60)
+box.Size = UDim2.new(0, 130, 0, 78)
+box.Position = UDim2.new(1, -140, 1, -88)
 box.BackgroundColor3 = Color3.fromRGB(14, 14, 20)
 box.BackgroundTransparency = 0.4
 box.BorderSizePixel = 0
 box.Active = true
 box.Parent = statsGui
-Instance.new("UICorner", box).CornerRadius = UDim.new(0, 8)
+Instance.new("UICorner", box).CornerRadius = UDim.new(0, 10)
 
 local boxStroke = Instance.new("UIStroke")
 boxStroke.Color = Color3.fromRGB(255, 60, 60)
 boxStroke.Thickness = 1
-boxStroke.Transparency = 0.75
+boxStroke.Transparency = 0.6
 boxStroke.Parent = box
 
 -- Header kéo
 local header = Instance.new("Frame")
-header.Size = UDim2.new(1, 0, 0, 14)
+header.Size = UDim2.new(1, 0, 0, 16)
 header.Position = UDim2.new(0, 0, 0, 0)
 header.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
 header.BackgroundTransparency = 0.7
 header.BorderSizePixel = 0
 header.Parent = box
-Instance.new("UICorner", header).CornerRadius = UDim.new(0, 8)
+Instance.new("UICorner", header).CornerRadius = UDim.new(0, 10)
 
 local dragHint = Instance.new("Frame")
-dragHint.Size = UDim2.new(0, 20, 0, 2)
-dragHint.Position = UDim2.new(0.5, -10, 0.5, -1)
-dragHint.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
-dragHint.BackgroundTransparency = 0.3
+dragHint.Size = UDim2.new(0, 24, 0, 2)
+dragHint.Position = UDim2.new(0.5, -12, 0.5, -1)
+dragHint.BackgroundColor3 = Color3.fromRGB(220, 220, 220)
+dragHint.BackgroundTransparency = 0.2
 dragHint.BorderSizePixel = 0
 dragHint.Parent = header
 Instance.new("UICorner", dragHint).CornerRadius = UDim.new(1, 0)
 
--- FPS
+-- FPS row
 local fpsTitle = Instance.new("TextLabel")
-fpsTitle.Size = UDim2.new(0, 30, 0, 18)
-fpsTitle.Position = UDim2.new(0, 6, 0, 16)
+fpsTitle.Size = UDim2.new(0, 35, 0, 18)
+fpsTitle.Position = UDim2.new(0, 10, 0, 20)
 fpsTitle.BackgroundTransparency = 1
 fpsTitle.Text = "FPS"
 fpsTitle.Font = Enum.Font.GothamBold
-fpsTitle.TextSize = 9
+fpsTitle.TextSize = 10
 fpsTitle.TextColor3 = Color3.fromRGB(180, 180, 180)
 fpsTitle.TextXAlignment = Enum.TextXAlignment.Left
 fpsTitle.Parent = box
 
 local fpsValue = Instance.new("TextLabel")
-fpsValue.Size = UDim2.new(0, 56, 0, 18)
-fpsValue.Position = UDim2.new(1, -62, 0, 16)
+fpsValue.Size = UDim2.new(0, 70, 0, 18)
+fpsValue.Position = UDim2.new(1, -80, 0, 20)
 fpsValue.BackgroundTransparency = 1
 fpsValue.Text = "--"
 fpsValue.Font = Enum.Font.GothamBold
-fpsValue.TextSize = 11
+fpsValue.TextSize = 12
 fpsValue.TextColor3 = Color3.fromRGB(0, 255, 120)
 fpsValue.TextXAlignment = Enum.TextXAlignment.Right
 fpsValue.Parent = box
 
--- PING
+-- PING row
 local pingTitle = Instance.new("TextLabel")
-pingTitle.Size = UDim2.new(0, 30, 0, 18)
-pingTitle.Position = UDim2.new(0, 6, 0, 32)
+pingTitle.Size = UDim2.new(0, 35, 0, 18)
+pingTitle.Position = UDim2.new(0, 10, 0, 38)
 pingTitle.BackgroundTransparency = 1
 pingTitle.Text = "PING"
 pingTitle.Font = Enum.Font.GothamBold
-pingTitle.TextSize = 9
+pingTitle.TextSize = 10
 pingTitle.TextColor3 = Color3.fromRGB(180, 180, 180)
 pingTitle.TextXAlignment = Enum.TextXAlignment.Left
 pingTitle.Parent = box
 
 local pingValue = Instance.new("TextLabel")
-pingValue.Size = UDim2.new(0, 56, 0, 18)
-pingValue.Position = UDim2.new(1, -62, 0, 32)
+pingValue.Size = UDim2.new(0, 70, 0, 18)
+pingValue.Position = UDim2.new(1, -80, 0, 38)
 pingValue.BackgroundTransparency = 1
 pingValue.Text = "--"
 pingValue.Font = Enum.Font.GothamBold
-pingValue.TextSize = 11
+pingValue.TextSize = 12
 pingValue.TextColor3 = Color3.fromRGB(0, 255, 120)
 pingValue.TextXAlignment = Enum.TextXAlignment.Right
 pingValue.Parent = box
 
+-- Credit dưới cùng
+local creditLabel = Instance.new("TextLabel")
+creditLabel.Size = UDim2.new(1, -10, 0, 14)
+creditLabel.Position = UDim2.new(0, 5, 1, -16)
+creditLabel.BackgroundTransparency = 1
+creditLabel.Text = "@script by kudo29001"
+creditLabel.Font = Enum.Font.Gotham
+creditLabel.TextSize = 9
+creditLabel.TextColor3 = Color3.fromRGB(140, 140, 155)
+creditLabel.TextXAlignment = Enum.TextXAlignment.Center
+creditLabel.Parent = box
+
 -- Nút X tròn
 local closeBtn = Instance.new("TextButton")
-closeBtn.Size = UDim2.new(0, 20, 0, 20)
-closeBtn.Position = UDim2.new(1, -24, 0, -3)
+closeBtn.Size = UDim2.new(0, 22, 0, 22)
+closeBtn.Position = UDim2.new(1, -26, 0, -3)
 closeBtn.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
-closeBtn.Text = ""
-closeBtn.AutoButtonColor = true
+closeBtn.Text = "x"
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextSize = 13
+closeBtn.TextColor3 = Color3.new(1, 1, 1)
 closeBtn.BorderSizePixel = 0
 closeBtn.ZIndex = 10
 closeBtn.Parent = box
 Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(1, 0)
-
-local closeIcon = Instance.new("TextLabel")
-closeIcon.Size = UDim2.new(1, 0, 1, 0)
-closeIcon.BackgroundTransparency = 1
-closeIcon.Text = "x"
-closeIcon.Font = Enum.Font.GothamBold
-closeIcon.TextSize = 14
-closeIcon.TextColor3 = Color3.new(1, 1, 1)
-closeIcon.ZIndex = 11
-closeIcon.Parent = closeBtn
 
 closeBtn.MouseButton1Click:Connect(function()
     pcall(function() statsGui:Destroy() end)
@@ -650,22 +662,22 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
--- ===== RESIZE BẰNG HÌNH CHỮ V GÓC DƯỚI PHẢI =====
+-- Resize bằng hình chữ V
 local resizeBtn = Instance.new("TextButton")
-resizeBtn.Size = UDim2.new(0, 22, 0, 22)
-resizeBtn.Position = UDim2.new(1, -24, 1, -24)
+resizeBtn.Size = UDim2.new(0, 24, 0, 24)
+resizeBtn.Position = UDim2.new(1, -26, 1, -26)
 resizeBtn.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
-resizeBtn.BackgroundTransparency = 0.5
+resizeBtn.BackgroundTransparency = 0.4
 resizeBtn.Text = ""
 resizeBtn.BorderSizePixel = 0
 resizeBtn.ZIndex = 9
 resizeBtn.Parent = box
-Instance.new("UICorner", resizeBtn).CornerRadius = UDim.new(0, 5)
+Instance.new("UICorner", resizeBtn).CornerRadius = UDim.new(0, 6)
 
--- Vẽ chữ V bằng 2 đường kẻ chéo
 local vLeft = Instance.new("Frame")
-vLeft.Size = UDim2.new(0, 2, 0, 8)
-vLeft.Position = UDim2.new(0, 6, 0, 8)
+vLeft.Size = UDim2.new(0, 2, 0, 9)
+vLeft.Position = UDim2.new(0, 7, 0, 9)
+vLeft.AnchorPoint = Vector2.new(0.5, 0.5)
 vLeft.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 vLeft.BorderSizePixel = 0
 vLeft.Rotation = -45
@@ -674,8 +686,9 @@ vLeft.Parent = resizeBtn
 Instance.new("UICorner", vLeft).CornerRadius = UDim.new(1, 0)
 
 local vRight = Instance.new("Frame")
-vRight.Size = UDim2.new(0, 2, 0, 8)
-vRight.Position = UDim2.new(0, 13, 0, 8)
+vRight.Size = UDim2.new(0, 2, 0, 9)
+vRight.Position = UDim2.new(0, 15, 0, 9)
+vRight.AnchorPoint = Vector2.new(0.5, 0.5)
 vRight.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 vRight.BorderSizePixel = 0
 vRight.Rotation = 45
@@ -699,8 +712,8 @@ UserInputService.InputChanged:Connect(function(input)
     if resizing and (input.UserInputType == Enum.UserInputType.Touch 
         or input.UserInputType == Enum.UserInputType.MouseMovement) then
         local delta = input.Position - resizeStart
-        local newX = math.max(90, resizeStartSize.X.Offset + delta.X)
-        local newY = math.max(48, resizeStartSize.Y.Offset + delta.Y)
+        local newX = math.max(110, resizeStartSize.X.Offset + delta.X)
+        local newY = math.max(70, resizeStartSize.Y.Offset + delta.Y)
         box.Size = UDim2.new(0, newX, 0, newY)
     end
 end)

@@ -260,50 +260,51 @@ border.Color = Color3.fromRGB(255, 60, 60)
 border.Thickness = 2
 border.Parent = popup
 
--- ===== VÒNG TRÒN XOAY LOADING =====
+-- ===== VÒNG TRÒN BỊ ĂN 1 PHẦN XOAY =====
 local spinWrap = Instance.new("Frame")
-spinWrap.Size = UDim2.new(0, 50, 0, 50)
-spinWrap.Position = UDim2.new(0, 20, 0, 20)
-spinWrap.BackgroundColor3 = Color3.fromRGB(30, 18, 24)
+spinWrap.Size = UDim2.new(0, 52, 0, 52)
+spinWrap.Position = UDim2.new(0, 20, 0, 22)
+spinWrap.BackgroundColor3 = Color3.fromRGB(25, 15, 20)
 spinWrap.BorderSizePixel = 0
 spinWrap.Parent = popup
 Instance.new("UICorner", spinWrap).CornerRadius = UDim.new(1, 0)
 
 local spinStroke = Instance.new("UIStroke")
-spinStroke.Color = Color3.fromRGB(255, 80, 80)
+spinStroke.Color = Color3.fromRGB(60, 40, 45)
 spinStroke.Thickness = 1.5
 spinStroke.Transparency = 0.4
 spinStroke.Parent = spinWrap
 
--- Vòng cung loading (dùng Frame + UICorner)
-local arcHolder = Instance.new("Frame")
-arcHolder.Size = UDim2.new(0, 36, 0, 36)
-arcHolder.Position = UDim2.new(0.5, -18, 0.5, -18)
-arcHolder.BackgroundTransparency = 1
-arcHolder.Parent = spinWrap
+-- Vòng tròn xoay (bị ăn 1 phần bằng mask)
+local spinner = Instance.new("Frame")
+spinner.Size = UDim2.new(0, 34, 0, 34)
+spinner.Position = UDim2.new(0.5, -17, 0.5, -17)
+spinner.BackgroundTransparency = 1
+spinner.Parent = spinWrap
 
-local arc = Instance.new("Frame")
-arc.Size = UDim2.new(0, 36, 0, 36)
-arc.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
-arc.BorderSizePixel = 0
-arc.Parent = arcHolder
-Instance.new("UICorner", arc).CornerRadius = UDim.new(1, 0)
+-- 3/4 vòng cung đỏ
+local arcBg = Instance.new("Frame")
+arcBg.Size = UDim2.new(1, 0, 1, 0)
+arcBg.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
+arcBg.BorderSizePixel = 0
+arcBg.Parent = spinner
+Instance.new("UICorner", arcBg).CornerRadius = UDim.new(1, 0)
 
--- Che giữa bằng frame nền để tạo vòng cung
-local arcMask = Instance.new("Frame")
-arcMask.Size = UDim2.new(0, 26, 0, 26)
-arcMask.Position = UDim2.new(0.5, -13, 0.5, -13)
-arcMask.BackgroundColor3 = Color3.fromRGB(30, 18, 24)
-arcMask.BorderSizePixel = 0
-arcMask.Parent = spinWrap
-Instance.new("UICorner", arcMask).CornerRadius = UDim.new(1, 0)
+-- Mask che 1 phần tạo thành 3/4 vòng cung
+local mask = Instance.new("Frame")
+mask.Size = UDim2.new(0, 14, 0, 14)
+mask.Position = UDim2.new(0, -1, 0, -1)
+mask.BackgroundColor3 = Color3.fromRGB(25, 15, 20)
+mask.BorderSizePixel = 0
+mask.Parent = spinner
+Instance.new("UICorner", mask).CornerRadius = UDim.new(1, 0)
 
--- Xoay vòng loading liên tục
+-- Xoay vòng loading
 task.spawn(function()
     local rot = 0
-    while arcHolder.Parent do
-        rot = (rot + 8) % 360
-        arcHolder.Rotation = rot
+    while spinner.Parent do
+        rot = (rot + 12) % 360
+        spinner.Rotation = rot
         task.wait(0.03)
     end
 end)
@@ -311,7 +312,7 @@ end)
 -- ===== TEXT =====
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, -180, 0, 26)
-title.Position = UDim2.new(0, 86, 0, 22)
+title.Position = UDim2.new(0, 88, 0, 22)
 title.BackgroundTransparency = 1
 title.Text = "fix lag v1.0"
 title.Font = Enum.Font.GothamBold
@@ -322,7 +323,7 @@ title.Parent = popup
 
 local sub = Instance.new("TextLabel")
 sub.Size = UDim2.new(1, -180, 0, 18)
-sub.Position = UDim2.new(0, 86, 0, 50)
+sub.Position = UDim2.new(0, 88, 0, 50)
 sub.BackgroundTransparency = 1
 sub.Text = "by kudo29001 ⚡"
 sub.Font = Enum.Font.Gotham
@@ -331,7 +332,6 @@ sub.TextColor3 = Color3.fromRGB(160, 160, 170)
 sub.TextXAlignment = Enum.TextXAlignment.Left
 sub.Parent = popup
 
--- % load
 local percentLabel = Instance.new("TextLabel")
 percentLabel.Size = UDim2.new(1, -40, 0, 22)
 percentLabel.Position = UDim2.new(0, 20, 0, 82)
@@ -342,7 +342,6 @@ percentLabel.TextSize = 16
 percentLabel.TextColor3 = Color3.fromRGB(255, 130, 100)
 percentLabel.Parent = popup
 
--- Progress bar
 local progressBg = Instance.new("Frame")
 progressBg.Size = UDim2.new(1, -40, 0, 8)
 progressBg.Position = UDim2.new(0, 20, 0, 112)
@@ -358,7 +357,6 @@ progressFill.BorderSizePixel = 0
 progressFill.Parent = progressBg
 Instance.new("UICorner", progressFill).CornerRadius = UDim.new(1, 0)
 
--- Load 0→100%
 task.spawn(function()
     local startTick = tick()
     local duration = 3
@@ -490,7 +488,6 @@ creditLabel.TextTransparency = 0.3
 creditLabel.TextXAlignment = Enum.TextXAlignment.Center
 creditLabel.Parent = box
 
--- Nút X
 local closeBtn = Instance.new("TextButton")
 closeBtn.Size = UDim2.new(0, 22, 0, 22)
 closeBtn.Position = UDim2.new(1, -26, 0, -3)
@@ -503,7 +500,6 @@ closeBtn.BorderSizePixel = 0
 closeBtn.Parent = box
 Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(1, 0)
 
--- Nút ẩn
 local hideBtn = Instance.new("TextButton")
 hideBtn.Size = UDim2.new(0, 22, 0, 22)
 hideBtn.Position = UDim2.new(1, -52, 0, -3)
@@ -516,10 +512,10 @@ hideBtn.BorderSizePixel = 0
 hideBtn.Parent = box
 Instance.new("UICorner", hideBtn).CornerRadius = UDim.new(1, 0)
 
--- ===== HÌNH CHỮ V Ở GÓC DƯỚI PHẢI, TRONG UI =====
+-- ===== HÌNH CHỮ V BÊN TRÁI UI =====
 local resizeBtn = Instance.new("TextButton")
 resizeBtn.Size = UDim2.new(0, 22, 0, 22)
-resizeBtn.Position = UDim2.new(1, -24, 1, -24)
+resizeBtn.Position = UDim2.new(0, -2, 1, -2)
 resizeBtn.BackgroundTransparency = 1
 resizeBtn.Text = ""
 resizeBtn.BorderSizePixel = 0
@@ -547,7 +543,6 @@ vR.Rotation = 45
 vR.Parent = resizeBtn
 Instance.new("UICorner", vR).CornerRadius = UDim.new(1, 0)
 
--- Nút hiện ⚡
 local showGui = Instance.new("ScreenGui")
 showGui.Name = "KudoToggle"
 showGui.ResetOnSpawn = false
@@ -585,7 +580,6 @@ closeBtn.MouseButton1Click:Connect(function()
     end)
 end)
 
--- ===== DRAG =====
 local dragging = false
 local dragStart, startPos
 
@@ -615,8 +609,9 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
--- ===== RESIZE (kéo góc dưới phải) =====
--- Kéo sang phải/xuống = tăng size
+-- ===== RESIZE TÍNH TỪ BÊN TRÁI =====
+-- Kéo sang phải = tăng width, kéo xuống = tăng height
+-- Position giữ nguyên bên trái (Neo về bên trái)
 local resizing = false
 local resizeStart, resizeStartSize
 
@@ -632,6 +627,7 @@ end)
 UserInputService.InputChanged:Connect(function(input)
     if resizing then
         local delta = input.Position - resizeStart
+        -- Kéo sang phải = mở rộng, kéo lên = thu nhỏ
         local newX = math.max(120, resizeStartSize.X.Offset + delta.X)
         local newY = math.max(80, resizeStartSize.Y.Offset + delta.Y)
         box.Size = UDim2.new(0, newX, 0, newY)

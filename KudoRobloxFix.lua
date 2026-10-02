@@ -16,7 +16,6 @@ for _, v in pairs(pg:GetChildren()) do
     end
 end
 
--- FFLAG
 pcall(function()
     setfflag("DFIntTaskSchedulerTargetFps", "9999")
     setfflag("DFIntFrameRateCap", "9999")
@@ -192,7 +191,7 @@ task.spawn(function()
     end
 end)
 
--- ==================== POPUP ====================
+-- POPUP
 local sg = Instance.new("ScreenGui")
 sg.Name = "KudoPopup"
 sg.ResetOnSpawn = false
@@ -213,7 +212,6 @@ border.Color = Color3.fromRGB(255, 60, 60)
 border.Thickness = 2
 border.Parent = popup
 
--- ===== LOADING ICON — VÒNG CUNG 3/4 ĐỀU =====
 local iconWrap = Instance.new("Frame")
 iconWrap.Size = UDim2.new(0, 52, 0, 52)
 iconWrap.Position = UDim2.new(0, 20, 0, 22)
@@ -227,14 +225,12 @@ iconStroke.Color = Color3.fromRGB(60, 40, 45)
 iconStroke.Thickness = 1.5
 iconStroke.Parent = iconWrap
 
--- Vòng tròn đầy đủ + 2 nửa mask che đều 2 góc đối diện
 local arcHolder = Instance.new("Frame")
 arcHolder.Size = UDim2.new(0, 34, 0, 34)
 arcHolder.Position = UDim2.new(0.5, -17, 0.5, -17)
 arcHolder.BackgroundTransparency = 1
 arcHolder.Parent = iconWrap
 
--- Vòng tròn trắng đầy đủ
 local arcRing = Instance.new("Frame")
 arcRing.Size = UDim2.new(1, 0, 1, 0)
 arcRing.BackgroundTransparency = 1
@@ -246,7 +242,6 @@ arcStroke.Color = Color3.fromRGB(255, 255, 255)
 arcStroke.Thickness = 3
 arcStroke.Parent = arcRing
 
--- Mask 1: che góc trên trái
 local mask1 = Instance.new("Frame")
 mask1.Size = UDim2.new(0, 20, 0, 20)
 mask1.Position = UDim2.new(0, -3, 0, -3)
@@ -255,7 +250,6 @@ mask1.BorderSizePixel = 0
 mask1.Parent = arcHolder
 Instance.new("UICorner", mask1).CornerRadius = UDim.new(0, 4)
 
--- Mask 2: che góc dưới phải
 local mask2 = Instance.new("Frame")
 mask2.Size = UDim2.new(0, 20, 0, 20)
 mask2.Position = UDim2.new(1, -17, 1, -17)
@@ -271,7 +265,6 @@ task.spawn(function()
     end
 end)
 
--- TEXT
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, -180, 0, 26)
 title.Position = UDim2.new(0, 88, 0, 22)
@@ -351,7 +344,7 @@ task.delay(4.5, function()
     sg:Destroy()
 end)
 
--- ==================== UI FPS/PING/TIME ====================
+-- UI FPS/PING/TIME
 local stats = Instance.new("ScreenGui")
 stats.Name = "KudoStats"
 stats.ResetOnSpawn = false
@@ -362,8 +355,8 @@ stats.Parent = pg
 local box = Instance.new("Frame")
 box.Size = UDim2.new(0, 150, 0, 92)
 box.Position = UDim2.new(1, -160, 1, -102)
--- Neo 3/4 về phía phải để khi tăng size, box mở rộng lệch về bên trái
-box.AnchorPoint = Vector2.new(0.75, 0)
+-- Neo về bên phải (như bản gốc trước khi đổi)
+box.AnchorPoint = Vector2.new(1, 0)
 box.BackgroundColor3 = Color3.fromRGB(14, 14, 20)
 box.BackgroundTransparency = 0.4
 box.BorderSizePixel = 0
@@ -522,7 +515,6 @@ closeB.MouseButton1Click:Connect(function()
     showSg:Destroy()
 end)
 
--- Drag
 local dragging = false
 local ds, sp
 header.InputBegan:Connect(function(i)
@@ -546,12 +538,7 @@ UIS.InputEnded:Connect(function(i)
     end
 end)
 
--- ===== RESIZE MỞ RỘNG LỆCH VỀ BÊN TRÁI =====
--- AnchorPoint.X = 0.75 -> 75% box nằm về bên phải điểm neo, 25% về bên trái
--- Khi Size.X tăng:
---   - Mép trái dịch về bên trái = 75% delta
---   - Mép phải dịch về bên phải = 25% delta
--- => box mở rộng chủ yếu về bên trái, vẫn nở cả phải
+-- RESIZE — như bản gốc: neo phải, kéo sang trái tăng
 local resizing = false
 local rs, rss
 resizeB.InputBegan:Connect(function(i)
@@ -565,8 +552,8 @@ end)
 UIS.InputChanged:Connect(function(i)
     if resizing then
         local d = i.Position - rs
-        -- Kéo sang phải = tăng
-        local nx = math.max(120, rss.X.Offset + d.X)
+        -- Với neo phải: kéo sang trái (d.X âm) = tăng width
+        local nx = math.max(120, rss.X.Offset - d.X)
         local ny = math.max(80, rss.Y.Offset + d.Y)
         box.Size = UDim2.new(0, nx, 0, ny)
     end

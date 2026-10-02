@@ -17,23 +17,47 @@ pcall(function()
     if gethui then uiParent = gethui() end
 end)
 
-for _, v in pairs(pg:GetChildren()) do
-    if v.Name == "KudoPopup" or v.Name == "KudoStats" or v.Name == "KudoToggle" then
-        v:Destroy()
-    end
-end
-pcall(function()
-    for _, v in pairs(game:GetService("CoreGui"):GetChildren()) do
-        if v.Name == "KudoPopup" or v.Name == "KudoStats" or v.Name == "KudoToggle" then
-            v:Destroy()
+-- ===== XOÁ TRIỆT ĐỂ UI CŨ - QUÉT MỌI SCREENGUI =====
+local function destroyOldUI()
+    -- Quét PlayerGui
+    for _, v in pairs(pg:GetChildren()) do
+        if v:IsA("ScreenGui") then
+            local n = v.Name:lower()
+            if n:find("kudo") or n:find("fixlag") or n:find("mailbox") or n:find("sender") or n == "kudopopup" or n == "kudostats" or n == "kudotoggle" then
+                pcall(function() v:Destroy() end)
+            end
         end
     end
-end)
-for _, v in pairs(pg:GetChildren()) do
-    if v:IsA("ScreenGui") and (v.Name:find("Kudo") or v.Name:find("FixLag")) then
-        pcall(function() v:Destroy() end)
+    -- Quét CoreGui
+    pcall(function()
+        local cg = game:GetService("CoreGui")
+        for _, v in pairs(cg:GetChildren()) do
+            if v:IsA("ScreenGui") or v:IsA("Folder") then
+                local n = v.Name:lower()
+                if n:find("kudo") or n:find("fixlag") then
+                    pcall(function() v:Destroy() end)
+                end
+            end
+        end
+    end)
+    -- Quét cả những ScreenGui có chứa element tên "KudoPopup"/"KudoStats"
+    local function scanContainer(container)
+        if not container then return end
+        for _, v in pairs(container:GetChildren()) do
+            if v:IsA("ScreenGui") then
+                if v:FindFirstChild("MainFrame") or v:FindFirstChild("Runner") or v:FindFirstChild("RunnerDot") then
+                    pcall(function() v:Destroy() end)
+                end
+            end
+        end
     end
+    scanContainer(pg)
+    pcall(function() scanContainer(game:GetService("CoreGui")) end)
 end
+
+destroyOldUI()
+task.wait(0.2)
+destroyOldUI()
 
 pcall(function()
     setfflag("DFIntTaskSchedulerTargetFps", "9999")
@@ -113,7 +137,7 @@ pcall(function()
     end
 end)
 
--- ==================== ANTI-AFK ====================
+-- ANTI-AFK
 task.spawn(function()
     while true do
         task.wait(60)
@@ -138,7 +162,7 @@ pcall(function()
     end)
 end)
 
--- ==================== CACHE NHÂN VẬT ====================
+-- CACHE NHÂN VẬT
 local charModels = {}
 local function watchChar(plr)
     if plr.Character then charModels[plr.Character] = true end
@@ -256,8 +280,7 @@ popup.ClipsDescendants = true
 popup.Parent = sg
 Instance.new("UICorner", popup).CornerRadius = UDim.new(0, 14)
 
--- ===== VIỀN ĐỎ SIÊU MỎNG BO TRÒN - DÙNG UISTROKE =====
--- Dùng 1 frame nội bộ với UIStroke mỏng chạy màu sáng tối luân phiên
+-- Viền đỏ mỏng bo tròn
 local borderHolder = Instance.new("Frame")
 borderHolder.Name = "BorderHolder"
 borderHolder.Size = UDim2.new(1, -4, 1, -4)
@@ -275,19 +298,15 @@ borderStroke.Transparency = 0
 borderStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 borderStroke.Parent = borderHolder
 
--- Hiệu ứng dải sáng chạy quanh viền bằng cách pulse độ sáng
--- Kết hợp thay đổi Thickness + Transparency để tạo cảm giác sáng chạy
 task.spawn(function()
-    local hue = 0
     while borderStroke.Parent do
-        hue = (hue + 0.02) % 1
-        borderStroke.Color = Color3.fromHSV(0, 1, 0.5 + math.abs(math.sin(tick() * 2)) * 0.5)
+        borderStroke.Color = Color3.fromRGB(255, 60 + math.abs(math.sin(tick() * 2)) * 40, 60)
         borderStroke.Thickness = 1 + math.abs(math.sin(tick() * 1.5)) * 0.6
         task.wait(0.03)
     end
 end)
 
--- NỘI DUNG POPUP
+-- ICON
 local iconWrap = Instance.new("Frame")
 iconWrap.Size = UDim2.new(0, 52, 0, 52)
 iconWrap.Position = UDim2.new(0, 20, 0, 22)
@@ -690,11 +709,10 @@ end)
 
 applyOpacity(0.5)
 
--- ===== CHỮ ∟ BO TRÒN GÓC TRÁI DƯỚI =====
--- Dùng 2 frame tạo chữ ∟ (L ngược), bo tròn 2 đầu
+-- ===== KÍ TỰ ∟ SÁT GÓC TRÁI DƯỚI, ÔM KHÍT VIỀN =====
 local cornerL = Instance.new("TextButton")
-cornerL.Size = UDim2.new(0, 22, 0, 22)
-cornerL.Position = UDim2.new(0, 0, 1, -22)
+cornerL.Size = UDim2.new(0, 20, 0, 20)
+cornerL.Position = UDim2.new(0, 0, 1, -20)
 cornerL.AnchorPoint = Vector2.new(0, 1)
 cornerL.BackgroundTransparency = 1
 cornerL.Text = ""
@@ -702,11 +720,11 @@ cornerL.BorderSizePixel = 0
 cornerL.ZIndex = 10
 cornerL.Parent = box
 
--- Đường dọc của ∟ (góc trái)
+-- Đường dọc của ∟ - sát trái, kéo dài từ đáy lên
 local vertLine = Instance.new("Frame")
-vertLine.Size = UDim2.new(0, 2, 0, 14)
-vertLine.Position = UDim2.new(0, 6, 0, 4)
-vertLine.AnchorPoint = Vector2.new(0.5, 0.5)
+vertLine.Size = UDim2.new(0, 2, 0, 16)
+vertLine.Position = UDim2.new(0, 3, 0, 3)
+vertLine.AnchorPoint = Vector2.new(0, 0)
 vertLine.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 vertLine.BackgroundTransparency = 0.3
 vertLine.BorderSizePixel = 0
@@ -714,11 +732,11 @@ vertLine.ZIndex = 11
 vertLine.Parent = cornerL
 Instance.new("UICorner", vertLine).CornerRadius = UDim.new(1, 0)
 
--- Đường ngang của ∟ (đáy)
+-- Đường ngang của ∟ - sát đáy, kéo dài sang phải
 local horizLine = Instance.new("Frame")
-horizLine.Size = UDim2.new(0, 14, 0, 2)
-horizLine.Position = UDim2.new(0, 13, 0, 16)
-horizLine.AnchorPoint = Vector2.new(0.5, 0.5)
+horizLine.Size = UDim2.new(0, 16, 0, 2)
+horizLine.Position = UDim2.new(0, 3, 0, 17)
+horizLine.AnchorPoint = Vector2.new(0, 0)
 horizLine.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 horizLine.BackgroundTransparency = 0.3
 horizLine.BorderSizePixel = 0

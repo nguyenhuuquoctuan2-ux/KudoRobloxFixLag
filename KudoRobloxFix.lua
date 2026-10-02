@@ -260,46 +260,48 @@ border.Color = Color3.fromRGB(255, 60, 60)
 border.Thickness = 2
 border.Parent = popup
 
--- ===== VÒNG TRÒN BỊ ĂN 1 PHẦN XOAY =====
+-- ===== LOGO VÒNG TRÒN RỖNG, CHỈ CÓ VIỀN =====
 local spinWrap = Instance.new("Frame")
 spinWrap.Size = UDim2.new(0, 52, 0, 52)
 spinWrap.Position = UDim2.new(0, 20, 0, 22)
-spinWrap.BackgroundColor3 = Color3.fromRGB(25, 15, 20)
-spinWrap.BorderSizePixel = 0
+spinWrap.BackgroundTransparency = 1
 spinWrap.Parent = popup
-Instance.new("UICorner", spinWrap).CornerRadius = UDim.new(1, 0)
 
-local spinStroke = Instance.new("UIStroke")
-spinStroke.Color = Color3.fromRGB(60, 40, 45)
-spinStroke.Thickness = 1.5
-spinStroke.Transparency = 0.4
-spinStroke.Parent = spinWrap
+-- Vòng tròn viền mờ nền (background ring)
+local bgRing = Instance.new("Frame")
+bgRing.Size = UDim2.new(1, 0, 1, 0)
+bgRing.Position = UDim2.new(0, 0, 0, 0)
+bgRing.BackgroundTransparency = 1
+bgRing.Parent = spinWrap
+Instance.new("UICorner", bgRing).CornerRadius = UDim.new(1, 0)
 
--- Vòng tròn xoay (bị ăn 1 phần bằng mask)
+local bgRingStroke = Instance.new("UIStroke")
+bgRingStroke.Color = Color3.fromRGB(60, 40, 45)
+bgRingStroke.Thickness = 2
+bgRingStroke.Transparency = 0.3
+bgRingStroke.Parent = bgRing
+
+-- Vòng sáng xoay (chỉ viền, rỗng bên trong)
 local spinner = Instance.new("Frame")
-spinner.Size = UDim2.new(0, 34, 0, 34)
-spinner.Position = UDim2.new(0.5, -17, 0.5, -17)
+spinner.Size = UDim2.new(0, 52, 0, 52)
 spinner.BackgroundTransparency = 1
 spinner.Parent = spinWrap
+Instance.new("UICorner", spinner).CornerRadius = UDim.new(1, 0)
 
--- 3/4 vòng cung đỏ
-local arcBg = Instance.new("Frame")
-arcBg.Size = UDim2.new(1, 0, 1, 0)
-arcBg.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
-arcBg.BorderSizePixel = 0
-arcBg.Parent = spinner
-Instance.new("UICorner", arcBg).CornerRadius = UDim.new(1, 0)
+-- Tạo vòng cung bằng Frame + UIStroke có Gradient
+local arcFrame = Instance.new("Frame")
+arcFrame.Size = UDim2.new(1, 0, 1, 0)
+arcFrame.BackgroundTransparency = 1
+arcFrame.Parent = spinner
+Instance.new("UICorner", arcFrame).CornerRadius = UDim.new(1, 0)
 
--- Mask che 1 phần tạo thành 3/4 vòng cung
-local mask = Instance.new("Frame")
-mask.Size = UDim2.new(0, 14, 0, 14)
-mask.Position = UDim2.new(0, -1, 0, -1)
-mask.BackgroundColor3 = Color3.fromRGB(25, 15, 20)
-mask.BorderSizePixel = 0
-mask.Parent = spinner
-Instance.new("UICorner", mask).CornerRadius = UDim.new(1, 0)
+local arcStroke = Instance.new("UIStroke")
+arcStroke.Color = Color3.fromRGB(255, 80, 80)
+arcStroke.Thickness = 3
+arcStroke.Transparency = 0.1
+arcStroke.Parent = arcFrame
 
--- Xoay vòng loading
+-- Xoay vòng
 task.spawn(function()
     local rot = 0
     while spinner.Parent do
@@ -357,6 +359,7 @@ progressFill.BorderSizePixel = 0
 progressFill.Parent = progressBg
 Instance.new("UICorner", progressFill).CornerRadius = UDim.new(1, 0)
 
+-- Load 0→100% + thông báo DONE
 task.spawn(function()
     local startTick = tick()
     local duration = 3
@@ -367,7 +370,10 @@ task.spawn(function()
         progressFill.Size = UDim2.new(t, 0, 1, 0)
         task.wait(0.05)
     end
-    percentLabel.Text = "100%"
+    
+    percentLabel.Text = "DONE ✓"
+    percentLabel.TextColor3 = Color3.fromRGB(80, 255, 130)
+    percentLabel.TextSize = 18
     progressFill.Size = UDim2.new(1, 0, 1, 0)
     TweenService:Create(progressFill, TweenInfo.new(0.2), {
         BackgroundColor3 = Color3.fromRGB(80, 255, 130)
@@ -512,10 +518,10 @@ hideBtn.BorderSizePixel = 0
 hideBtn.Parent = box
 Instance.new("UICorner", hideBtn).CornerRadius = UDim.new(1, 0)
 
--- ===== HÌNH CHỮ V BÊN TRÁI UI =====
+-- ===== CHỮ V TRONG UI, GÓC TRÁI DƯỚI =====
 local resizeBtn = Instance.new("TextButton")
 resizeBtn.Size = UDim2.new(0, 22, 0, 22)
-resizeBtn.Position = UDim2.new(0, -2, 1, -2)
+resizeBtn.Position = UDim2.new(0, 4, 1, -24)
 resizeBtn.BackgroundTransparency = 1
 resizeBtn.Text = ""
 resizeBtn.BorderSizePixel = 0
@@ -609,9 +615,6 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
--- ===== RESIZE TÍNH TỪ BÊN TRÁI =====
--- Kéo sang phải = tăng width, kéo xuống = tăng height
--- Position giữ nguyên bên trái (Neo về bên trái)
 local resizing = false
 local resizeStart, resizeStartSize
 
@@ -627,7 +630,6 @@ end)
 UserInputService.InputChanged:Connect(function(input)
     if resizing then
         local delta = input.Position - resizeStart
-        -- Kéo sang phải = mở rộng, kéo lên = thu nhỏ
         local newX = math.max(120, resizeStartSize.X.Offset + delta.X)
         local newY = math.max(80, resizeStartSize.Y.Offset + delta.Y)
         box.Size = UDim2.new(0, newX, 0, newY)

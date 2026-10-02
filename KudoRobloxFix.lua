@@ -355,7 +355,6 @@ stats.Parent = pg
 local box = Instance.new("Frame")
 box.Size = UDim2.new(0, 150, 0, 92)
 box.Position = UDim2.new(1, -160, 1, -102)
--- Neo về bên phải (như bản gốc trước khi đổi)
 box.AnchorPoint = Vector2.new(1, 0)
 box.BackgroundColor3 = Color3.fromRGB(14, 14, 20)
 box.BackgroundTransparency = 0.4
@@ -426,6 +425,7 @@ credit.TextTransparency = 0.3
 credit.TextXAlignment = Enum.TextXAlignment.Center
 credit.Parent = box
 
+-- Nút X (tắt)
 local closeB = Instance.new("TextButton")
 closeB.Size = UDim2.new(0, 22, 0, 22)
 closeB.Position = UDim2.new(1, -26, 0, -3)
@@ -438,6 +438,7 @@ closeB.BorderSizePixel = 0
 closeB.Parent = box
 Instance.new("UICorner", closeB).CornerRadius = UDim.new(1, 0)
 
+-- Nút ẩn
 local hideB = Instance.new("TextButton")
 hideB.Size = UDim2.new(0, 22, 0, 22)
 hideB.Position = UDim2.new(1, -52, 0, -3)
@@ -450,6 +451,33 @@ hideB.BorderSizePixel = 0
 hideB.Parent = box
 Instance.new("UICorner", hideB).CornerRadius = UDim.new(1, 0)
 
+-- Nút LOCK (khoá vị trí + kích cỡ)
+local lockB = Instance.new("TextButton")
+lockB.Size = UDim2.new(0, 22, 0, 22)
+lockB.Position = UDim2.new(1, -78, 0, -3)
+lockB.BackgroundColor3 = Color3.fromRGB(80, 80, 90)
+lockB.Text = "🔓"
+lockB.Font = Enum.Font.GothamBold
+lockB.TextSize = 11
+lockB.TextColor3 = Color3.new(1, 1, 1)
+lockB.BorderSizePixel = 0
+lockB.Parent = box
+Instance.new("UICorner", lockB).CornerRadius = UDim.new(1, 0)
+
+local locked = false
+
+lockB.MouseButton1Click:Connect(function()
+    locked = not locked
+    if locked then
+        lockB.BackgroundColor3 = Color3.fromRGB(80, 200, 100)
+        lockB.Text = "🔒"
+    else
+        lockB.BackgroundColor3 = Color3.fromRGB(80, 80, 90)
+        lockB.Text = "🔓"
+    end
+end)
+
+-- Resize
 local resizeB = Instance.new("TextButton")
 resizeB.Size = UDim2.new(0, 24, 0, 24)
 resizeB.Position = UDim2.new(0, 6, 1, -26)
@@ -515,9 +543,11 @@ closeB.MouseButton1Click:Connect(function()
     showSg:Destroy()
 end)
 
+-- DRAG (chặn khi khoá)
 local dragging = false
 local ds, sp
 header.InputBegan:Connect(function(i)
+    if locked then return end
     if i.UserInputType == Enum.UserInputType.Touch or i.UserInputType == Enum.UserInputType.MouseButton1 then
         dragging = true
         ds = i.Position
@@ -526,7 +556,7 @@ header.InputBegan:Connect(function(i)
 end)
 
 UIS.InputChanged:Connect(function(i)
-    if dragging then
+    if dragging and not locked then
         local d = i.Position - ds
         box.Position = UDim2.new(sp.X.Scale, sp.X.Offset + d.X, sp.Y.Scale, sp.Y.Offset + d.Y)
     end
@@ -538,10 +568,11 @@ UIS.InputEnded:Connect(function(i)
     end
 end)
 
--- RESIZE — như bản gốc: neo phải, kéo sang trái tăng
+-- RESIZE (chặn khi khoá)
 local resizing = false
 local rs, rss
 resizeB.InputBegan:Connect(function(i)
+    if locked then return end
     if i.UserInputType == Enum.UserInputType.Touch or i.UserInputType == Enum.UserInputType.MouseButton1 then
         resizing = true
         rs = i.Position
@@ -550,9 +581,8 @@ resizeB.InputBegan:Connect(function(i)
 end)
 
 UIS.InputChanged:Connect(function(i)
-    if resizing then
+    if resizing and not locked then
         local d = i.Position - rs
-        -- Với neo phải: kéo sang trái (d.X âm) = tăng width
         local nx = math.max(120, rss.X.Offset - d.X)
         local ny = math.max(80, rss.Y.Offset + d.Y)
         box.Size = UDim2.new(0, nx, 0, ny)

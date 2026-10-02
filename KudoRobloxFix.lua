@@ -191,7 +191,7 @@ task.spawn(function()
     end
 end)
 
--- POPUP
+-- ==================== POPUP ====================
 local sg = Instance.new("ScreenGui")
 sg.Name = "KudoPopup"
 sg.ResetOnSpawn = false
@@ -199,29 +199,74 @@ sg.IgnoreGuiInset = true
 sg.DisplayOrder = 1000
 sg.Parent = pg
 
+-- Glow phía sau popup (dùng ImageLabel)
+local glowOuter = Instance.new("ImageLabel")
+glowOuter.Size = UDim2.new(0, 420, 0, 200)
+glowOuter.Position = UDim2.new(0.5, -210, 0.4, -100)
+glowOuter.BackgroundTransparency = 1
+glowOuter.Image = "rbxassetid://5028857472"
+glowOuter.ImageColor3 = Color3.fromRGB(255, 60, 60)
+glowOuter.ImageTransparency = 0.55
+glowOuter.ZIndex = 999
+glowOuter.Parent = sg
+
 local popup = Instance.new("Frame")
 popup.Size = UDim2.new(0, 360, 0, 140)
 popup.Position = UDim2.new(0.5, -180, 0.4, -70)
 popup.BackgroundColor3 = Color3.fromRGB(15, 15, 22)
 popup.BorderSizePixel = 0
+popup.ZIndex = 1000
 popup.Parent = sg
 Instance.new("UICorner", popup).CornerRadius = UDim.new(0, 14)
 
+-- Viền sáng đỏ chính
 local border = Instance.new("UIStroke")
-border.Color = Color3.fromRGB(255, 60, 60)
-border.Thickness = 2
+border.Color = Color3.fromRGB(255, 80, 80)
+border.Thickness = 2.5
+border.Transparency = 0
+border.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 border.Parent = popup
 
+-- Viền sáng phụ bao ngoài (double stroke)
+local border2 = Instance.new("UIStroke")
+border2.Color = Color3.fromRGB(255, 150, 150)
+border2.Thickness = 1
+border2.Transparency = 0.5
+border2.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+border2.Parent = popup
+
+-- Pulse glow animation
+task.spawn(function()
+    while glowOuter.Parent do
+        TS:Create(glowOuter, TweenInfo.new(1.5), {ImageTransparency = 0.4}):Play()
+        task.wait(1.5)
+        TS:Create(glowOuter, TweenInfo.new(1.5), {ImageTransparency = 0.7}):Play()
+        task.wait(1.5)
+    end
+end)
+
+-- Border RGB chạy màu
+task.spawn(function()
+    while border.Parent do
+        local hue = (tick() * 0.15) % 1
+        border.Color = Color3.fromHSV(hue, 0.7, 1)
+        border2.Color = Color3.fromHSV(hue, 0.4, 1)
+        task.wait(0.05)
+    end
+end)
+
+-- VÒNG CUNG LOADING
 local iconWrap = Instance.new("Frame")
 iconWrap.Size = UDim2.new(0, 52, 0, 52)
 iconWrap.Position = UDim2.new(0, 20, 0, 22)
 iconWrap.BackgroundColor3 = Color3.fromRGB(25, 15, 20)
 iconWrap.BorderSizePixel = 0
+iconWrap.ZIndex = 1001
 iconWrap.Parent = popup
 Instance.new("UICorner", iconWrap).CornerRadius = UDim.new(1, 0)
 
 local iconStroke = Instance.new("UIStroke")
-iconStroke.Color = Color3.fromRGB(60, 40, 45)
+iconStroke.Color = Color3.fromRGB(80, 50, 55)
 iconStroke.Thickness = 1.5
 iconStroke.Parent = iconWrap
 
@@ -229,6 +274,7 @@ local arcHolder = Instance.new("Frame")
 arcHolder.Size = UDim2.new(0, 34, 0, 34)
 arcHolder.Position = UDim2.new(0.5, -17, 0.5, -17)
 arcHolder.BackgroundTransparency = 1
+arcHolder.ZIndex = 1002
 arcHolder.Parent = iconWrap
 
 local arcRing = Instance.new("Frame")
@@ -247,6 +293,7 @@ mask1.Size = UDim2.new(0, 20, 0, 20)
 mask1.Position = UDim2.new(0, -3, 0, -3)
 mask1.BackgroundColor3 = Color3.fromRGB(25, 15, 20)
 mask1.BorderSizePixel = 0
+mask1.ZIndex = 1003
 mask1.Parent = arcHolder
 Instance.new("UICorner", mask1).CornerRadius = UDim.new(0, 4)
 
@@ -255,6 +302,7 @@ mask2.Size = UDim2.new(0, 20, 0, 20)
 mask2.Position = UDim2.new(1, -17, 1, -17)
 mask2.BackgroundColor3 = Color3.fromRGB(25, 15, 20)
 mask2.BorderSizePixel = 0
+mask2.ZIndex = 1003
 mask2.Parent = arcHolder
 Instance.new("UICorner", mask2).CornerRadius = UDim.new(0, 4)
 
@@ -265,6 +313,7 @@ task.spawn(function()
     end
 end)
 
+-- TEXT
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, -180, 0, 26)
 title.Position = UDim2.new(0, 88, 0, 22)
@@ -274,6 +323,7 @@ title.Font = Enum.Font.GothamBold
 title.TextSize = 20
 title.TextColor3 = Color3.fromRGB(255, 100, 100)
 title.TextXAlignment = Enum.TextXAlignment.Left
+title.ZIndex = 1001
 title.Parent = popup
 
 local sub = Instance.new("TextLabel")
@@ -283,8 +333,9 @@ sub.BackgroundTransparency = 1
 sub.Text = "by kudo29001 ⚡"
 sub.Font = Enum.Font.Gotham
 sub.TextSize = 12
-sub.TextColor3 = Color3.fromRGB(160, 160, 170)
+sub.TextColor3 = Color3.fromRGB(170, 170, 180)
 sub.TextXAlignment = Enum.TextXAlignment.Left
+sub.ZIndex = 1001
 sub.Parent = popup
 
 local percentL = Instance.new("TextLabel")
@@ -295,6 +346,7 @@ percentL.Text = "0%"
 percentL.Font = Enum.Font.GothamBold
 percentL.TextSize = 16
 percentL.TextColor3 = Color3.fromRGB(255, 130, 100)
+percentL.ZIndex = 1001
 percentL.Parent = popup
 
 local pBg = Instance.new("Frame")
@@ -302,6 +354,7 @@ pBg.Size = UDim2.new(1, -40, 0, 8)
 pBg.Position = UDim2.new(0, 20, 0, 112)
 pBg.BackgroundColor3 = Color3.fromRGB(40, 30, 35)
 pBg.BorderSizePixel = 0
+pBg.ZIndex = 1001
 pBg.Parent = popup
 Instance.new("UICorner", pBg).CornerRadius = UDim.new(1, 0)
 
@@ -309,6 +362,7 @@ local pFill = Instance.new("Frame")
 pFill.Size = UDim2.new(0, 0, 1, 0)
 pFill.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
 pFill.BorderSizePixel = 0
+pFill.ZIndex = 1002
 pFill.Parent = pBg
 Instance.new("UICorner", pFill).CornerRadius = UDim.new(1, 0)
 
@@ -329,7 +383,9 @@ end)
 
 task.delay(4.5, function()
     TS:Create(popup, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
+    TS:Create(glowOuter, TweenInfo.new(0.6), {ImageTransparency = 1}):Play()
     TS:Create(border, TweenInfo.new(0.6), {Transparency = 1}):Play()
+    TS:Create(border2, TweenInfo.new(0.6), {Transparency = 1}):Play()
     TS:Create(title, TweenInfo.new(0.6), {TextTransparency = 1}):Play()
     TS:Create(sub, TweenInfo.new(0.6), {TextTransparency = 1}):Play()
     TS:Create(percentL, TweenInfo.new(0.6), {TextTransparency = 1}):Play()
@@ -344,7 +400,7 @@ task.delay(4.5, function()
     sg:Destroy()
 end)
 
--- UI FPS/PING/TIME
+-- ==================== UI FPS/PING/TIME ====================
 local stats = Instance.new("ScreenGui")
 stats.Name = "KudoStats"
 stats.ResetOnSpawn = false
@@ -425,7 +481,7 @@ credit.TextTransparency = 0.3
 credit.TextXAlignment = Enum.TextXAlignment.Center
 credit.Parent = box
 
--- Nút X (tắt)
+-- Nút X (tắt) — phải
 local closeB = Instance.new("TextButton")
 closeB.Size = UDim2.new(0, 22, 0, 22)
 closeB.Position = UDim2.new(1, -26, 0, -3)
@@ -438,7 +494,7 @@ closeB.BorderSizePixel = 0
 closeB.Parent = box
 Instance.new("UICorner", closeB).CornerRadius = UDim.new(1, 0)
 
--- Nút ẩn
+-- Nút ẩn — phải
 local hideB = Instance.new("TextButton")
 hideB.Size = UDim2.new(0, 22, 0, 22)
 hideB.Position = UDim2.new(1, -52, 0, -3)
@@ -451,7 +507,7 @@ hideB.BorderSizePixel = 0
 hideB.Parent = box
 Instance.new("UICorner", hideB).CornerRadius = UDim.new(1, 0)
 
--- Nút LOCK (khoá vị trí + kích cỡ)
+-- Nút LOCK — giữa
 local lockB = Instance.new("TextButton")
 lockB.Size = UDim2.new(0, 22, 0, 22)
 lockB.Position = UDim2.new(1, -78, 0, -3)
@@ -464,8 +520,20 @@ lockB.BorderSizePixel = 0
 lockB.Parent = box
 Instance.new("UICorner", lockB).CornerRadius = UDim.new(1, 0)
 
-local locked = false
+-- Nút OPACITY — trái của LOCK
+local opacityB = Instance.new("TextButton")
+opacityB.Size = UDim2.new(0, 22, 0, 22)
+opacityB.Position = UDim2.new(1, -104, 0, -3)
+opacityB.BackgroundColor3 = Color3.fromRGB(80, 100, 200)
+opacityB.Text = "◐"
+opacityB.Font = Enum.Font.GothamBold
+opacityB.TextSize = 13
+opacityB.TextColor3 = Color3.new(1, 1, 1)
+opacityB.BorderSizePixel = 0
+opacityB.Parent = box
+Instance.new("UICorner", opacityB).CornerRadius = UDim.new(1, 0)
 
+local locked = false
 lockB.MouseButton1Click:Connect(function()
     locked = not locked
     if locked then
@@ -476,6 +544,37 @@ lockB.MouseButton1Click:Connect(function()
         lockB.Text = "🔓"
     end
 end)
+
+-- ===== OPACITY SLIDER =====
+local opacityLevels = {0.4, 0.55, 0.7, 0.85, 1}
+local opacityIndex = 1
+
+-- Hàm cập nhật độ mờ cho toàn bộ UI
+local function applyOpacity(v)
+    box.BackgroundTransparency = v
+    for _, child in ipairs(box:GetDescendants()) do
+        if child:IsA("TextLabel") then
+            -- Giữ độ tương phản bằng cách giảm nhẹ text transparency
+            if child.Name ~= "fpsValue" and child.Name ~= "pingValue" and child.Name ~= "timeValue" then
+                child.TextTransparency = math.clamp(v - 0.4, 0, 0.5)
+            end
+        end
+    end
+    -- Header, stroke
+    header.BackgroundTransparency = math.clamp(v + 0.3, 0, 1)
+    bxStroke.Transparency = math.clamp(v + 0.2, 0, 1)
+end
+
+opacityB.MouseButton1Click:Connect(function()
+    opacityIndex = opacityIndex + 1
+    if opacityIndex > #opacityLevels then
+        opacityIndex = 1
+    end
+    applyOpacity(opacityLevels[opacityIndex])
+end)
+
+-- Khởi tạo opacity ban đầu
+applyOpacity(opacityLevels[opacityIndex])
 
 -- Resize
 local resizeB = Instance.new("TextButton")
@@ -543,7 +642,7 @@ closeB.MouseButton1Click:Connect(function()
     showSg:Destroy()
 end)
 
--- DRAG (chặn khi khoá)
+-- Drag
 local dragging = false
 local ds, sp
 header.InputBegan:Connect(function(i)
@@ -568,7 +667,7 @@ UIS.InputEnded:Connect(function(i)
     end
 end)
 
--- RESIZE (chặn khi khoá)
+-- Resize
 local resizing = false
 local rs, rss
 resizeB.InputBegan:Connect(function(i)

@@ -43,19 +43,6 @@ local function destroyOldUI()
             end
         end)
     end
-    pcall(function()
-        for _, v in ipairs(PlayerGui:GetDescendants()) do
-            if v:IsA("ScreenGui") then
-                local n = v.Name:lower()
-                for _, key in ipairs(namesToKill) do
-                    if n:find(key) then
-                        pcall(function() v:Destroy() end)
-                        break
-                    end
-                end
-            end
-        end
-    end)
 end
 
 for i = 1, 5 do
@@ -233,33 +220,44 @@ pcall(function()
         Camera.FieldOfView = 85
     end
     Workspace.StreamingEnabled = true
-    Workspace.StreamingTargetRadius = 32
-    Workspace.StreamingMinRadius = 16
+    Workspace.StreamingTargetRadius = 24
+    Workspace.StreamingMinRadius = 12
 end)
 
 local SKY_GRAY = Color3.fromRGB(128, 128, 128)
 
-pcall(function()
-    for _, v in ipairs(Lighting:GetChildren()) do
-        if v:IsA("PostEffect") or v:IsA("Sky") or v:IsA("Atmosphere") or v:IsA("Clouds") then
-            v:Destroy()
+local function applyGraySky()
+    pcall(function()
+        for _, v in ipairs(Lighting:GetChildren()) do
+            if v:IsA("Sky") or v:IsA("Atmosphere") or v:IsA("Clouds") or v:IsA("PostEffect") then
+                pcall(function() v:Destroy() end)
+            end
         end
+        Lighting.GlobalShadows = false
+        Lighting.Brightness = 1.6
+        Lighting.ClockTime = 14
+        Lighting.GeographicLatitude = 0
+        Lighting.Ambient = SKY_GRAY
+        Lighting.OutdoorAmbient = SKY_GRAY
+        Lighting.EnvironmentDiffuseScale = 0
+        Lighting.EnvironmentSpecularScale = 0
+        Lighting.ExposureCompensation = 0
+        Lighting.ShadowSoftness = 0
+        Lighting.FogColor = SKY_GRAY
+        Lighting.FogStart = 0
+        Lighting.FogEnd = 2000
+        Lighting.ColorShift_Top = SKY_GRAY
+        Lighting.ColorShift_Bottom = SKY_GRAY
+    end)
+end
+
+applyGraySky()
+
+task.spawn(function()
+    while true do
+        task.wait(1)
+        applyGraySky()
     end
-    Lighting.GlobalShadows = false
-    Lighting.Brightness = 1.6
-    Lighting.ClockTime = 14
-    Lighting.GeographicLatitude = 0
-    Lighting.Ambient = SKY_GRAY
-    Lighting.OutdoorAmbient = SKY_GRAY
-    Lighting.EnvironmentDiffuseScale = 0
-    Lighting.EnvironmentSpecularScale = 0
-    Lighting.ExposureCompensation = 0
-    Lighting.ShadowSoftness = 0
-    Lighting.FogColor = SKY_GRAY
-    Lighting.FogStart = 0
-    Lighting.FogEnd = 3000
-    Lighting.ColorShift_Top = SKY_GRAY
-    Lighting.ColorShift_Bottom = SKY_GRAY
 end)
 
 pcall(function()
@@ -386,7 +384,7 @@ local function processBatch(list)
     end
 end
 
-local function fastScan()
+task.spawn(function()
     local descendants = Workspace:GetDescendants()
     local total = #descendants
     if total == 0 then return end
@@ -403,25 +401,21 @@ local function fastScan()
     local running = 0
     local index = 1
     local done = false
-    task.spawn(function()
-        while not done do
-            if running < MAX_CONCURRENT and index <= #batches then
-                local batch = batches[index]
-                index = index + 1
-                running = running + 1
-                task.spawn(function()
-                    pcall(processBatch, batch)
-                    running = running - 1
-                end)
-            elseif index > #batches and running == 0 then
-                done = true
-            end
-            RunService.Heartbeat:Wait()
+    while not done do
+        if running < MAX_CONCURRENT and index <= #batches then
+            local batch = batches[index]
+            index = index + 1
+            running = running + 1
+            task.spawn(function()
+                pcall(processBatch, batch)
+                running = running - 1
+            end)
+        elseif index > #batches and running == 0 then
+            done = true
         end
-    end)
-end
-
-task.spawn(fastScan)
+        RunService.Heartbeat:Wait()
+    end
+end)
 
 Workspace.DescendantAdded:Connect(function(v)
     task.defer(function()
@@ -429,12 +423,12 @@ Workspace.DescendantAdded:Connect(function(v)
     end)
 end)
 
-local CULL_DIST_SQ = 28 * 28
+local CULL_DIST_SQ = 24 * 24
 local culled = {}
 
 task.spawn(function()
     while true do
-        task.wait(0.4)
+        task.wait(0.3)
         pcall(function()
             if not Camera then return end
             local camPos = Camera.CFrame.Position
@@ -460,31 +454,6 @@ task.spawn(function()
     end
 end)
 
-pcall(function()
-    while true do
-        task.wait(2)
-        pcall(function()
-            Lighting.FogColor = SKY_GRAY
-            Lighting.FogStart = 0
-            Lighting.FogEnd = 3000
-            Lighting.Ambient = SKY_GRAY
-            Lighting.OutdoorAmbient = SKY_GRAY
-            Lighting.Brightness = 1.6
-            Lighting.GlobalShadows = false
-            Lighting.EnvironmentDiffuseScale = 0
-            Lighting.EnvironmentSpecularScale = 0
-            Lighting.ExposureCompensation = 0
-            Lighting.ColorShift_Top = SKY_GRAY
-            Lighting.ColorShift_Bottom = SKY_GRAY
-            for _, v in ipairs(Lighting:GetChildren()) do
-                if v:IsA("PostEffect") or v:IsA("Sky") or v:IsA("Atmosphere") or v:IsA("Clouds") then
-                    pcall(function() v:Destroy() end)
-                end
-            end
-        end)
-    end
-end)
-
 task.spawn(function()
     while true do
         task.wait(1)
@@ -500,7 +469,7 @@ end)
 
 task.spawn(function()
     while true do
-        task.wait(15)
+        task.wait(12)
         pcall(function()
             collectgarbage("collect")
             collectgarbage("collect")
@@ -526,7 +495,7 @@ end)
 
 task.spawn(function()
     while true do
-        task.wait(3)
+        task.wait(2)
         pcall(function()
             for _, v in ipairs(Workspace:GetDescendants()) do
                 if v:IsA("Decal") or v:IsA("Texture") then
@@ -572,56 +541,46 @@ backdrop.ZIndex = 999
 backdrop.Parent = sg
 
 local popup = Instance.new("Frame")
-popup.Size = UDim2.new(0, 360, 0, 100)
-popup.Position = UDim2.new(0.5, -180, 0.5, -50)
+popup.Size = UDim2.new(0, 320, 0, 90)
+popup.Position = UDim2.new(0.5, -160, 0.5, -45)
 popup.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
 popup.BorderSizePixel = 0
-popup.Active = false
 popup.ZIndex = 1000
 popup.Parent = sg
 Instance.new("UICorner", popup).CornerRadius = UDim.new(0, 8)
 
-local borderHolder = Instance.new("Frame")
-borderHolder.Name = "BorderHolder"
-borderHolder.Size = UDim2.new(1, -2, 1, -2)
-borderHolder.Position = UDim2.new(0, 1, 0, 1)
-borderHolder.BackgroundTransparency = 1
-borderHolder.ZIndex = 1001
-borderHolder.Parent = popup
-Instance.new("UICorner", borderHolder).CornerRadius = UDim.new(0, 7)
-
 local borderStroke = Instance.new("UIStroke")
 borderStroke.Color = Color3.fromRGB(60, 60, 60)
 borderStroke.Thickness = 1
-borderStroke.Parent = borderHolder
+borderStroke.Parent = popup
 
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, -40, 0, 22)
-title.Position = UDim2.new(0, 20, 0, 16)
+title.Size = UDim2.new(1, -30, 0, 20)
+title.Position = UDim2.new(0, 15, 0, 14)
 title.BackgroundTransparency = 1
 title.Text = "fix lag + anti-afk"
 title.Font = Enum.Font.GothamMedium
-title.TextSize = 16
+title.TextSize = 15
 title.TextColor3 = Color3.fromRGB(240, 240, 240)
 title.TextXAlignment = Enum.TextXAlignment.Left
 title.ZIndex = 1010
 title.Parent = popup
 
 local sub = Instance.new("TextLabel")
-sub.Size = UDim2.new(1, -40, 0, 16)
-sub.Position = UDim2.new(0, 20, 0, 38)
+sub.Size = UDim2.new(1, -30, 0, 14)
+sub.Position = UDim2.new(0, 15, 0, 34)
 sub.BackgroundTransparency = 1
 sub.Text = "made by @kudo29001.      v1.1"
 sub.Font = Enum.Font.Gotham
-sub.TextSize = 11
+sub.TextSize = 10
 sub.TextColor3 = Color3.fromRGB(140, 140, 140)
 sub.TextXAlignment = Enum.TextXAlignment.Left
 sub.ZIndex = 1010
 sub.Parent = popup
 
 local barBg = Instance.new("Frame")
-barBg.Size = UDim2.new(1, -40, 0, 4)
-barBg.Position = UDim2.new(0, 20, 0, 68)
+barBg.Size = UDim2.new(1, -30, 0, 4)
+barBg.Position = UDim2.new(0, 15, 0, 60)
 barBg.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 barBg.BorderSizePixel = 0
 barBg.ZIndex = 1010
@@ -636,29 +595,29 @@ barFill.ZIndex = 1011
 barFill.Parent = barBg
 Instance.new("UICorner", barFill).CornerRadius = UDim.new(1, 0)
 
-local percentL = Instance.new("TextLabel")
-percentL.Size = UDim2.new(0, 60, 0, 16)
-percentL.Position = UDim2.new(1, -80, 0, 16)
-percentL.BackgroundTransparency = 1
-percentL.Text = "0%"
-percentL.Font = Enum.Font.GothamMedium
-percentL.TextSize = 13
-percentL.TextColor3 = Color3.fromRGB(200, 200, 200)
-percentL.TextXAlignment = Enum.TextXAlignment.Right
-percentL.ZIndex = 1010
-percentL.Parent = popup
-
 local statusLabel = Instance.new("TextLabel")
-statusLabel.Size = UDim2.new(1, -40, 0, 14)
-statusLabel.Position = UDim2.new(0, 20, 0, 82)
+statusLabel.Size = UDim2.new(1, -100, 0, 14)
+statusLabel.Position = UDim2.new(0, 15, 0, 70)
 statusLabel.BackgroundTransparency = 1
 statusLabel.Text = "loading..."
 statusLabel.Font = Enum.Font.Gotham
-statusLabel.TextSize = 11
+statusLabel.TextSize = 10
 statusLabel.TextColor3 = Color3.fromRGB(140, 140, 140)
 statusLabel.TextXAlignment = Enum.TextXAlignment.Left
 statusLabel.ZIndex = 1010
 statusLabel.Parent = popup
+
+local percentL = Instance.new("TextLabel")
+percentL.Size = UDim2.new(0, 60, 0, 14)
+percentL.Position = UDim2.new(1, -75, 0, 70)
+percentL.BackgroundTransparency = 1
+percentL.Text = "0%"
+percentL.Font = Enum.Font.GothamMedium
+percentL.TextSize = 10
+percentL.TextColor3 = Color3.fromRGB(200, 200, 200)
+percentL.TextXAlignment = Enum.TextXAlignment.Right
+percentL.ZIndex = 1010
+percentL.Parent = popup
 
 local totalTime = 2.5
 task.spawn(function()
@@ -706,7 +665,7 @@ box.AnchorPoint = Vector2.new(1, 0)
 box.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 box.BackgroundTransparency = 0.3
 box.BorderSizePixel = 0
-box.Active = false
+box.Active = true
 box.Parent = statsGui
 Instance.new("UICorner", box).CornerRadius = UDim.new(0, 8)
 
@@ -771,6 +730,47 @@ credit.TextColor3 = Color3.fromRGB(255, 100, 100)
 credit.TextTransparency = 0.3
 credit.TextXAlignment = Enum.TextXAlignment.Center
 credit.Parent = box
+
+local resizeHandle = Instance.new("TextButton")
+resizeHandle.Size = UDim2.new(0, 18, 0, 18)
+resizeHandle.Position = UDim2.new(0, -6, 1, -6)
+resizeHandle.AnchorPoint = Vector2.new(0, 1)
+resizeHandle.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+resizeHandle.BackgroundTransparency = 0.4
+resizeHandle.Text = ""
+resizeHandle.BorderSizePixel = 0
+resizeHandle.ZIndex = 30
+resizeHandle.Parent = box
+Instance.new("UICorner", resizeHandle).CornerRadius = UDim.new(1, 0)
+
+local resizing = false
+local resizeStartPos
+local resizeStartSize
+
+resizeHandle.InputBegan:Connect(function(i)
+    if i.UserInputType == Enum.UserInputType.Touch or i.UserInputType == Enum.UserInputType.MouseButton1 then
+        resizing = true
+        resizeStartPos = i.Position
+        resizeStartSize = box.AbsoluteSize
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(i)
+    if resizing then
+        local deltaX = resizeStartPos.X - i.Position.X
+        local deltaY = i.Position.Y - resizeStartPos.Y
+        local newW = math.clamp(resizeStartSize.X + deltaX, 120, 500)
+        local newH = math.clamp(resizeStartSize.Y + deltaY, 80, 400)
+        box.Size = UDim2.new(0, newW, 0, newH)
+        box.Position = UDim2.new(1, -(newW + 10), 1, -(newH + 10))
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(i)
+    if i.UserInputType == Enum.UserInputType.Touch or i.UserInputType == Enum.UserInputType.MouseButton1 then
+        resizing = false
+    end
+end)
 
 local closeB = Instance.new("TextButton")
 closeB.Size = UDim2.new(0, 22, 0, 22)
@@ -970,7 +970,7 @@ end)
 local dragging = false
 local ds, sp
 
-box.InputBegan:Connect(function(i)
+header.InputBegan:Connect(function(i)
     if locked then return end
     if i.UserInputType == Enum.UserInputType.Touch or i.UserInputType == Enum.UserInputType.MouseButton1 then
         dragging = true

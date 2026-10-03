@@ -731,44 +731,284 @@ credit.TextTransparency = 0.3
 credit.TextXAlignment = Enum.TextXAlignment.Center
 credit.Parent = box
 
-local resizeHandle = Instance.new("TextButton")
-resizeHandle.Size = UDim2.new(0, 18, 0, 18)
-resizeHandle.Position = UDim2.new(0, -6, 1, -6)
-resizeHandle.AnchorPoint = Vector2.new(0, 1)
-resizeHandle.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
-resizeHandle.BackgroundTransparency = 0.4
-resizeHandle.Text = ""
-resizeHandle.BorderSizePixel = 0
-resizeHandle.ZIndex = 30
-resizeHandle.Parent = box
-Instance.new("UICorner", resizeHandle).CornerRadius = UDim.new(1, 0)
+local cornerSize = 14
+local cornerThick = 2
+local cornerColor = Color3.fromRGB(255, 60, 60)
 
-local resizing = false
-local resizeStartPos
-local resizeStartSize
+local brH = Instance.new("Frame")
+brH.Size = UDim2.new(0, cornerSize, 0, cornerThick)
+brH.Position = UDim2.new(1, -(cornerSize + 2), 1, -(cornerThick + 2))
+brH.BackgroundColor3 = cornerColor
+brH.BorderSizePixel = 0
+brH.ZIndex = 30
+brH.Parent = box
 
-resizeHandle.InputBegan:Connect(function(i)
+local brV = Instance.new("Frame")
+brV.Size = UDim2.new(0, cornerThick, 0, cornerSize)
+brV.Position = UDim2.new(1, -(cornerThick + 2), 1, -(cornerSize + 2))
+brV.BackgroundColor3 = cornerColor
+brV.BorderSizePixel = 0
+brV.ZIndex = 30
+brV.Parent = box
+
+local blH = Instance.new("Frame")
+blH.Size = UDim2.new(0, cornerSize, 0, cornerThick)
+blH.Position = UDim2.new(0, 2, 1, -(cornerThick + 2))
+blH.BackgroundColor3 = cornerColor
+blH.BorderSizePixel = 0
+blH.ZIndex = 30
+blH.Parent = box
+
+local blV = Instance.new("Frame")
+blV.Size = UDim2.new(0, cornerThick, 0, cornerSize)
+blV.Position = UDim2.new(0, 2, 1, -(cornerSize + 2))
+blV.BackgroundColor3 = cornerColor
+blV.BorderSizePixel = 0
+blV.ZIndex = 30
+blV.Parent = box
+
+local trH = Instance.new("Frame")
+trH.Size = UDim2.new(0, cornerSize, 0, cornerThick)
+trH.Position = UDim2.new(1, -(cornerSize + 2), 0, 2)
+trH.BackgroundColor3 = cornerColor
+trH.BorderSizePixel = 0
+trH.ZIndex = 30
+trH.Parent = box
+
+local trV = Instance.new("Frame")
+trV.Size = UDim2.new(0, cornerThick, 0, cornerSize)
+trV.Position = UDim2.new(1, -(cornerThick + 2), 0, 2)
+trV.BackgroundColor3 = cornerColor
+trV.BorderSizePixel = 0
+trV.ZIndex = 30
+trV.Parent = box
+
+local tlH = Instance.new("Frame")
+tlH.Size = UDim2.new(0, cornerSize, 0, cornerThick)
+tlH.Position = UDim2.new(0, 2, 0, 2)
+tlH.BackgroundColor3 = cornerColor
+tlH.BorderSizePixel = 0
+tlH.ZIndex = 30
+tlH.Parent = box
+
+local tlV = Instance.new("Frame")
+tlV.Size = UDim2.new(0, cornerThick, 0, cornerSize)
+tlV.Position = UDim2.new(0, 2, 0, 2)
+tlV.BackgroundColor3 = cornerColor
+tlV.BorderSizePixel = 0
+tlV.ZIndex = 30
+tlV.Parent = box
+
+local edgeLeft = Instance.new("TextButton")
+edgeLeft.Size = UDim2.new(0, 12, 0.7, 0)
+edgeLeft.Position = UDim2.new(0, -4, 0.15, 0)
+edgeLeft.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+edgeLeft.BackgroundTransparency = 0.7
+edgeLeft.Text = ""
+edgeLeft.BorderSizePixel = 0
+edgeLeft.ZIndex = 25
+edgeLeft.Parent = box
+
+local edgeRight = Instance.new("TextButton")
+edgeRight.Size = UDim2.new(0, 12, 0.7, 0)
+edgeRight.Position = UDim2.new(1, -8, 0.15, 0)
+edgeRight.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+edgeRight.BackgroundTransparency = 0.7
+edgeRight.Text = ""
+edgeRight.BorderSizePixel = 0
+edgeRight.ZIndex = 25
+edgeRight.Parent = box
+
+local edgeTop = Instance.new("TextButton")
+edgeTop.Size = UDim2.new(0.7, 0, 0, 12)
+edgeTop.Position = UDim2.new(0.15, 0, 0, -4)
+edgeTop.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+edgeTop.BackgroundTransparency = 0.7
+edgeTop.Text = ""
+edgeTop.BorderSizePixel = 0
+edgeTop.ZIndex = 25
+edgeTop.Parent = box
+
+local edgeBottom = Instance.new("TextButton")
+edgeBottom.Size = UDim2.new(0.7, 0, 0, 12)
+edgeBottom.Position = UDim2.new(0.15, 0, 1, -8)
+edgeBottom.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+edgeBottom.BackgroundTransparency = 0.7
+edgeBottom.Text = ""
+edgeBottom.BorderSizePixel = 0
+edgeBottom.ZIndex = 25
+edgeBottom.Parent = box
+
+local brHandle = Instance.new("TextButton")
+brHandle.Size = UDim2.new(0, 22, 0, 22)
+brHandle.Position = UDim2.new(1, -22, 1, -22)
+brHandle.BackgroundTransparency = 1
+brHandle.Text = ""
+brHandle.BorderSizePixel = 0
+brHandle.ZIndex = 40
+brHandle.Parent = box
+
+local blHandle = Instance.new("TextButton")
+blHandle.Size = UDim2.new(0, 22, 0, 22)
+blHandle.Position = UDim2.new(0, 0, 1, -22)
+blHandle.BackgroundTransparency = 1
+blHandle.Text = ""
+blHandle.BorderSizePixel = 0
+blHandle.ZIndex = 40
+blHandle.Parent = box
+
+local trHandle = Instance.new("TextButton")
+trHandle.Size = UDim2.new(0, 22, 0, 22)
+trHandle.Position = UDim2.new(1, -22, 0, 0)
+trHandle.BackgroundTransparency = 1
+trHandle.Text = ""
+trHandle.BorderSizePixel = 0
+trHandle.ZIndex = 40
+trHandle.Parent = box
+
+local tlHandle = Instance.new("TextButton")
+tlHandle.Size = UDim2.new(0, 22, 0, 22)
+tlHandle.Position = UDim2.new(0, 0, 0, 0)
+tlHandle.BackgroundTransparency = 1
+tlHandle.Text = ""
+tlHandle.BorderSizePixel = 0
+tlHandle.ZIndex = 40
+tlHandle.Parent = box
+
+local MIN_W = 120
+local MIN_H = 80
+
+local function clampSize(w, h)
+    return math.clamp(w, MIN_W, 600), math.clamp(h, MIN_H, 500)
+end
+
+local resizeMode = nil
+local resizeStartPos = nil
+local resizeStartSize = nil
+local resizeStartBoxPos = nil
+
+local function beginResize(mode, input)
+    resizeMode = mode
+    resizeStartPos = input.Position
+    resizeStartSize = box.AbsoluteSize
+    resizeStartBoxPos = box.AbsolutePosition
+end
+
+local function doResize(input)
+    if not resizeMode then return end
+    local dx = input.Position.X - resizeStartPos.X
+    local dy = input.Position.Y - resizeStartPos.Y
+    local startW = resizeStartSize.X
+    local startH = resizeStartSize.Y
+    local startX = resizeStartBoxPos.X
+    local startY = resizeStartBoxPos.Y
+    
+    local newW, newH = startW, startH
+    local newX, newY = startX, startY
+    
+    if resizeMode == "br" then
+        newW = startW + dx
+        newH = startH + dy
+        newW, newH = clampSize(newW, newH)
+    elseif resizeMode == "bl" then
+        newW = startW - dx
+        newH = startH + dy
+        newW, newH = clampSize(newW, newH)
+        newX = startX + (startW - newW)
+    elseif resizeMode == "tr" then
+        newW = startW + dx
+        newH = startH - dy
+        newW, newH = clampSize(newW, newH)
+        newY = startY + (startH - newH)
+    elseif resizeMode == "tl" then
+        newW = startW - dx
+        newH = startH - dy
+        newW, newH = clampSize(newW, newH)
+        newX = startX + (startW - newW)
+        newY = startY + (startH - newH)
+    elseif resizeMode == "left" then
+        newW = startW - dx
+        newW = clampSize(newW, startH)
+        newX = startX + (startW - newW)
+    elseif resizeMode == "right" then
+        newW = startW + dx
+        newW = clampSize(newW, startH)
+    elseif resizeMode == "top" then
+        newH = startH - dy
+        newH = clampSize(startW, newH)
+        newY = startY + (startH - newH)
+    elseif resizeMode == "bottom" then
+        newH = startH + dy
+        newH = clampSize(startW, newH)
+    end
+    
+    box.Size = UDim2.new(0, newW, 0, newH)
+    box.Position = UDim2.new(0, newX, 0, newY)
+end
+
+local function endResize()
+    resizeMode = nil
+end
+
+brHandle.InputBegan:Connect(function(i)
     if i.UserInputType == Enum.UserInputType.Touch or i.UserInputType == Enum.UserInputType.MouseButton1 then
-        resizing = true
-        resizeStartPos = i.Position
-        resizeStartSize = box.AbsoluteSize
+        beginResize("br", i)
+    end
+end)
+
+blHandle.InputBegan:Connect(function(i)
+    if i.UserInputType == Enum.UserInputType.Touch or i.UserInputType == Enum.UserInputType.MouseButton1 then
+        beginResize("bl", i)
+    end
+end)
+
+trHandle.InputBegan:Connect(function(i)
+    if i.UserInputType == Enum.UserInputType.Touch or i.UserInputType == Enum.UserInputType.MouseButton1 then
+        beginResize("tr", i)
+    end
+end)
+
+tlHandle.InputBegan:Connect(function(i)
+    if i.UserInputType == Enum.UserInputType.Touch or i.UserInputType == Enum.UserInputType.MouseButton1 then
+        beginResize("tl", i)
+    end
+end)
+
+edgeLeft.InputBegan:Connect(function(i)
+    if i.UserInputType == Enum.UserInputType.Touch or i.UserInputType == Enum.UserInputType.MouseButton1 then
+        beginResize("left", i)
+    end
+end)
+
+edgeRight.InputBegan:Connect(function(i)
+    if i.UserInputType == Enum.UserInputType.Touch or i.UserInputType == Enum.UserInputType.MouseButton1 then
+        beginResize("right", i)
+    end
+end)
+
+edgeTop.InputBegan:Connect(function(i)
+    if i.UserInputType == Enum.UserInputType.Touch or i.UserInputType == Enum.UserInputType.MouseButton1 then
+        beginResize("top", i)
+    end
+end)
+
+edgeBottom.InputBegan:Connect(function(i)
+    if i.UserInputType == Enum.UserInputType.Touch or i.UserInputType == Enum.UserInputType.MouseButton1 then
+        beginResize("bottom", i)
     end
 end)
 
 UserInputService.InputChanged:Connect(function(i)
-    if resizing then
-        local deltaX = resizeStartPos.X - i.Position.X
-        local deltaY = i.Position.Y - resizeStartPos.Y
-        local newW = math.clamp(resizeStartSize.X + deltaX, 120, 500)
-        local newH = math.clamp(resizeStartSize.Y + deltaY, 80, 400)
-        box.Size = UDim2.new(0, newW, 0, newH)
-        box.Position = UDim2.new(1, -(newW + 10), 1, -(newH + 10))
+    if resizeMode then
+        if i.UserInputType == Enum.UserInputType.Touch or i.UserInputType == Enum.UserInputType.MouseMovement then
+            doResize(i)
+        end
     end
 end)
 
 UserInputService.InputEnded:Connect(function(i)
     if i.UserInputType == Enum.UserInputType.Touch or i.UserInputType == Enum.UserInputType.MouseButton1 then
-        resizing = false
+        endResize()
     end
 end)
 
@@ -781,7 +1021,7 @@ closeB.Font = Enum.Font.GothamBold
 closeB.TextSize = 13
 closeB.TextColor3 = Color3.new(1, 1, 1)
 closeB.BorderSizePixel = 0
-closeB.ZIndex = 10
+closeB.ZIndex = 50
 closeB.Parent = box
 Instance.new("UICorner", closeB).CornerRadius = UDim.new(1, 0)
 
@@ -794,7 +1034,7 @@ hideB.Font = Enum.Font.GothamBold
 hideB.TextSize = 15
 hideB.TextColor3 = Color3.new(1, 1, 1)
 hideB.BorderSizePixel = 0
-hideB.ZIndex = 10
+hideB.ZIndex = 50
 hideB.Parent = box
 Instance.new("UICorner", hideB).CornerRadius = UDim.new(1, 0)
 
@@ -807,7 +1047,7 @@ lockB.Font = Enum.Font.GothamBold
 lockB.TextSize = 11
 lockB.TextColor3 = Color3.new(1, 1, 1)
 lockB.BorderSizePixel = 0
-lockB.ZIndex = 10
+lockB.ZIndex = 50
 lockB.Parent = box
 Instance.new("UICorner", lockB).CornerRadius = UDim.new(1, 0)
 
@@ -820,7 +1060,7 @@ opacityB.Font = Enum.Font.GothamBold
 opacityB.TextSize = 13
 opacityB.TextColor3 = Color3.new(1, 1, 1)
 opacityB.BorderSizePixel = 0
-opacityB.ZIndex = 10
+opacityB.ZIndex = 50
 opacityB.Parent = box
 Instance.new("UICorner", opacityB).CornerRadius = UDim.new(1, 0)
 
@@ -843,7 +1083,7 @@ sliderPanel.Position = UDim2.new(0, 10, 1, -34)
 sliderPanel.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
 sliderPanel.BorderSizePixel = 0
 sliderPanel.Visible = false
-sliderPanel.ZIndex = 20
+sliderPanel.ZIndex = 60
 sliderPanel.Parent = box
 Instance.new("UICorner", sliderPanel).CornerRadius = UDim.new(0, 6)
 
@@ -852,7 +1092,7 @@ sliderBg.Size = UDim2.new(1, -20, 0, 6)
 sliderBg.Position = UDim2.new(0, 10, 0.5, -3)
 sliderBg.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
 sliderBg.BorderSizePixel = 0
-sliderBg.ZIndex = 21
+sliderBg.ZIndex = 61
 sliderBg.Parent = sliderPanel
 Instance.new("UICorner", sliderBg).CornerRadius = UDim.new(1, 0)
 
@@ -860,7 +1100,7 @@ local sliderFill = Instance.new("Frame")
 sliderFill.Size = UDim2.new(0.5, 0, 1, 0)
 sliderFill.BackgroundColor3 = Color3.fromRGB(80, 150, 255)
 sliderFill.BorderSizePixel = 0
-sliderFill.ZIndex = 22
+sliderFill.ZIndex = 62
 sliderFill.Parent = sliderBg
 Instance.new("UICorner", sliderFill).CornerRadius = UDim.new(1, 0)
 
@@ -870,7 +1110,7 @@ sliderKnob.Position = UDim2.new(0.5, -8, 0.5, -8)
 sliderKnob.BackgroundColor3 = Color3.fromRGB(150, 200, 255)
 sliderKnob.Text = ""
 sliderKnob.BorderSizePixel = 0
-sliderKnob.ZIndex = 23
+sliderKnob.ZIndex = 63
 sliderKnob.Parent = sliderBg
 Instance.new("UICorner", sliderKnob).CornerRadius = UDim.new(1, 0)
 

@@ -800,6 +800,51 @@ task.spawn(function()
     end
 end)
 
+task.spawn(function()
+    while true do
+        task.wait(1)
+        pcall(function()
+            local prompts = {}
+            local function collectPrompts(container)
+                for _, v in ipairs(container:GetDescendants()) do
+                    if v:IsA("ProximityPrompt") then
+                        prompts[#prompts + 1] = v
+                    end
+                end
+            end
+            collectPrompts(Workspace)
+            pcall(function() collectPrompts(PlayerGui) end)
+            for _, p in ipairs(prompts) do
+                pcall(function()
+                    if p.HoldDuration > 0.15 then
+                        p.HoldDuration = 0.15
+                    end
+                    if p.MaxActivationDistance < 12 then
+                        p.MaxActivationDistance = 12
+                    end
+                    p.RequiresLineOfSight = false
+                end)
+            end
+        end)
+    end
+end)
+
+Workspace.DescendantAdded:Connect(function(v)
+    task.defer(function()
+        if v:IsA("ProximityPrompt") then
+            pcall(function()
+                if v.HoldDuration > 0.15 then
+                    v.HoldDuration = 0.15
+                end
+                if v.MaxActivationDistance < 12 then
+                    v.MaxActivationDistance = 12
+                end
+                v.RequiresLineOfSight = false
+            end)
+        end
+    end)
+end)
+
 local notifGui = Instance.new("ScreenGui")
 notifGui.Name = "LegacyNotif_" .. HttpService:GenerateGUID(false):sub(1, 8)
 notifGui.ResetOnSpawn = false

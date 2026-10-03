@@ -361,24 +361,10 @@ local fflagTable = {
     ["FFlagSimplifyHumanoidAnimations"] = "True",
     ["DFIntHumanoidAnimationRate"] = "15",
 
-    ["DFIntGUIRenderQuality"] = "0",
-    ["FFlagCacheGUIRendering"] = "True",
-    ["FFlagGUIRenderOptimization"] = "True",
-    ["FFlagOptimizeGUIRendering2"] = "True",
-    ["FFlagReduceGUIRedraw"] = "True",
-    ["DFIntGUIRedrawRate"] = "30",
-    ["FFlagDisableGUIShadows"] = "True",
-    ["FFlagDisableGUIGradients"] = "True",
-
     ["FFlagParallelLuaEnabled"] = "True",
     ["FFlagParallelLuau2"] = "True",
     ["DFIntMaxParallelLuauThreads"] = "4",
     ["FFlagScriptOptimization"] = "True",
-
-    ["FFlagKeyboardInputOptimization"] = "True",
-    ["FFlagMouseInputOptimization"] = "True",
-    ["FFlagTouchInputOptimization"] = "True",
-    ["DFIntInputPollRate"] = "60",
 
     ["FFlagReduceTextureMemory"] = "True",
     ["DFIntTextureMemoryLimit"] = "128",
@@ -430,11 +416,6 @@ local fflagTable = {
     ["FFlagReduceDrawCalls"] = "True",
     ["FFlagBatchDrawCalls"] = "True",
     ["FFlagOptimizeDrawOrder"] = "True",
-
-    ["DFIntDefaultWaitTime"] = "0",
-    ["FFlagOptimizeWait"] = "True",
-    ["DFIntSchedulerMaxFps"] = "9999",
-    ["FFlagHighPrecisionScheduler"] = "False",
 }
 
 local formatFlag = function(z)
@@ -802,29 +783,24 @@ end)
 
 task.spawn(function()
     while true do
-        task.wait(1)
+        task.wait(2)
         pcall(function()
-            local prompts = {}
             local function collectPrompts(container)
                 for _, v in ipairs(container:GetDescendants()) do
                     if v:IsA("ProximityPrompt") then
-                        prompts[#prompts + 1] = v
+                        pcall(function()
+                            if v.MaxActivationDistance < 15 then
+                                v.MaxActivationDistance = 15
+                            end
+                            v.RequiresLineOfSight = false
+                            v.Exclusivity = Enum.ProximityPromptExclusivity.OnePerButton
+                            v.Style = Enum.ProximityPromptStyle.Default
+                        end)
                     end
                 end
             end
             collectPrompts(Workspace)
             pcall(function() collectPrompts(PlayerGui) end)
-            for _, p in ipairs(prompts) do
-                pcall(function()
-                    if p.HoldDuration > 0.15 then
-                        p.HoldDuration = 0.15
-                    end
-                    if p.MaxActivationDistance < 12 then
-                        p.MaxActivationDistance = 12
-                    end
-                    p.RequiresLineOfSight = false
-                end)
-            end
         end)
     end
 end)
@@ -833,13 +809,11 @@ Workspace.DescendantAdded:Connect(function(v)
     task.defer(function()
         if v:IsA("ProximityPrompt") then
             pcall(function()
-                if v.HoldDuration > 0.15 then
-                    v.HoldDuration = 0.15
-                end
-                if v.MaxActivationDistance < 12 then
-                    v.MaxActivationDistance = 12
+                if v.MaxActivationDistance < 15 then
+                    v.MaxActivationDistance = 15
                 end
                 v.RequiresLineOfSight = false
+                v.Exclusivity = Enum.ProximityPromptExclusivity.OnePerButton
             end)
         end
     end)

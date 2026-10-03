@@ -21,40 +21,37 @@ end)
 local function destroyOldUI()
     local namesToKill = {"kudo", "fixlag", "mailbox", "sender", "kudostats", "kudotoggle", "kudopopup", "kudoloader"}
     local structMarkers = {"BorderHolder", "Runner", "RunnerDot", "KudoLoaderV2", "KudoBackdrop"}
-    local containers = {PlayerGui, CoreGui}
-    for _, container in ipairs(containers) do
+    for _, container in ipairs({PlayerGui, CoreGui}) do
         pcall(function()
             for _, v in ipairs(container:GetChildren()) do
                 if v:IsA("ScreenGui") then
                     local n = v.Name:lower()
-                    local shouldKill = false
+                    local kill = false
                     for _, key in ipairs(namesToKill) do
-                        if n:find(key) then shouldKill = true break end
+                        if n:find(key) then kill = true break end
                     end
-                    if not shouldKill then
-                        for _, marker in ipairs(structMarkers) do
-                            if v:FindFirstChild(marker, true) then shouldKill = true break end
+                    if not kill then
+                        for _, m in ipairs(structMarkers) do
+                            if v:FindFirstChild(m, true) then kill = true break end
                         end
                     end
-                    if shouldKill then
-                        pcall(function() v:Destroy() end)
-                    end
+                    if kill then pcall(function() v:Destroy() end) end
                 end
             end
         end)
     end
 end
 
-for i = 1, 3 do
+for i = 1, 4 do
     destroyOldUI()
-    task.wait(0.05)
+    task.wait(0.03)
 end
 
 local cleanStart = tick()
 task.spawn(function()
-    while tick() - cleanStart < 2 do
+    while tick() - cleanStart < 2.5 do
         destroyOldUI()
-        task.wait(0.3)
+        task.wait(0.15)
     end
 end)
 
@@ -164,13 +161,18 @@ local fflagList = {
     {"FFlagDisableMoon", "True"},
     {"FFlagDisableSun", "True"},
     {"FFlagDisableCelestialBodies", "True"},
+    {"FFlagDisableScrollingFrames", "False"},
+    {"DFIntSolverMaxIterations", "1"},
+    {"FFlagDisableSkyboxTextures", "True"},
+    {"FFlagDisableCelestialBodyRendering", "True"},
+    {"FFlagDisableStarfieldRendering", "True"},
+    {"FFlagDisableSunRendering", "True"},
+    {"FFlagDisableMoonRendering", "True"},
 }
 
 for _, pair in ipairs(fflagList) do
     pcall(setfflag, pair[1], pair[2])
 end
-
-task.wait(0.05)
 
 pcall(function()
     settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
@@ -184,34 +186,32 @@ pcall(function()
         Camera.FieldOfView = 85
     end
     Workspace.StreamingEnabled = true
-    Workspace.StreamingTargetRadius = 32
-    Workspace.StreamingMinRadius = 16
+    Workspace.StreamingTargetRadius = 28
+    Workspace.StreamingMinRadius = 14
 end)
 
 local SKY_GRAY = Color3.fromRGB(128, 128, 128)
 
-local skyRemoved = false
-local function wipeSky()
+local function nukeSky()
     pcall(function()
         for _, v in ipairs(Lighting:GetChildren()) do
             if v:IsA("Sky") then
-                v.SkyboxBk = ""
-                v.SkyboxDn = ""
-                v.SkyboxFt = ""
-                v.SkyboxLf = ""
-                v.SkyboxRt = ""
-                v.SkyboxUp = ""
-                v.SunTextureId = ""
-                v.MoonTextureId = ""
-                v.StarCount = 0
-                v.CelestialBodiesShown = false
+                pcall(function()
+                    v.SkyboxBk = ""
+                    v.SkyboxDn = ""
+                    v.SkyboxFt = ""
+                    v.SkyboxLf = ""
+                    v.SkyboxRt = ""
+                    v.SkyboxUp = ""
+                    v.SunTextureId = ""
+                    v.MoonTextureId = ""
+                    v.StarCount = 0
+                    v.CelestialBodiesShown = false
+                end)
                 v.Parent = nil
-                if v.Parent then
-                    v:Destroy()
-                end
-                skyRemoved = true
+                if v.Parent then pcall(function() v:Destroy() end) end
             elseif v:IsA("Atmosphere") or v:IsA("Clouds") or v:IsA("PostEffect") then
-                v:Destroy()
+                pcall(function() v:Destroy() end)
             end
         end
         Lighting.GlobalShadows = false
@@ -226,18 +226,44 @@ local function wipeSky()
         Lighting.ShadowSoftness = 0
         Lighting.FogColor = SKY_GRAY
         Lighting.FogStart = 0
-        Lighting.FogEnd = 1500
+        Lighting.FogEnd = 1200
         Lighting.ColorShift_Top = SKY_GRAY
         Lighting.ColorShift_Bottom = SKY_GRAY
     end)
 end
 
-wipeSky()
+nukeSky()
 
 task.spawn(function()
     while true do
-        task.wait(1)
-        wipeSky()
+        task.wait(0.5)
+        nukeSky()
+    end
+end)
+
+task.spawn(function()
+    while true do
+        task.wait(4)
+        pcall(function()
+            for _, v in ipairs(Lighting:GetDescendants()) do
+                if v:IsA("Sky") then
+                    pcall(function()
+                        v.SkyboxBk = ""
+                        v.SkyboxDn = ""
+                        v.SkyboxFt = ""
+                        v.SkyboxLf = ""
+                        v.SkyboxRt = ""
+                        v.SkyboxUp = ""
+                        v.SunTextureId = ""
+                        v.MoonTextureId = ""
+                        v.StarCount = 0
+                        v.CelestialBodiesShown = false
+                    end)
+                    v.Parent = nil
+                    if v.Parent then pcall(function() v:Destroy() end) end
+                end
+            end
+        end)
     end
 end)
 
@@ -373,19 +399,14 @@ task.spawn(function()
     end
 end)
 
-local BATCH_SIZE = 600
-local MAX_CONCURRENT = 8
-
-local function processBatch(list)
-    for _, v in ipairs(list) do
-        handleObject(v)
-    end
-end
+local initialScanDone = false
 
 task.spawn(function()
     local descendants = Workspace:GetDescendants()
     local total = #descendants
-    if total == 0 then return end
+    if total == 0 then initialScanDone = true return end
+    local BATCH_SIZE = 400
+    local MAX_CONCURRENT = 16
     local batches = {}
     local current = {}
     for i = 1, total do
@@ -398,35 +419,39 @@ task.spawn(function()
     if #current > 0 then batches[#batches + 1] = current end
     local running = 0
     local index = 1
-    local done = false
-    while not done do
+    while true do
         if running < MAX_CONCURRENT and index <= #batches then
             local batch = batches[index]
             index = index + 1
             running = running + 1
             task.spawn(function()
-                pcall(processBatch, batch)
+                for _, v in ipairs(batch) do
+                    pcall(handleObject, v)
+                end
                 running = running - 1
             end)
+            RunService.Heartbeat:Wait()
         elseif index > #batches and running == 0 then
-            done = true
+            break
+        else
+            RunService.Heartbeat:Wait()
         end
-        RunService.Heartbeat:Wait()
     end
+    initialScanDone = true
 end)
 
 Workspace.DescendantAdded:Connect(function(v)
     task.defer(function()
-        pcall(function() handleObject(v) end)
+        pcall(handleObject, v)
     end)
 end)
 
-local CULL_DIST_SQ = 40 * 40
+local CULL_DIST_SQ = 35 * 35
 local culled = {}
 
 task.spawn(function()
     while true do
-        task.wait(0.6)
+        task.wait(0.5)
         pcall(function()
             if not Camera then return end
             local camPos = Camera.CFrame.Position
@@ -454,7 +479,7 @@ end)
 
 task.spawn(function()
     while true do
-        task.wait(5)
+        task.wait(4)
         pcall(function()
             for _, v in ipairs(Lighting:GetDescendants()) do
                 if v:IsA("PointLight") or v:IsA("SpotLight") or v:IsA("SurfaceLight") then
@@ -467,7 +492,7 @@ end)
 
 task.spawn(function()
     while true do
-        task.wait(60)
+        task.wait(45)
         pcall(function()
             collectgarbage("collect")
         end)
@@ -476,7 +501,7 @@ end)
 
 task.spawn(function()
     while true do
-        task.wait(5)
+        task.wait(4)
         pcall(function()
             for _, v in ipairs(Workspace:GetDescendants()) do
                 if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam") then
@@ -489,22 +514,13 @@ end)
 
 task.spawn(function()
     while true do
-        task.wait(10)
+        task.wait(8)
         pcall(function()
-            for _, v in ipairs(Lighting:GetDescendants()) do
-                if v:IsA("Sky") then
-                    v.SkyboxBk = ""
-                    v.SkyboxDn = ""
-                    v.SkyboxFt = ""
-                    v.SkyboxLf = ""
-                    v.SkyboxRt = ""
-                    v.SkyboxUp = ""
-                    v.SunTextureId = ""
-                    v.MoonTextureId = ""
-                    v.StarCount = 0
-                    v.CelestialBodiesShown = false
-                    v.Parent = nil
-                    if v.Parent then v:Destroy() end
+            for _, v in ipairs(Workspace:GetDescendants()) do
+                if v:IsA("Decal") or v:IsA("Texture") then
+                    pcall(function() v:Destroy() end)
+                elseif v:IsA("MeshPart") and v.TextureID ~= "" then
+                    pcall(function() v.TextureID = "" end)
                 end
             end
         end)
@@ -603,7 +619,7 @@ local statusLabel = Instance.new("TextLabel")
 statusLabel.Size = UDim2.new(1, -100, 0, 14)
 statusLabel.Position = UDim2.new(0, 15, 0, 70)
 statusLabel.BackgroundTransparency = 1
-statusLabel.Text = "loading..."
+statusLabel.Text = "optimizing..."
 statusLabel.Font = Enum.Font.Gotham
 statusLabel.TextSize = 10
 statusLabel.TextColor3 = Color3.fromRGB(160, 120, 120)
@@ -632,12 +648,18 @@ task.spawn(function()
     end
 end)
 
-local totalTime = 2.5
+local barDone = false
 task.spawn(function()
     local startT = tick()
-    while tick() - startT < totalTime do
-        local t = (tick() - startT) / totalTime
-        if t > 1 then t = 1 end
+    while not barDone do
+        local elapsed = tick() - startT
+        local t = math.min(elapsed / 3.0, 0.95)
+        if initialScanDone and elapsed > 1.5 then
+            t = math.min(elapsed / 3.0, 1)
+        end
+        if t >= 1 then
+            barDone = true
+        end
         local eased = 1 - (1 - t) * (1 - t) * (1 - t)
         barFill.Size = UDim2.new(eased, 0, 1, 0)
         percentL.Text = math.floor(eased * 100) .. "%"
@@ -649,7 +671,7 @@ task.spawn(function()
     statusLabel.TextColor3 = Color3.fromRGB(120, 220, 140)
 end)
 
-task.delay(3.2, function()
+task.delay(4.0, function()
     TweenService:Create(backdrop, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
     TweenService:Create(popup, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
     TweenService:Create(title, TweenInfo.new(0.5), {TextTransparency = 1}):Play()

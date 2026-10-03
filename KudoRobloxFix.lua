@@ -460,9 +460,6 @@ pcall(function()
     if Camera then
         Camera.FieldOfView = 85
     end
-    Workspace.StreamingEnabled = true
-    Workspace.StreamingTargetRadius = 32
-    Workspace.StreamingMinRadius = 16
 end)
 
 local SKY_GRAY = Color3.fromRGB(128, 128, 128)
@@ -594,10 +591,10 @@ local function isProtected(v)
         or v:IsA("Animator")
 end
 
-local function hasProtectedAncestor(v)
+local function hasInteractiveAncestor(v)
     local cur = v
     local depth = 0
-    while cur and depth < 6 do
+    while cur and depth < 10 do
         if cur:IsA("ProximityPrompt") 
             or cur:IsA("ClickDetector") 
             or cur:IsA("SurfaceGui") 
@@ -607,6 +604,12 @@ local function hasProtectedAncestor(v)
             or cur:IsA("Animator")
         then
             return true
+        end
+        if cur:IsA("Model") then
+            if cur:FindFirstChildOfClass("Humanoid") then return true end
+            if cur:FindFirstChildOfClass("AnimationController") then return true end
+            if cur:FindFirstChildOfClass("ProximityPrompt") then return true end
+            if cur:FindFirstChildOfClass("ClickDetector") then return true end
         end
         cur = cur.Parent
         depth = depth + 1
@@ -647,7 +650,7 @@ local function flattenWater(v)
 end
 
 local function handleObject(v)
-    if isProtected(v) or isChar(v) or hasProtectedAncestor(v) then return end
+    if isProtected(v) or isChar(v) or hasInteractiveAncestor(v) then return end
     if isNpcOrInteractive(v) then return end
     local cn = v.ClassName
     if killTypes[cn] then
@@ -657,7 +660,7 @@ local function handleObject(v)
             v.Material = Enum.Material.SmoothPlastic
             v.Reflectance = 0
             v.CastShadow = false
-            if v:IsA("MeshPart") and v.TextureID ~= "" and not hasProtectedAncestor(v) then
+            if v:IsA("MeshPart") and v.TextureID ~= "" and not hasInteractiveAncestor(v) then
                 v.RenderFidelity = Enum.RenderFidelity.Performance
             end
         end)
@@ -729,7 +732,7 @@ Workspace.DescendantAdded:Connect(function(v)
     end)
 end)
 
-local CULL_DIST_SQ = 70 * 70
+local CULL_DIST_SQ = 55 * 55
 local culled = {}
 
 task.spawn(function()
@@ -740,7 +743,8 @@ task.spawn(function()
             local camPos = Camera.CFrame.Position
             for _, v in ipairs(Workspace:GetChildren()) do
                 if v:IsA("BasePart") and not isChar(v) then
-                    if not v:FindFirstChildOfClass("Humanoid") 
+                    if not hasInteractiveAncestor(v) 
+                        and not v:FindFirstChildOfClass("Humanoid") 
                         and not v:FindFirstChildOfClass("BillboardGui") 
                         and not v:FindFirstChildOfClass("ProximityPrompt")
                         and not v:FindFirstChildOfClass("ClickDetector")
@@ -793,7 +797,7 @@ task.spawn(function()
         pcall(function()
             for _, v in ipairs(Workspace:GetDescendants()) do
                 if (v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam")) 
-                    and not hasProtectedAncestor(v) 
+                    and not hasInteractiveAncestor(v) 
                 then
                     if v.Enabled then v.Enabled = false end
                 end

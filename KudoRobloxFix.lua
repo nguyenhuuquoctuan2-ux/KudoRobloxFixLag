@@ -205,6 +205,9 @@ local fflagTable = {
     ["FFlagDisableGrass"] = "True",
 
     ["DFIntCSGLevelOfDetailSwitchingDistance"] = "0",
+    ["DFIntCSGLevelOfDetailSwitchingDistanceL12"] = "0",
+    ["DFIntCSGLevelOfDetailSwitchingDistanceL23"] = "0",
+    ["DFIntCSGLevelOfDetailSwitchingDistanceL34"] = "0",
     ["FFlagDisableLODTransitions"] = "True",
     ["FFlagForceLOD0"] = "True",
     ["DFIntLODBias"] = "8",
@@ -212,6 +215,7 @@ local fflagTable = {
 
     ["DFFlagDebugRenderForceTechnologyVoxel"] = "True",
     ["FFlagDebugPauseVoxelizer"] = "True",
+    ["DFFlagDebugSkipMeshVoxelizer"] = "True",
     ["DFIntSolverSpringDamping"] = "0",
     ["DFIntMaxSimultaneousPhysicsJobs"] = "1",
     ["DFIntPhysicsStepPerFrame"] = "1",
@@ -224,6 +228,7 @@ local fflagTable = {
     ["DFIntPhysicsQualityOverride"] = "0",
 
     ["DFIntFrameBufferPoolSize"] = "1",
+    ["DFIntMaxFrameBufferSize"] = "4",
     ["DFIntDebugEngineOptimizationLevel"] = "3",
     ["DFFlagDisableGPUOcclusion"] = "True",
     ["FFlagRenderDisableForwardLights"] = "True",
@@ -300,6 +305,31 @@ local fflagTable = {
     ["DFIntMaxSoundChannels"] = "8",
     ["FFlagDisableSoundOcclusion"] = "True",
     ["DFIntSoundRollOffQuality"] = "0",
+
+    ["FIntRomarkStartWithGraphicQualityLevel"] = "1",
+    ["FIntRenderLocalLightUpdatesMin"] = "1",
+    ["FIntRenderLocalLightUpdatesMax"] = "1",
+    ["FIntRenderGrassDetailStrands"] = "0",
+    ["FIntFullscreenTitleBarTriggerDelayMillis"] = "18000000",
+    ["FIntV1MenuLanguageSelectionFeaturePerMillageRollout"] = "0",
+    ["FFlagAlwaysShowVRToggleV3"] = "False",
+    ["FFlagEnableTFFeedbackModeEntryCheck"] = "False",
+    ["FFlagDisableFeedbackSoothsayerCheck"] = "False",
+    ["FFlagAddHapticsToggle"] = "False",
+    ["FFlagChatTranslationSettingEnabled3"] = "False",
+    ["FFlagChatTranslationEnableSystemMessage"] = "False",
+    ["FFlagDebugDisableTelemetryEphemeralCounter"] = "True",
+    ["FFlagDebugDisableTelemetryEphemeralStat"] = "True",
+    ["FFlagDebugDisableTelemetryEventIngest"] = "True",
+    ["FFlagDebugDisableTelemetryPoint"] = "True",
+    ["FFlagDebugDisableTelemetryV2Counter"] = "True",
+    ["FFlagDebugDisableTelemetryV2Event"] = "True",
+    ["FFlagDebugDisableTelemetryV2Stat"] = "True",
+    ["FIntRenderShadowIntensity"] = "0",
+    ["DFIntTextureCompositorActiveJobs"] = "0",
+    ["DFFlagUseVisBugChecks"] = "True",
+    ["FFlagAdServiceEnabled"] = "False",
+    ["FIntDebugTextureManagerSkipMips"] = "8",
 }
 
 local formatFlag = function(z)
@@ -1266,6 +1296,6 @@ end)
 task.wait(0.1)
 applyOpacity(0.5)
 
-showNotif("Overhaul Loaded", "FFlags applied. Optimization active.", 6)
+showNotif("Script successfully loaded!", "FFlags applied. Optimization active.", 6)
 
 print("fix lag + anti-afk v1.1 by kudo29001 loaded")

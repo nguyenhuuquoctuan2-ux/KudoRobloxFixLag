@@ -461,8 +461,8 @@ pcall(function()
         Camera.FieldOfView = 85
     end
     Workspace.StreamingEnabled = true
-    Workspace.StreamingTargetRadius = 24
-    Workspace.StreamingMinRadius = 12
+    Workspace.StreamingTargetRadius = 32
+    Workspace.StreamingMinRadius = 16
 end)
 
 local SKY_GRAY = Color3.fromRGB(128, 128, 128)
@@ -589,17 +589,37 @@ local function isProtected(v)
         or v:IsA("RemoteFunction")
         or v:IsA("BindableEvent")
         or v:IsA("BindableFunction")
+        or v:IsA("Animation")
+        or v:IsA("AnimationController")
+        or v:IsA("Animator")
 end
 
 local function hasProtectedAncestor(v)
     local cur = v
     local depth = 0
-    while cur and depth < 4 do
-        if cur:IsA("ProximityPrompt") or cur:IsA("ClickDetector") or cur:IsA("SurfaceGui") or cur:IsA("BillboardGui") then
+    while cur and depth < 6 do
+        if cur:IsA("ProximityPrompt") 
+            or cur:IsA("ClickDetector") 
+            or cur:IsA("SurfaceGui") 
+            or cur:IsA("BillboardGui")
+            or cur:IsA("Humanoid")
+            or cur:IsA("AnimationController")
+            or cur:IsA("Animator")
+        then
             return true
         end
         cur = cur.Parent
         depth = depth + 1
+    end
+    return false
+end
+
+local function isNpcOrInteractive(v)
+    if v:IsA("Model") then
+        if v:FindFirstChildOfClass("Humanoid") then return true end
+        if v:FindFirstChildOfClass("AnimationController") then return true end
+        if v:FindFirstChildOfClass("ProximityPrompt", true) then return true end
+        if v:FindFirstChildOfClass("ClickDetector", true) then return true end
     end
     return false
 end
@@ -628,6 +648,7 @@ end
 
 local function handleObject(v)
     if isProtected(v) or isChar(v) or hasProtectedAncestor(v) then return end
+    if isNpcOrInteractive(v) then return end
     local cn = v.ClassName
     if killTypes[cn] then
         pcall(function() v:Destroy() end)
@@ -708,12 +729,12 @@ Workspace.DescendantAdded:Connect(function(v)
     end)
 end)
 
-local CULL_DIST_SQ = 60 * 60
+local CULL_DIST_SQ = 70 * 70
 local culled = {}
 
 task.spawn(function()
     while true do
-        task.wait(0.2)
+        task.wait(0.15)
         pcall(function()
             if not Camera then return end
             local camPos = Camera.CFrame.Position
@@ -779,44 +800,6 @@ task.spawn(function()
             end
         end)
     end
-end)
-
-task.spawn(function()
-    while true do
-        task.wait(2)
-        pcall(function()
-            local function collectPrompts(container)
-                for _, v in ipairs(container:GetDescendants()) do
-                    if v:IsA("ProximityPrompt") then
-                        pcall(function()
-                            if v.MaxActivationDistance < 15 then
-                                v.MaxActivationDistance = 15
-                            end
-                            v.RequiresLineOfSight = false
-                            v.Exclusivity = Enum.ProximityPromptExclusivity.OnePerButton
-                            v.Style = Enum.ProximityPromptStyle.Default
-                        end)
-                    end
-                end
-            end
-            collectPrompts(Workspace)
-            pcall(function() collectPrompts(PlayerGui) end)
-        end)
-    end
-end)
-
-Workspace.DescendantAdded:Connect(function(v)
-    task.defer(function()
-        if v:IsA("ProximityPrompt") then
-            pcall(function()
-                if v.MaxActivationDistance < 15 then
-                    v.MaxActivationDistance = 15
-                end
-                v.RequiresLineOfSight = false
-                v.Exclusivity = Enum.ProximityPromptExclusivity.OnePerButton
-            end)
-        end
-    end)
 end)
 
 local notifGui = Instance.new("ScreenGui")

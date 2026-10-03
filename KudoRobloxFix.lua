@@ -732,43 +732,6 @@ Workspace.DescendantAdded:Connect(function(v)
     end)
 end)
 
-local CULL_DIST_SQ = 55 * 55
-local culled = {}
-
-task.spawn(function()
-    while true do
-        task.wait(0.15)
-        pcall(function()
-            if not Camera then return end
-            local camPos = Camera.CFrame.Position
-            for _, v in ipairs(Workspace:GetChildren()) do
-                if v:IsA("BasePart") and not isChar(v) then
-                    if not hasInteractiveAncestor(v) 
-                        and not v:FindFirstChildOfClass("Humanoid") 
-                        and not v:FindFirstChildOfClass("BillboardGui") 
-                        and not v:FindFirstChildOfClass("ProximityPrompt")
-                        and not v:FindFirstChildOfClass("ClickDetector")
-                        and not v:FindFirstChildOfClass("SurfaceGui")
-                    then
-                        local pos = v.Position
-                        if pos.Y >= camPos.Y - 3 then
-                            local dx, dy, dz = pos.X - camPos.X, pos.Y - camPos.Y, pos.Z - camPos.Z
-                            local shouldHide = (dx*dx + dy*dy + dz*dz) > CULL_DIST_SQ
-                            if shouldHide and not culled[v] then
-                                culled[v] = true
-                                pcall(function() v.LocalTransparencyModifier = 1 end)
-                            elseif not shouldHide and culled[v] then
-                                culled[v] = false
-                                pcall(function() v.LocalTransparencyModifier = 0 end)
-                            end
-                        end
-                    end
-                end
-            end
-        end)
-    end
-end)
-
 task.spawn(function()
     while true do
         task.wait(3)

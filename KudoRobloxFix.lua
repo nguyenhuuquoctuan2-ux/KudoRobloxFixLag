@@ -9,6 +9,7 @@ local Terrain = Workspace:FindFirstChildOfClass("Terrain")
 local Camera = Workspace.CurrentCamera
 local VirtualUser = game:GetService("VirtualUser")
 local CoreGui = game:GetService("CoreGui")
+local CollectionService = game:GetService("CollectionService")
 
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
@@ -154,6 +155,55 @@ local fflagBatches = {
         {"DFIntMaxVisibleBeams", "0"},
         {"DFIntMaxVisibleTrails", "0"},
     },
+    {
+        {"FFlagDisableGrass", "True"},
+        {"FFlagDisableMeshes", "False"},
+        {"DFIntMeshQualityOverride", "0"},
+        {"FFlagDisableMeshTextures", "True"},
+        {"FFlagDisableMaterialTextures", "True"},
+        {"FFlagDisableBumpMap", "True"},
+        {"FFlagDisableNormalMap", "True"},
+        {"FFlagDisableSpecularMap", "True"},
+        {"DFIntReflectionQualityOverride", "0"},
+        {"FFlagDisableReflections", "True"},
+        {"FFlagDisableWaterReflections", "True"},
+        {"FFlagDisableGlassReflections", "True"},
+    },
+    {
+        {"DFIntSolverIterations", "1"},
+        {"DFIntMaxSolverIterations", "1"},
+        {"FFlagDisableFluidForces", "True"},
+        {"FFlagDisableAeroForces", "True"},
+        {"DFIntMaxJointCount", "1"},
+        {"FFlagSimplifyPhysics", "True"},
+        {"DFIntPhysicsQualityOverride", "0"},
+        {"DFFlagPhysicsQualityOverrideEnabled", "True"},
+    },
+    {
+        {"DFIntLightingQualityOverride", "0"},
+        {"DFFlagLightingQualityOverrideEnabled", "True"},
+        {"FFlagDisablePointLights", "True"},
+        {"FFlagDisableSpotLights", "True"},
+        {"FFlagDisableSurfaceLights", "True"},
+        {"DFIntMaxLights", "0"},
+        {"FFlagDisableGlobalShadows", "True"},
+        {"FFlagDisableLocalShadows", "True"},
+    },
+    {
+        {"DFIntAnimationQualityOverride", "0"},
+        {"FFlagDisableAnimationBlending", "True"},
+        {"DFIntMaxAnimationTracks", "1"},
+        {"FFlagSimplifyAnimations", "True"},
+    },
+    {
+        {"FFlagDisableAudioEffects", "False"},
+        {"DFIntAudioQualityOverride", "0"},
+    },
+    {
+        {"DFIntMaterialQualityOverride", "0"},
+        {"FFlagDisableMaterialShaders", "True"},
+        {"FFlagForceSimpleMaterial", "True"},
+    },
 }
 
 for _, batch in ipairs(fflagBatches) do
@@ -175,12 +225,14 @@ end)
 
 pcall(function()
     if Camera then
-        Camera.FieldOfView = 75
+        Camera.FieldOfView = 80
     end
     Workspace.StreamingEnabled = true
-    Workspace.StreamingTargetRadius = 48
-    Workspace.StreamingMinRadius = 24
+    Workspace.StreamingTargetRadius = 40
+    Workspace.StreamingMinRadius = 20
 end)
+
+local SKY_GRAY = Color3.fromRGB(128, 128, 128)
 
 pcall(function()
     for _, v in ipairs(Lighting:GetChildren()) do
@@ -201,20 +253,20 @@ pcall(function()
     sky.CelestialBodiesShown = false
     sky.Parent = Lighting
     Lighting.GlobalShadows = false
-    Lighting.Brightness = 2.5
+    Lighting.Brightness = 1.6
     Lighting.ClockTime = 14
     Lighting.GeographicLatitude = 0
-    Lighting.Ambient = Color3.fromRGB(150, 150, 150)
-    Lighting.OutdoorAmbient = Color3.fromRGB(160, 160, 160)
-    Lighting.EnvironmentDiffuseScale = 0.5
+    Lighting.Ambient = Color3.fromRGB(128, 128, 128)
+    Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
+    Lighting.EnvironmentDiffuseScale = 0
     Lighting.EnvironmentSpecularScale = 0
-    Lighting.ExposureCompensation = 0.5
+    Lighting.ExposureCompensation = 0
     Lighting.ShadowSoftness = 0
-    Lighting.FogColor = Color3.fromRGB(128, 128, 128)
+    Lighting.FogColor = SKY_GRAY
     Lighting.FogStart = 0
-    Lighting.FogEnd = 10000
-    Lighting.ColorShift_Top = Color3.fromRGB(128, 128, 128)
-    Lighting.ColorShift_Bottom = Color3.fromRGB(128, 128, 128)
+    Lighting.FogEnd = 5000
+    Lighting.ColorShift_Top = SKY_GRAY
+    Lighting.ColorShift_Bottom = SKY_GRAY
 end)
 
 pcall(function()
@@ -222,7 +274,7 @@ pcall(function()
         Terrain.WaterWaveSize = 0
         Terrain.WaterWaveSpeed = 0
         Terrain.WaterReflectance = 0
-        Terrain.WaterTransparency = 0.3
+        Terrain.WaterTransparency = 0
         Terrain.WaterColor = Color3.fromRGB(0, 100, 200)
         Terrain.Decoration = false
     end
@@ -285,11 +337,15 @@ local killTypes = {
     ColorCorrectionEffect = true, SunRaysEffect = true,
 }
 
-local flatMaterials = {
-    Enum.Material.SmoothPlastic,
-    Enum.Material.SmoothPlastic,
-    Enum.Material.SmoothPlastic,
-}
+local function flattenWater(v)
+    pcall(function()
+        v.WaterColor = Color3.fromRGB(0, 100, 200)
+        v.WaterTransparency = 0
+        v.WaterReflectance = 0
+        v.WaterWaveSize = 0
+        v.WaterWaveSpeed = 0
+    end)
+end
 
 local function handleObject(v)
     if isName(v) or isChar(v) then return end
@@ -301,30 +357,39 @@ local function handleObject(v)
             v.Material = Enum.Material.SmoothPlastic
             v.Reflectance = 0
             v.CastShadow = false
-            v.Transparency = 0
             if v:IsA("MeshPart") then
                 v.RenderFidelity = Enum.RenderFidelity.Performance
                 v.TextureID = ""
-                v.MeshId = v.MeshId
             end
         end)
     elseif cn == "Model" then
         pcall(function()
             v.LevelOfDetail = Enum.ModelLevelOfDetail.StreamingMesh
         end)
-    elseif cn == "Water" then
-        pcall(function()
-            v.WaterColor = Color3.fromRGB(0, 100, 200)
-            v.WaterTransparency = 0.3
-            v.WaterReflectance = 0
-            v.WaterWaveSize = 0
-            v.WaterWaveSpeed = 0
-        end)
     end
 end
 
-local BATCH_SIZE = 500
-local MAX_CONCURRENT = 12
+local function scanTerrain()
+    pcall(function()
+        if not Terrain then return end
+        flattenWater(Terrain)
+        for _, v in ipairs(Terrain:GetChildren()) do
+            if v:IsA("Water") then
+                flattenWater(v)
+            end
+        end
+    end)
+end
+
+task.spawn(function()
+    while true do
+        task.wait(0.5)
+        scanTerrain()
+    end
+end)
+
+local BATCH_SIZE = 800
+local MAX_CONCURRENT = 16
 
 local function processBatch(list)
     for _, v in ipairs(list) do
@@ -375,12 +440,12 @@ Workspace.DescendantAdded:Connect(function(v)
     end)
 end)
 
-local CULL_DIST_SQ = 45 * 45
+local CULL_DIST_SQ = 35 * 35
 local culled = {}
 
 task.spawn(function()
     while true do
-        task.wait(1.0)
+        task.wait(0.6)
         pcall(function()
             if not Camera then return end
             local camPos = Camera.CFrame.Position
@@ -406,12 +471,33 @@ task.spawn(function()
     end
 end)
 
+local function reapplyFog()
+    pcall(function()
+        Lighting.FogColor = SKY_GRAY
+        Lighting.FogStart = 0
+        Lighting.FogEnd = 5000
+        Lighting.Ambient = Color3.fromRGB(128, 128, 128)
+        Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
+        Lighting.Brightness = 1.6
+        Lighting.GlobalShadows = false
+        Lighting.EnvironmentDiffuseScale = 0
+        Lighting.EnvironmentSpecularScale = 0
+    end)
+end
+
+task.spawn(function()
+    while true do
+        task.wait(3)
+        reapplyFog()
+    end
+end)
+
 pcall(function()
     local count = 0
     for _, v in ipairs(Lighting:GetDescendants()) do
         if v:IsA("PointLight") or v:IsA("SpotLight") or v:IsA("SurfaceLight") then
             count = count + 1
-            if count > 4 then
+            if count > 0 then
                 v.Enabled = false
             end
         end
@@ -420,8 +506,9 @@ end)
 
 task.spawn(function()
     while true do
-        task.wait(30)
+        task.wait(20)
         pcall(function()
+            collectgarbage("collect")
             collectgarbage("collect")
             collectgarbage("collect")
             collectgarbage("collect")
@@ -431,13 +518,42 @@ end)
 
 task.spawn(function()
     while true do
-        task.wait(2)
+        task.wait(1.5)
         pcall(function()
             for _, v in ipairs(Workspace:GetDescendants()) do
                 if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam") then
                     if v.Enabled then
                         v.Enabled = false
                     end
+                end
+            end
+        end)
+    end
+end)
+
+pcall(function()
+    RunService.Stepped:Connect(function()
+        pcall(function()
+            for _, v in ipairs(Workspace:GetChildren()) do
+                if v:IsA("BasePart") and not isChar(v) then
+                    if v.Transparency > 0 and v.Transparency < 1 then
+                        v.Transparency = 1
+                    end
+                end
+            end
+        end)
+    end)
+end)
+
+task.spawn(function()
+    while true do
+        task.wait(5)
+        pcall(function()
+            for _, v in ipairs(Workspace:GetDescendants()) do
+                if v:IsA("Decal") or v:IsA("Texture") then
+                    pcall(function() v:Destroy() end)
+                elseif v:IsA("MeshPart") then
+                    pcall(function() v.TextureID = "" end)
                 end
             end
         end)

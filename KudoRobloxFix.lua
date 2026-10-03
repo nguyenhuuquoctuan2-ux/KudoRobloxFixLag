@@ -45,168 +45,132 @@ local function destroyOldUI()
     end
 end
 
-for i = 1, 5 do
+for i = 1, 3 do
     destroyOldUI()
     task.wait(0.05)
 end
 
 local cleanStart = tick()
 task.spawn(function()
-    while tick() - cleanStart < 3 do
+    while tick() - cleanStart < 2 do
         destroyOldUI()
-        task.wait(0.2)
+        task.wait(0.3)
     end
 end)
 
-local fflagBatches = {
-    {
-        {"DFIntTaskSchedulerTargetFps", "9999"},
-        {"DFIntFrameRateCap", "9999"},
-        {"DFIntMaxFrameRate", "9999"},
-        {"FFlagDisableVSync", "True"},
-        {"DFIntDebugFRMQualityLevelOverride", "1"},
-    },
-    {
-        {"DFIntTextureQualityOverride", "0"},
-        {"DFFlagTextureQualityOverrideEnabled", "True"},
-        {"FFlagTextureQualityOverride", "True"},
-        {"FFlagDisableTextures", "True"},
-        {"FFlagDisableSurfaceAppearance", "True"},
-        {"FFlagDisableDecals", "True"},
-        {"FFlagDisableMaterialTextures", "True"},
-        {"FFlagDisableBumpMap", "True"},
-        {"FFlagDisableNormalMap", "True"},
-        {"FFlagDisableSpecularMap", "True"},
-    },
-    {
-        {"DFFlagDisableSSAO", "True"},
-        {"FFlagDisableSSAO", "True"},
-        {"FFlagDisablePostFx", "True"},
-        {"FFlagDisableBloom", "True"},
-        {"FFlagDisableDepthOfField", "True"},
-        {"FFlagDisableSunRays", "True"},
-        {"FFlagDisableAntiAliasing", "True"},
-        {"FFlagDisableMotionBlur", "True"},
-        {"FFlagDisableHDR", "True"},
-        {"FFlagDisableToneMapping", "True"},
-        {"FFlagDisableMultiSample", "True"},
-        {"FFlagDisableSunLight", "True"},
-        {"FFlagDisableSunShadow", "True"},
-        {"FFlagDisableSunGlow", "True"},
-        {"FFlagDisableSunFlare", "True"},
-    },
-    {
-        {"FFlagRenderShadowIntensity", "0"},
-        {"FFlagRenderShadowIntensityOverride", "True"},
-        {"FFlagDisableShadows", "True"},
-        {"FFlagDebugSkyGray", "True"},
-        {"FFlagDisableAtmosphere", "True"},
-        {"FFlagDisableSky", "True"},
-        {"FFlagDisableFog", "True"},
-        {"FFlagDisableTerrainDecoration", "True"},
-        {"FIntFRMMaxGrassDistance", "0"},
-        {"FFlagDisableGrass", "True"},
-    },
-    {
-        {"DFIntCSGLevelOfDetailSwitchingDistance", "0"},
-        {"FFlagDisableLODTransitions", "True"},
-        {"FFlagForceLOD0", "True"},
-        {"DFIntLODBias", "8"},
-        {"DFIntMeshQualityOverride", "0"},
-    },
-    {
-        {"DFFlagDebugRenderForceTechnologyVoxel", "True"},
-        {"FFlagDebugPauseVoxelizer", "True"},
-        {"DFIntSolverSpringDamping", "0"},
-        {"DFIntMaxSimultaneousPhysicsJobs", "1"},
-        {"DFIntPhysicsStepPerFrame", "1"},
-        {"DFIntMaximumCollisionIterations", "1"},
-        {"DFIntSolverConvergenceIterations", "1"},
-        {"DFIntSolverIterations", "1"},
-        {"FFlagDisableFluidForces", "True"},
-        {"FFlagDisableAeroForces", "True"},
-        {"FFlagSimplifyPhysics", "True"},
-        {"DFIntPhysicsQualityOverride", "0"},
-    },
-    {
-        {"DFIntFrameBufferPoolSize", "1"},
-        {"DFIntDebugEngineOptimizationLevel", "3"},
-        {"DFFlagDisableGPUOcclusion", "True"},
-        {"FFlagRenderDisableForwardLights", "True"},
-        {"DFIntNumberOfRenderPasses", "1"},
-        {"DFIntMaxConcurrentRenderPasses", "1"},
-    },
-    {
-        {"DFIntMaxDataPacketsPerFrame", "1"},
-        {"DFIntMaxDataPacketsPerSecond", "60"},
-        {"FFlagDisableRemoteEventsThrottling", "False"},
-        {"DFIntRemoteEventThrottleLimit", "10"},
-        {"FFlagOptimizeNetworkSend", "True"},
-        {"DFIntNetworkClusterPacketCache", "1"},
-    },
-    {
-        {"FFlagDisableTerrain", "True"},
-        {"FFlagDisableWater", "True"},
-        {"FFlagDisableSkybox", "True"},
-        {"FFlagDisableParticles", "True"},
-        {"FFlagDisableTrails", "True"},
-        {"FFlagDisableBeams", "True"},
-        {"FFlagDisableHighlight", "True"},
-        {"DFIntMaxVisibleParticles", "0"},
-        {"DFIntMaxVisibleBeams", "0"},
-        {"DFIntMaxVisibleTrails", "0"},
-    },
-    {
-        {"FFlagDisableReflections", "True"},
-        {"FFlagDisableWaterReflections", "True"},
-        {"FFlagDisableGlassReflections", "True"},
-        {"DFIntReflectionQualityOverride", "0"},
-    },
-    {
-        {"DFIntLightingQualityOverride", "0"},
-        {"DFFlagLightingQualityOverrideEnabled", "True"},
-        {"FFlagDisablePointLights", "True"},
-        {"FFlagDisableSpotLights", "True"},
-        {"FFlagDisableSurfaceLights", "True"},
-        {"DFIntMaxLights", "0"},
-        {"FFlagDisableGlobalShadows", "True"},
-        {"FFlagDisableLocalShadows", "True"},
-    },
-    {
-        {"DFIntAnimationQualityOverride", "0"},
-        {"FFlagDisableAnimationBlending", "True"},
-        {"DFIntMaxAnimationTracks", "1"},
-        {"FFlagSimplifyAnimations", "True"},
-    },
-    {
-        {"DFIntMaterialQualityOverride", "0"},
-        {"FFlagDisableMaterialShaders", "True"},
-        {"FFlagForceSimpleMaterial", "True"},
-    },
-    {
-        {"FFlagDisableParticleLighting", "True"},
-        {"FFlagDisableParticleShadows", "True"},
-        {"FFlagDisableParticleReflections", "True"},
-        {"DFIntParticleQualityOverride", "0"},
-    },
-    {
-        {"FFlagDisableClouds", "True"},
-        {"FFlagDisableStars", "True"},
-        {"FFlagDisableMoon", "True"},
-        {"FFlagDisableSun", "True"},
-        {"FFlagDisableCelestialBodies", "True"},
-    },
+local fflagList = {
+    {"DFIntTaskSchedulerTargetFps", "9999"},
+    {"DFIntFrameRateCap", "9999"},
+    {"DFIntMaxFrameRate", "9999"},
+    {"FFlagDisableVSync", "True"},
+    {"DFIntDebugFRMQualityLevelOverride", "1"},
+    {"DFIntTextureQualityOverride", "0"},
+    {"DFFlagTextureQualityOverrideEnabled", "True"},
+    {"FFlagTextureQualityOverride", "True"},
+    {"FFlagDisableTextures", "True"},
+    {"FFlagDisableSurfaceAppearance", "True"},
+    {"FFlagDisableDecals", "True"},
+    {"FFlagDisableMaterialTextures", "True"},
+    {"FFlagDisableBumpMap", "True"},
+    {"FFlagDisableNormalMap", "True"},
+    {"FFlagDisableSpecularMap", "True"},
+    {"DFFlagDisableSSAO", "True"},
+    {"FFlagDisableSSAO", "True"},
+    {"FFlagDisablePostFx", "True"},
+    {"FFlagDisableBloom", "True"},
+    {"FFlagDisableDepthOfField", "True"},
+    {"FFlagDisableSunRays", "True"},
+    {"FFlagDisableAntiAliasing", "True"},
+    {"FFlagDisableMotionBlur", "True"},
+    {"FFlagDisableHDR", "True"},
+    {"FFlagDisableToneMapping", "True"},
+    {"FFlagDisableMultiSample", "True"},
+    {"FFlagDisableSunLight", "True"},
+    {"FFlagDisableSunShadow", "True"},
+    {"FFlagDisableSunGlow", "True"},
+    {"FFlagDisableSunFlare", "True"},
+    {"FFlagRenderShadowIntensity", "0"},
+    {"FFlagRenderShadowIntensityOverride", "True"},
+    {"FFlagDisableShadows", "True"},
+    {"FFlagDebugSkyGray", "True"},
+    {"FFlagDisableAtmosphere", "True"},
+    {"FFlagDisableSky", "True"},
+    {"FFlagDisableFog", "True"},
+    {"FFlagDisableTerrainDecoration", "True"},
+    {"FIntFRMMaxGrassDistance", "0"},
+    {"FFlagDisableGrass", "True"},
+    {"DFIntCSGLevelOfDetailSwitchingDistance", "0"},
+    {"FFlagDisableLODTransitions", "True"},
+    {"FFlagForceLOD0", "True"},
+    {"DFIntLODBias", "8"},
+    {"DFIntMeshQualityOverride", "0"},
+    {"DFFlagDebugRenderForceTechnologyVoxel", "True"},
+    {"FFlagDebugPauseVoxelizer", "True"},
+    {"DFIntSolverSpringDamping", "0"},
+    {"DFIntMaxSimultaneousPhysicsJobs", "1"},
+    {"DFIntPhysicsStepPerFrame", "1"},
+    {"DFIntMaximumCollisionIterations", "1"},
+    {"DFIntSolverConvergenceIterations", "1"},
+    {"DFIntSolverIterations", "1"},
+    {"FFlagDisableFluidForces", "True"},
+    {"FFlagDisableAeroForces", "True"},
+    {"FFlagSimplifyPhysics", "True"},
+    {"DFIntPhysicsQualityOverride", "0"},
+    {"DFIntFrameBufferPoolSize", "1"},
+    {"DFIntDebugEngineOptimizationLevel", "3"},
+    {"DFFlagDisableGPUOcclusion", "True"},
+    {"FFlagRenderDisableForwardLights", "True"},
+    {"DFIntNumberOfRenderPasses", "1"},
+    {"DFIntMaxConcurrentRenderPasses", "1"},
+    {"DFIntMaxDataPacketsPerFrame", "1"},
+    {"DFIntMaxDataPacketsPerSecond", "60"},
+    {"FFlagOptimizeNetworkSend", "True"},
+    {"DFIntNetworkClusterPacketCache", "1"},
+    {"FFlagDisableTerrain", "True"},
+    {"FFlagDisableWater", "True"},
+    {"FFlagDisableSkybox", "True"},
+    {"FFlagDisableParticles", "True"},
+    {"FFlagDisableTrails", "True"},
+    {"FFlagDisableBeams", "True"},
+    {"FFlagDisableHighlight", "True"},
+    {"DFIntMaxVisibleParticles", "0"},
+    {"DFIntMaxVisibleBeams", "0"},
+    {"DFIntMaxVisibleTrails", "0"},
+    {"FFlagDisableReflections", "True"},
+    {"FFlagDisableWaterReflections", "True"},
+    {"FFlagDisableGlassReflections", "True"},
+    {"DFIntReflectionQualityOverride", "0"},
+    {"DFIntLightingQualityOverride", "0"},
+    {"DFFlagLightingQualityOverrideEnabled", "True"},
+    {"FFlagDisablePointLights", "True"},
+    {"FFlagDisableSpotLights", "True"},
+    {"FFlagDisableSurfaceLights", "True"},
+    {"DFIntMaxLights", "0"},
+    {"FFlagDisableGlobalShadows", "True"},
+    {"FFlagDisableLocalShadows", "True"},
+    {"DFIntAnimationQualityOverride", "0"},
+    {"FFlagDisableAnimationBlending", "True"},
+    {"DFIntMaxAnimationTracks", "1"},
+    {"FFlagSimplifyAnimations", "True"},
+    {"DFIntMaterialQualityOverride", "0"},
+    {"FFlagDisableMaterialShaders", "True"},
+    {"FFlagForceSimpleMaterial", "True"},
+    {"FFlagDisableParticleLighting", "True"},
+    {"FFlagDisableParticleShadows", "True"},
+    {"FFlagDisableParticleReflections", "True"},
+    {"DFIntParticleQualityOverride", "0"},
+    {"FFlagDisableClouds", "True"},
+    {"FFlagDisableStars", "True"},
+    {"FFlagDisableMoon", "True"},
+    {"FFlagDisableSun", "True"},
+    {"FFlagDisableCelestialBodies", "True"},
 }
 
-for _, batch in ipairs(fflagBatches) do
-    task.spawn(function()
-        for _, pair in ipairs(batch) do
-            pcall(setfflag, pair[1], pair[2])
-        end
-    end)
+for _, pair in ipairs(fflagList) do
+    pcall(setfflag, pair[1], pair[2])
 end
 
-task.wait(0.1)
+task.wait(0.05)
 
 pcall(function()
     settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
@@ -220,14 +184,36 @@ pcall(function()
         Camera.FieldOfView = 85
     end
     Workspace.StreamingEnabled = true
-    Workspace.StreamingTargetRadius = 24
-    Workspace.StreamingMinRadius = 12
+    Workspace.StreamingTargetRadius = 32
+    Workspace.StreamingMinRadius = 16
 end)
 
 local SKY_GRAY = Color3.fromRGB(128, 128, 128)
 
-local function applyGrayEnvironment()
+local skyRemoved = false
+local function wipeSky()
     pcall(function()
+        for _, v in ipairs(Lighting:GetChildren()) do
+            if v:IsA("Sky") then
+                v.SkyboxBk = ""
+                v.SkyboxDn = ""
+                v.SkyboxFt = ""
+                v.SkyboxLf = ""
+                v.SkyboxRt = ""
+                v.SkyboxUp = ""
+                v.SunTextureId = ""
+                v.MoonTextureId = ""
+                v.StarCount = 0
+                v.CelestialBodiesShown = false
+                v.Parent = nil
+                if v.Parent then
+                    v:Destroy()
+                end
+                skyRemoved = true
+            elseif v:IsA("Atmosphere") or v:IsA("Clouds") or v:IsA("PostEffect") then
+                v:Destroy()
+            end
+        end
         Lighting.GlobalShadows = false
         Lighting.Brightness = 1.6
         Lighting.ClockTime = 14
@@ -243,35 +229,15 @@ local function applyGrayEnvironment()
         Lighting.FogEnd = 1500
         Lighting.ColorShift_Top = SKY_GRAY
         Lighting.ColorShift_Bottom = SKY_GRAY
-
-        for _, v in ipairs(Lighting:GetChildren()) do
-            if v:IsA("Sky") then
-                pcall(function()
-                    v.SkyboxBk = ""
-                    v.SkyboxDn = ""
-                    v.SkyboxFt = ""
-                    v.SkyboxLf = ""
-                    v.SkyboxRt = ""
-                    v.SkyboxUp = ""
-                    v.SunTextureId = ""
-                    v.MoonTextureId = ""
-                    v.StarCount = 0
-                    v.CelestialBodiesShown = false
-                end)
-                pcall(function() v:Destroy() end)
-            elseif v:IsA("Atmosphere") or v:IsA("Clouds") or v:IsA("PostEffect") then
-                pcall(function() v:Destroy() end)
-            end
-        end
     end)
 end
 
-applyGrayEnvironment()
+wipeSky()
 
 task.spawn(function()
     while true do
-        task.wait(0.25)
-        applyGrayEnvironment()
+        task.wait(1)
+        wipeSky()
     end
 end)
 
@@ -343,8 +309,6 @@ local killTypes = {
     ColorCorrectionEffect = true, SunRaysEffect = true,
 }
 
-local GRAY_MATERIAL = Enum.Material.SmoothPlastic
-
 local function flattenWater(v)
     pcall(function()
         v.WaterColor = Color3.fromRGB(0, 100, 200)
@@ -355,22 +319,10 @@ local function flattenWater(v)
     end)
 end
 
-local function grayifyPart(v)
-    pcall(function()
-        v.Material = GRAY_MATERIAL
-        v.Color = SKY_GRAY
-        v.Reflectance = 0
-        v.CastShadow = false
-        v.Transparency = 0
-    end)
-end
-
 local function handleObject(v)
     if isName(v) or isChar(v) then return end
     local cn = v.ClassName
-    if killTypes[cn] then
-        pcall(function() v:Destroy() end)
-    elseif cn == "Sky" then
+    if cn == "Sky" then
         pcall(function()
             v.SkyboxBk = ""
             v.SkyboxDn = ""
@@ -382,16 +334,23 @@ local function handleObject(v)
             v.MoonTextureId = ""
             v.StarCount = 0
             v.CelestialBodiesShown = false
+            v.Parent = nil
+            if v.Parent then v:Destroy() end
         end)
+        return
+    end
+    if killTypes[cn] then
         pcall(function() v:Destroy() end)
     elseif cn == "Part" or cn == "MeshPart" or cn == "UnionOperation" or cn == "WedgePart" then
-        grayifyPart(v)
-        if v:IsA("MeshPart") then
-            pcall(function()
+        pcall(function()
+            v.Material = Enum.Material.SmoothPlastic
+            v.Reflectance = 0
+            v.CastShadow = false
+            if v:IsA("MeshPart") then
                 v.RenderFidelity = Enum.RenderFidelity.Performance
                 v.TextureID = ""
-            end)
-        end
+            end
+        end)
     elseif cn == "Model" then
         pcall(function()
             v.LevelOfDetail = Enum.ModelLevelOfDetail.StreamingMesh
@@ -414,8 +373,8 @@ task.spawn(function()
     end
 end)
 
-local BATCH_SIZE = 1000
-local MAX_CONCURRENT = 24
+local BATCH_SIZE = 600
+local MAX_CONCURRENT = 8
 
 local function processBatch(list)
     for _, v in ipairs(list) do
@@ -462,46 +421,12 @@ Workspace.DescendantAdded:Connect(function(v)
     end)
 end)
 
-task.spawn(function()
-    while true do
-        task.wait(3)
-        pcall(function()
-            local descendants = Workspace:GetDescendants()
-            for _, v in ipairs(descendants) do
-                if not isName(v) and not isChar(v) then
-                    local cn = v.ClassName
-                    if cn == "Part" or cn == "MeshPart" or cn == "UnionOperation" or cn == "WedgePart" then
-                        if v.Color ~= SKY_GRAY or v.Material ~= GRAY_MATERIAL then
-                            grayifyPart(v)
-                        end
-                    end
-                end
-            end
-        end)
-    end
-end)
-
-task.spawn(function()
-    while true do
-        task.wait(3)
-        pcall(function()
-            for _, v in ipairs(Workspace:GetDescendants()) do
-                if v:IsA("Decal") or v:IsA("Texture") then
-                    pcall(function() v:Destroy() end)
-                elseif v:IsA("MeshPart") then
-                    pcall(function() v.TextureID = "" end)
-                end
-            end
-        end)
-    end
-end)
-
-local CULL_DIST_SQ = 24 * 24
+local CULL_DIST_SQ = 40 * 40
 local culled = {}
 
 task.spawn(function()
     while true do
-        task.wait(0.3)
+        task.wait(0.6)
         pcall(function()
             if not Camera then return end
             local camPos = Camera.CFrame.Position
@@ -529,7 +454,7 @@ end)
 
 task.spawn(function()
     while true do
-        task.wait(1)
+        task.wait(5)
         pcall(function()
             for _, v in ipairs(Lighting:GetDescendants()) do
                 if v:IsA("PointLight") or v:IsA("SpotLight") or v:IsA("SurfaceLight") then
@@ -542,12 +467,8 @@ end)
 
 task.spawn(function()
     while true do
-        task.wait(12)
+        task.wait(60)
         pcall(function()
-            collectgarbage("collect")
-            collectgarbage("collect")
-            collectgarbage("collect")
-            collectgarbage("collect")
             collectgarbage("collect")
         end)
     end
@@ -555,7 +476,7 @@ end)
 
 task.spawn(function()
     while true do
-        task.wait(1)
+        task.wait(5)
         pcall(function()
             for _, v in ipairs(Workspace:GetDescendants()) do
                 if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam") then
@@ -568,31 +489,22 @@ end)
 
 task.spawn(function()
     while true do
-        task.wait(0.3)
+        task.wait(10)
         pcall(function()
-            for _, v in ipairs(Workspace:GetChildren()) do
-                if v:IsA("BasePart") and not isChar(v) then
-                    if v.Transparency > 0 and v.Transparency < 1 then
-                        v.Transparency = 1
-                    end
-                end
-            end
-        end)
-    end
-end)
-
-task.spawn(function()
-    while true do
-        task.wait(2)
-        pcall(function()
-            for _, v in ipairs(Workspace:GetDescendants()) do
-                if v:IsA("Sky") or v:IsA("Atmosphere") or v:IsA("Clouds") then
-                    pcall(function() v:Destroy() end)
-                end
-            end
-            for _, v in ipairs(Lighting:GetChildren()) do
-                if v:IsA("Sky") or v:IsA("Atmosphere") or v:IsA("Clouds") then
-                    pcall(function() v:Destroy() end)
+            for _, v in ipairs(Lighting:GetDescendants()) do
+                if v:IsA("Sky") then
+                    v.SkyboxBk = ""
+                    v.SkyboxDn = ""
+                    v.SkyboxFt = ""
+                    v.SkyboxLf = ""
+                    v.SkyboxRt = ""
+                    v.SkyboxUp = ""
+                    v.SunTextureId = ""
+                    v.MoonTextureId = ""
+                    v.StarCount = 0
+                    v.CelestialBodiesShown = false
+                    v.Parent = nil
+                    if v.Parent then v:Destroy() end
                 end
             end
         end)
@@ -716,7 +628,7 @@ task.spawn(function()
         local pulse = math.abs(math.sin(tick() * 3))
         barBgStroke.Transparency = 0.3 + pulse * 0.4
         barGlow.BackgroundTransparency = 0.5 + pulse * 0.3
-        task.wait(0.04)
+        task.wait(0.05)
     end
 end)
 
@@ -729,7 +641,7 @@ task.spawn(function()
         local eased = 1 - (1 - t) * (1 - t) * (1 - t)
         barFill.Size = UDim2.new(eased, 0, 1, 0)
         percentL.Text = math.floor(eased * 100) .. "%"
-        task.wait(0.016)
+        task.wait(0.03)
     end
     barFill.Size = UDim2.new(1, 0, 1, 0)
     percentL.Text = "100%"
@@ -1094,4 +1006,4 @@ end)
 task.wait(0.1)
 applyOpacity(0.5)
 
-print("fix lag + anti-fok v1.1 by kudo29001 loaded")
+print("fix lag + anti-afk v1.1 by kudo29001 loaded")

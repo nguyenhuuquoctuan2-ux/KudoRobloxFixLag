@@ -143,7 +143,6 @@ local fflagTable = {
     ["FIntFRMMaxGrassDistance"] = "0",
     ["FIntFRMMinGrassDistance"] = "0",
     ["FIntGrassMovementReducedMotionFactor"] = "0",
-    ["FIntDebugTextureManagerSkipMips"] = "8",
     ["FIntPerformanceTelemetryQueueProcessLimit"] = "0",
     ["FIntTelemetryProfilerFrequency"] = "0",
     ["FIntRenderLocalLightFadeInMs"] = "0",
@@ -325,7 +324,6 @@ local fflagTable = {
     ["DFIntTextureCompositorActiveJobs"] = "0",
     ["DFFlagUseVisBugChecks"] = "True",
     ["FFlagAdServiceEnabled"] = "False",
-    ["FIntDebugTextureManagerSkipMips"] = "8",
 
     ["DFIntMaxParticleCount"] = "0",
     ["DFIntMinParticleCount"] = "0",
@@ -370,10 +368,7 @@ local fflagTable = {
     ["FFlagCacheGUIRendering"] = "True",
     ["FFlagGUIRenderOptimization"] = "True",
     ["FFlagOptimizeGUIRendering2"] = "True",
-    ["FFlagReduceGUIRedraw"] = "True",
-    ["DFIntGUIRedrawRate"] = "30",
     ["FFlagDisableGUIShadows"] = "True",
-    ["FFlagDisableGUIGradients"] = "True",
 
     ["FFlagParallelLuaEnabled"] = "True",
     ["FFlagParallelLuau2"] = "True",
@@ -592,6 +587,53 @@ local function isName(v)
     return v:IsA("BillboardGui") or v:IsA("TextLabel") or v:IsA("TextButton") or v:IsA("Humanoid")
 end
 
+local function hasInteraction(v)
+    if not v then return false end
+    if v:FindFirstChildOfClass("ProximityPrompt") then return true end
+    if v:FindFirstChildOfClass("ClickDetector") then return true end
+    if v:FindFirstChildOfClass("SurfaceGui") then return true end
+    if v:FindFirstChildOfClass("BillboardGui") then return true end
+    if v:FindFirstChildOfClass("SurfaceAppearance") then return true end
+    if v:FindFirstChildOfClass("Attachment") then return true end
+    return false
+end
+
+local function isInteractiveParent(v)
+    if not v then return false end
+    if hasInteraction(v) then return true end
+    local p = v.Parent
+    if p and hasInteraction(p) then return true end
+    local gp = p and p.Parent
+    if gp and hasInteraction(gp) then return true end
+    return false
+end
+
+local INTERACTIVE_KEYWORDS = {
+    "mail", "shop", "egg", "station", "interact", "click", "prompt",
+    "npc", "door", "button", "lever", "chest", "crate", "seed",
+    "pet", "garden", "plant", "harvest", "sell", "buy", "trade",
+    "sign", "board", "menu", "ui", "gui", "hud", "panel", "stall"
+}
+
+local function isInteractiveName(v)
+    if not v then return false end
+    local n = v.Name:lower()
+    for _, kw in ipairs(INTERACTIVE_KEYWORDS) do
+        if n:find(kw) then return true end
+    end
+    return false
+end
+
+local function isProtected(v)
+    if not v then return false end
+    if isInteractiveName(v) then return true end
+    local p = v.Parent
+    if p and isInteractiveName(p) then return true end
+    local gp = p and p.Parent
+    if gp and isInteractiveName(gp) then return true end
+    return false
+end
+
 local killTypes = {
     ParticleEmitter = true, Trail = true, Smoke = true, Fire = true,
     Sparkles = true, Beam = true, Highlight = true, SelectionBox = true,
@@ -617,6 +659,9 @@ end
 
 local function handleObject(v)
     if isName(v) or isChar(v) then return end
+    if isInteractiveParent(v) then return end
+    if isProtected(v) then return end
+    
     local cn = v.ClassName
     if killTypes[cn] then
         pcall(function() v:Destroy() end)
@@ -627,7 +672,9 @@ local function handleObject(v)
             v.CastShadow = false
             if v:IsA("MeshPart") then
                 v.RenderFidelity = Enum.RenderFidelity.Performance
-                v.TextureID = ""
+                if not isProtected(v) then
+                    v.TextureID = ""
+                end
             end
         end)
     elseif cn == "Model" then
@@ -709,7 +756,12 @@ task.spawn(function()
             local camPos = Camera.CFrame.Position
             for _, v in ipairs(Workspace:GetChildren()) do
                 if v:IsA("BasePart") and not isChar(v) then
-                    if not v:FindFirstChildOfClass("Humanoid") and not v:FindFirstChildOfClass("BillboardGui") then
+                    if not v:FindFirstChildOfClass("Humanoid") 
+                       and not v:FindFirstChildOfClass("BillboardGui")
+                       and not v:FindFirstChildOfClass("ProximityPrompt")
+                       and not v:FindFirstChildOfClass("ClickDetector")
+                       and not v:FindFirstChildOfClass("SurfaceGui")
+                       and not isProtected(v) then
                         local pos = v.Position
                         if pos.Y >= camPos.Y - 3 then
                             local dx, dy, dz = pos.X - camPos.X, pos.Y - camPos.Y, pos.Z - camPos.Z
@@ -735,7 +787,9 @@ task.spawn(function()
         pcall(function()
             for _, v in ipairs(Lighting:GetDescendants()) do
                 if v:IsA("PointLight") or v:IsA("SpotLight") or v:IsA("SurfaceLight") then
-                    if v.Enabled then v.Enabled = false end
+                    if v.Enabled and not isProtected(v) then
+                        v.Enabled = false
+                    end
                 end
             end
         end)
@@ -757,7 +811,9 @@ task.spawn(function()
         pcall(function()
             for _, v in ipairs(Workspace:GetDescendants()) do
                 if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam") then
-                    if v.Enabled then v.Enabled = false end
+                    if v.Enabled and not isProtected(v) then
+                        v.Enabled = false
+                    end
                 end
             end
         end)
@@ -770,9 +826,13 @@ task.spawn(function()
         pcall(function()
             for _, v in ipairs(Workspace:GetDescendants()) do
                 if v:IsA("Decal") or v:IsA("Texture") then
-                    pcall(function() v:Destroy() end)
-                elseif v:IsA("MeshPart") and v.TextureID ~= "" then
-                    pcall(function() v.TextureID = "" end)
+                    if not isProtected(v) then
+                        pcall(function() v:Destroy() end)
+                    end
+                elseif v:IsA("MeshPart") then
+                    if v.TextureID ~= "" and not isProtected(v) then
+                        pcall(function() v.TextureID = "" end)
+                    end
                 end
             end
         end)

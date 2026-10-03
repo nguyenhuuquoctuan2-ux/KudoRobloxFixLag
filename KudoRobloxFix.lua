@@ -9,17 +9,18 @@ local Terrain = Workspace:FindFirstChildOfClass("Terrain")
 local Camera = Workspace.CurrentCamera
 local VirtualUser = game:GetService("VirtualUser")
 local CoreGui = game:GetService("CoreGui")
+local HttpService = game:GetService("HttpService")
 
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
 local uiParent = PlayerGui
 pcall(function()
-    if gethui then uiParent = gethui() end
+    if gethui then uiParent = gethui() elseif cloneref then uiParent = cloneref(CoreGui) end
 end)
 
 local function destroyOldUI()
-    local namesToKill = {"kudo", "fixlag", "mailbox", "sender", "kudostats", "kudotoggle", "kudopopup", "kudoloader"}
+    local namesToKill = {"kudo", "fixlag", "mailbox", "sender", "kudostats", "kudotoggle", "kudopopup", "kudoloader", "smvll", "overhaul"}
     local structMarkers = {"BorderHolder", "Runner", "RunnerDot", "KudoLoaderV2", "KudoBackdrop"}
     for _, container in ipairs({PlayerGui, CoreGui}) do
         pcall(function()
@@ -301,8 +302,35 @@ local fflagTable = {
     ["DFIntSoundRollOffQuality"] = "0",
 }
 
-for key, value in pairs(fflagTable) do
-    pcall(setfflag, key, value)
+local formatFlag = function(z)
+    z = z:gsub("^DFInt", "")
+    z = z:gsub("^DFFlag", "")
+    z = z:gsub("^FFlag", "")
+    z = z:gsub("^FInt", "")
+    z = z:gsub("FString", "")
+    z = z:gsub("FLog", "")
+    return z
+end
+
+if setfflag then
+    task.spawn(function()
+        for k, v in pairs(fflagTable) do
+            pcall(function()
+                local formatted = formatFlag(k)
+                if getfflag and getfflag(formatted) then
+                    setfflag(formatted, v)
+                elseif getfflag and getfflag(k) then
+                    setfflag(k, v)
+                else
+                    setfflag(k, v)
+                end
+            end)
+        end
+    end)
+else
+    for k, v in pairs(fflagTable) do
+        pcall(setfflag, k, v)
+    end
 end
 
 pcall(function()
@@ -610,6 +638,123 @@ task.spawn(function()
         end)
     end
 end)
+
+local notifGui = Instance.new("ScreenGui")
+notifGui.Name = "KudoNotif_" .. HttpService:GenerateGUID(false):sub(1, 8)
+notifGui.ResetOnSpawn = false
+notifGui.DisplayOrder = 2147483647
+notifGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+pcall(function() notifGui.Parent = uiParent end)
+
+local activeNotifs = {}
+local NOTIF_CONST = {
+    WIDTH = 260,
+    HEIGHT = 80,
+    PADDING = 12,
+    THEME = Color3.fromRGB(255, 60, 60),
+    BG = Color3.fromRGB(18, 18, 18),
+    TEXT = Color3.fromRGB(240, 240, 240),
+    SUBTEXT = Color3.fromRGB(160, 160, 160),
+    SPEED = 0.4
+}
+
+local function updateNotifs()
+    for index, data in ipairs(activeNotifs) do
+        local targetY = -NOTIF_CONST.PADDING - ((index - 1) * (NOTIF_CONST.HEIGHT + NOTIF_CONST.PADDING))
+        TweenService:Create(data.Container, TweenInfo.new(NOTIF_CONST.SPEED, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+            Position = UDim2.new(1, -NOTIF_CONST.PADDING, 1, targetY)
+        }):Play()
+    end
+end
+
+local function showNotif(titleText, messageText, duration)
+    duration = duration or 6
+    local container = Instance.new("Frame")
+    container.Size = UDim2.new(0, NOTIF_CONST.WIDTH, 0, NOTIF_CONST.HEIGHT)
+    container.Position = UDim2.new(1, 320, 1, -NOTIF_CONST.PADDING)
+    container.AnchorPoint = Vector2.new(1, 1)
+    container.BackgroundTransparency = 1
+    container.Parent = notifGui
+
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(1, 0, 1, 0)
+    frame.BackgroundColor3 = NOTIF_CONST.BG
+    frame.BorderSizePixel = 0
+    frame.Parent = container
+    Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 8)
+
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = Color3.fromRGB(60, 30, 30)
+    stroke.Thickness = 1
+    stroke.Parent = frame
+
+    local accent = Instance.new("Frame")
+    accent.Size = UDim2.new(1, 0, 0, 2)
+    accent.BackgroundColor3 = NOTIF_CONST.THEME
+    accent.BorderSizePixel = 0
+    accent.Parent = frame
+
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Size = UDim2.new(1, -50, 0, 22)
+    titleLabel.Position = UDim2.new(0, 14, 0, 10)
+    titleLabel.BackgroundTransparency = 1
+    titleLabel.Text = titleText
+    titleLabel.TextColor3 = NOTIF_CONST.TEXT
+    titleLabel.Font = Enum.Font.GothamBold
+    titleLabel.TextSize = 15
+    titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    titleLabel.Parent = frame
+
+    local msgLabel = Instance.new("TextLabel")
+    msgLabel.Size = UDim2.new(1, -28, 0, 36)
+    msgLabel.Position = UDim2.new(0, 14, 0, 34)
+    msgLabel.BackgroundTransparency = 1
+    msgLabel.Text = messageText
+    msgLabel.TextColor3 = NOTIF_CONST.SUBTEXT
+    msgLabel.Font = Enum.Font.GothamMedium
+    msgLabel.TextSize = 12
+    msgLabel.TextWrapped = true
+    msgLabel.TextXAlignment = Enum.TextXAlignment.Left
+    msgLabel.TextYAlignment = Enum.TextYAlignment.Top
+    msgLabel.Parent = frame
+
+    local closeBtn = Instance.new("TextButton")
+    closeBtn.Size = UDim2.new(0, 22, 0, 22)
+    closeBtn.Position = UDim2.new(1, -8, 0, 8)
+    closeBtn.AnchorPoint = Vector2.new(1, 0)
+    closeBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+    closeBtn.Text = "X"
+    closeBtn.TextColor3 = Color3.fromRGB(150, 150, 150)
+    closeBtn.Font = Enum.Font.GothamBold
+    closeBtn.TextSize = 11
+    closeBtn.AutoButtonColor = false
+    closeBtn.Parent = frame
+    Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 6)
+
+    local notifData = {Container = container}
+    table.insert(activeNotifs, 1, notifData)
+    updateNotifs()
+
+    local closed = false
+    local function closeNotif()
+        if closed then return end
+        closed = true
+        local idx = table.find(activeNotifs, notifData)
+        if idx then
+            table.remove(activeNotifs, idx)
+            updateNotifs()
+        end
+        local tweenOut = TweenService:Create(container, TweenInfo.new(NOTIF_CONST.SPEED, Enum.EasingStyle.Sine, Enum.EasingDirection.In), {
+            Position = UDim2.new(1, 320, container.Position.Y.Scale, container.Position.Y.Offset)
+        })
+        tweenOut:Play()
+        tweenOut.Completed:Wait()
+        container:Destroy()
+    end
+
+    closeBtn.MouseButton1Click:Connect(closeNotif)
+    task.delay(duration, closeNotif)
+end
 
 local sg = Instance.new("ScreenGui")
 sg.Name = "KudoLoaderV2"
@@ -1120,5 +1265,7 @@ end)
 
 task.wait(0.1)
 applyOpacity(0.5)
+
+showNotif("Overhaul Loaded", "FFlags applied. Optimization active.", 6)
 
 print("fix lag + anti-afk v1.1 by kudo29001 loaded")

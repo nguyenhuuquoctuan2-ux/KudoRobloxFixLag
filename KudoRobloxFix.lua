@@ -589,40 +589,37 @@ local function isProtected(v)
         or v:IsA("Animation")
         or v:IsA("AnimationController")
         or v:IsA("Animator")
+        or v:IsA("Texture")
+        or v:IsA("Decal")
+        or v:IsA("SpecialMesh")
+        or v:IsA("MeshPart")
+        or v:IsA("UnionOperation")
+        or v:IsA("Model")
 end
 
-local function hasInteractiveAncestor(v)
+local function isInteractiveTree(v)
+    if v:IsA("ProximityPrompt") or v:IsA("ClickDetector") or v:IsA("SurfaceGui") or v:IsA("BillboardGui") then
+        return true
+    end
+    if v:FindFirstChildOfClass("ProximityPrompt") or v:FindFirstChildOfClass("ClickDetector") then
+        return true
+    end
     local cur = v
     local depth = 0
-    while cur and depth < 10 do
-        if cur:IsA("ProximityPrompt") 
-            or cur:IsA("ClickDetector") 
-            or cur:IsA("SurfaceGui") 
-            or cur:IsA("BillboardGui")
-            or cur:IsA("Humanoid")
-            or cur:IsA("AnimationController")
-            or cur:IsA("Animator")
-        then
-            return true
-        end
+    while cur and depth < 12 do
         if cur:IsA("Model") then
+            if cur:FindFirstChildOfClass("ProximityPrompt", true) then return true end
+            if cur:FindFirstChildOfClass("ClickDetector", true) then return true end
             if cur:FindFirstChildOfClass("Humanoid") then return true end
             if cur:FindFirstChildOfClass("AnimationController") then return true end
-            if cur:FindFirstChildOfClass("ProximityPrompt") then return true end
-            if cur:FindFirstChildOfClass("ClickDetector") then return true end
+        end
+        if cur:IsA("ProximityPrompt") or cur:IsA("ClickDetector") 
+            or cur:IsA("SurfaceGui") or cur:IsA("BillboardGui")
+            or cur:IsA("Humanoid") or cur:IsA("AnimationController") then
+            return true
         end
         cur = cur.Parent
         depth = depth + 1
-    end
-    return false
-end
-
-local function isNpcOrInteractive(v)
-    if v:IsA("Model") then
-        if v:FindFirstChildOfClass("Humanoid") then return true end
-        if v:FindFirstChildOfClass("AnimationController") then return true end
-        if v:FindFirstChildOfClass("ProximityPrompt", true) then return true end
-        if v:FindFirstChildOfClass("ClickDetector", true) then return true end
     end
     return false
 end
@@ -632,8 +629,6 @@ local killTypes = {
     Sparkles = true, Beam = true,
     PointLight = true, SpotLight = true,
     SurfaceLight = true, ForceField = true, Explosion = true,
-    Texture = true, SpecialMesh = true,
-    Cloth = true, WrapLayer = true, WrapTarget = true,
     Atmosphere = true, Clouds = true,
     DepthOfFieldEffect = true, BloomEffect = true, BlurEffect = true,
     ColorCorrectionEffect = true, SunRaysEffect = true,
@@ -650,24 +645,12 @@ local function flattenWater(v)
 end
 
 local function handleObject(v)
-    if isProtected(v) or isChar(v) or hasInteractiveAncestor(v) then return end
-    if isNpcOrInteractive(v) then return end
+    if isChar(v) then return end
+    if isProtected(v) then return end
+    if isInteractiveTree(v) then return end
     local cn = v.ClassName
     if killTypes[cn] then
         pcall(function() v:Destroy() end)
-    elseif cn == "Part" or cn == "MeshPart" or cn == "UnionOperation" or cn == "WedgePart" or cn == "CornerWedgePart" then
-        pcall(function()
-            v.Material = Enum.Material.SmoothPlastic
-            v.Reflectance = 0
-            v.CastShadow = false
-            if v:IsA("MeshPart") and v.TextureID ~= "" and not hasInteractiveAncestor(v) then
-                v.RenderFidelity = Enum.RenderFidelity.Performance
-            end
-        end)
-    elseif cn == "Model" then
-        pcall(function()
-            v.LevelOfDetail = Enum.ModelLevelOfDetail.StreamingMesh
-        end)
     end
 end
 
@@ -760,7 +743,7 @@ task.spawn(function()
         pcall(function()
             for _, v in ipairs(Workspace:GetDescendants()) do
                 if (v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam")) 
-                    and not hasInteractiveAncestor(v) 
+                    and not isInteractiveTree(v) 
                 then
                     if v.Enabled then v.Enabled = false end
                 end

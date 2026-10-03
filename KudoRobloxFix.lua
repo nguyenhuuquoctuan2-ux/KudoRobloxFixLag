@@ -226,13 +226,8 @@ end)
 
 local SKY_GRAY = Color3.fromRGB(128, 128, 128)
 
-local function applyGraySky()
+local function applyGrayEnvironment()
     pcall(function()
-        for _, v in ipairs(Lighting:GetChildren()) do
-            if v:IsA("Sky") or v:IsA("Atmosphere") or v:IsA("Clouds") or v:IsA("PostEffect") then
-                pcall(function() v:Destroy() end)
-            end
-        end
         Lighting.GlobalShadows = false
         Lighting.Brightness = 1.6
         Lighting.ClockTime = 14
@@ -245,18 +240,38 @@ local function applyGraySky()
         Lighting.ShadowSoftness = 0
         Lighting.FogColor = SKY_GRAY
         Lighting.FogStart = 0
-        Lighting.FogEnd = 2000
+        Lighting.FogEnd = 1500
         Lighting.ColorShift_Top = SKY_GRAY
         Lighting.ColorShift_Bottom = SKY_GRAY
+
+        for _, v in ipairs(Lighting:GetChildren()) do
+            if v:IsA("Sky") then
+                pcall(function()
+                    v.SkyboxBk = ""
+                    v.SkyboxDn = ""
+                    v.SkyboxFt = ""
+                    v.SkyboxLf = ""
+                    v.SkyboxRt = ""
+                    v.SkyboxUp = ""
+                    v.SunTextureId = ""
+                    v.MoonTextureId = ""
+                    v.StarCount = 0
+                    v.CelestialBodiesShown = false
+                end)
+                pcall(function() v:Destroy() end)
+            elseif v:IsA("Atmosphere") or v:IsA("Clouds") or v:IsA("PostEffect") then
+                pcall(function() v:Destroy() end)
+            end
+        end
     end)
 end
 
-applyGraySky()
+applyGrayEnvironment()
 
 task.spawn(function()
     while true do
-        task.wait(1)
-        applyGraySky()
+        task.wait(0.25)
+        applyGrayEnvironment()
     end
 end)
 
@@ -323,10 +338,12 @@ local killTypes = {
     Animation = true, SurfaceAppearance = true,
     Decal = true, Texture = true, SpecialMesh = true,
     Cloth = true, WrapLayer = true, WrapTarget = true,
-    Atmosphere = true, Clouds = true, Sky = true,
+    Atmosphere = true, Clouds = true,
     DepthOfFieldEffect = true, BloomEffect = true, BlurEffect = true,
     ColorCorrectionEffect = true, SunRaysEffect = true,
 }
+
+local GRAY_MATERIAL = Enum.Material.SmoothPlastic
 
 local function flattenWater(v)
     pcall(function()
@@ -338,21 +355,43 @@ local function flattenWater(v)
     end)
 end
 
+local function grayifyPart(v)
+    pcall(function()
+        v.Material = GRAY_MATERIAL
+        v.Color = SKY_GRAY
+        v.Reflectance = 0
+        v.CastShadow = false
+        v.Transparency = 0
+    end)
+end
+
 local function handleObject(v)
     if isName(v) or isChar(v) then return end
     local cn = v.ClassName
     if killTypes[cn] then
         pcall(function() v:Destroy() end)
-    elseif cn == "Part" or cn == "MeshPart" or cn == "UnionOperation" or cn == "WedgePart" then
+    elseif cn == "Sky" then
         pcall(function()
-            v.Material = Enum.Material.SmoothPlastic
-            v.Reflectance = 0
-            v.CastShadow = false
-            if v:IsA("MeshPart") then
+            v.SkyboxBk = ""
+            v.SkyboxDn = ""
+            v.SkyboxFt = ""
+            v.SkyboxLf = ""
+            v.SkyboxRt = ""
+            v.SkyboxUp = ""
+            v.SunTextureId = ""
+            v.MoonTextureId = ""
+            v.StarCount = 0
+            v.CelestialBodiesShown = false
+        end)
+        pcall(function() v:Destroy() end)
+    elseif cn == "Part" or cn == "MeshPart" or cn == "UnionOperation" or cn == "WedgePart" then
+        grayifyPart(v)
+        if v:IsA("MeshPart") then
+            pcall(function()
                 v.RenderFidelity = Enum.RenderFidelity.Performance
                 v.TextureID = ""
-            end
-        end)
+            end)
+        end
     elseif cn == "Model" then
         pcall(function()
             v.LevelOfDetail = Enum.ModelLevelOfDetail.StreamingMesh
@@ -421,6 +460,40 @@ Workspace.DescendantAdded:Connect(function(v)
     task.defer(function()
         pcall(function() handleObject(v) end)
     end)
+end)
+
+task.spawn(function()
+    while true do
+        task.wait(3)
+        pcall(function()
+            local descendants = Workspace:GetDescendants()
+            for _, v in ipairs(descendants) do
+                if not isName(v) and not isChar(v) then
+                    local cn = v.ClassName
+                    if cn == "Part" or cn == "MeshPart" or cn == "UnionOperation" or cn == "WedgePart" then
+                        if v.Color ~= SKY_GRAY or v.Material ~= GRAY_MATERIAL then
+                            grayifyPart(v)
+                        end
+                    end
+                end
+            end
+        end)
+    end
+end)
+
+task.spawn(function()
+    while true do
+        task.wait(3)
+        pcall(function()
+            for _, v in ipairs(Workspace:GetDescendants()) do
+                if v:IsA("Decal") or v:IsA("Texture") then
+                    pcall(function() v:Destroy() end)
+                elseif v:IsA("MeshPart") then
+                    pcall(function() v.TextureID = "" end)
+                end
+            end
+        end)
+    end
 end)
 
 local CULL_DIST_SQ = 24 * 24
@@ -495,13 +568,13 @@ end)
 
 task.spawn(function()
     while true do
-        task.wait(2)
+        task.wait(0.3)
         pcall(function()
-            for _, v in ipairs(Workspace:GetDescendants()) do
-                if v:IsA("Decal") or v:IsA("Texture") then
-                    pcall(function() v:Destroy() end)
-                elseif v:IsA("MeshPart") then
-                    pcall(function() v.TextureID = "" end)
+            for _, v in ipairs(Workspace:GetChildren()) do
+                if v:IsA("BasePart") and not isChar(v) then
+                    if v.Transparency > 0 and v.Transparency < 1 then
+                        v.Transparency = 1
+                    end
                 end
             end
         end)
@@ -510,13 +583,16 @@ end)
 
 task.spawn(function()
     while true do
-        task.wait(0.3)
+        task.wait(2)
         pcall(function()
-            for _, v in ipairs(Workspace:GetChildren()) do
-                if v:IsA("BasePart") and not isChar(v) then
-                    if v.Transparency > 0 and v.Transparency < 1 then
-                        v.Transparency = 1
-                    end
+            for _, v in ipairs(Workspace:GetDescendants()) do
+                if v:IsA("Sky") or v:IsA("Atmosphere") or v:IsA("Clouds") then
+                    pcall(function() v:Destroy() end)
+                end
+            end
+            for _, v in ipairs(Lighting:GetChildren()) do
+                if v:IsA("Sky") or v:IsA("Atmosphere") or v:IsA("Clouds") then
+                    pcall(function() v:Destroy() end)
                 end
             end
         end)
@@ -550,7 +626,7 @@ popup.Parent = sg
 Instance.new("UICorner", popup).CornerRadius = UDim.new(0, 8)
 
 local borderStroke = Instance.new("UIStroke")
-borderStroke.Color = Color3.fromRGB(60, 60, 60)
+borderStroke.Color = Color3.fromRGB(80, 30, 30)
 borderStroke.Thickness = 1
 borderStroke.Parent = popup
 
@@ -579,21 +655,37 @@ sub.ZIndex = 1010
 sub.Parent = popup
 
 local barBg = Instance.new("Frame")
-barBg.Size = UDim2.new(1, -30, 0, 4)
+barBg.Size = UDim2.new(1, -30, 0, 5)
 barBg.Position = UDim2.new(0, 15, 0, 60)
-barBg.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+barBg.BackgroundColor3 = Color3.fromRGB(40, 25, 25)
 barBg.BorderSizePixel = 0
 barBg.ZIndex = 1010
 barBg.Parent = popup
 Instance.new("UICorner", barBg).CornerRadius = UDim.new(1, 0)
 
+local barBgStroke = Instance.new("UIStroke")
+barBgStroke.Color = Color3.fromRGB(180, 50, 50)
+barBgStroke.Thickness = 1
+barBgStroke.Transparency = 0.5
+barBgStroke.Parent = barBg
+
 local barFill = Instance.new("Frame")
 barFill.Size = UDim2.new(0, 0, 1, 0)
-barFill.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+barFill.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
 barFill.BorderSizePixel = 0
 barFill.ZIndex = 1011
 barFill.Parent = barBg
 Instance.new("UICorner", barFill).CornerRadius = UDim.new(1, 0)
+
+local barGlow = Instance.new("Frame")
+barGlow.Size = UDim2.new(1, 4, 1, 4)
+barGlow.Position = UDim2.new(0, -2, 0, -2)
+barGlow.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
+barGlow.BackgroundTransparency = 0.6
+barGlow.BorderSizePixel = 0
+barGlow.ZIndex = 1009
+barGlow.Parent = barFill
+Instance.new("UICorner", barGlow).CornerRadius = UDim.new(1, 0)
 
 local statusLabel = Instance.new("TextLabel")
 statusLabel.Size = UDim2.new(1, -100, 0, 14)
@@ -602,7 +694,7 @@ statusLabel.BackgroundTransparency = 1
 statusLabel.Text = "loading..."
 statusLabel.Font = Enum.Font.Gotham
 statusLabel.TextSize = 10
-statusLabel.TextColor3 = Color3.fromRGB(140, 140, 140)
+statusLabel.TextColor3 = Color3.fromRGB(160, 120, 120)
 statusLabel.TextXAlignment = Enum.TextXAlignment.Left
 statusLabel.ZIndex = 1010
 statusLabel.Parent = popup
@@ -614,10 +706,19 @@ percentL.BackgroundTransparency = 1
 percentL.Text = "0%"
 percentL.Font = Enum.Font.GothamMedium
 percentL.TextSize = 10
-percentL.TextColor3 = Color3.fromRGB(200, 200, 200)
+percentL.TextColor3 = Color3.fromRGB(255, 130, 130)
 percentL.TextXAlignment = Enum.TextXAlignment.Right
 percentL.ZIndex = 1010
 percentL.Parent = popup
+
+task.spawn(function()
+    while barBg.Parent do
+        local pulse = math.abs(math.sin(tick() * 3))
+        barBgStroke.Transparency = 0.3 + pulse * 0.4
+        barGlow.BackgroundTransparency = 0.5 + pulse * 0.3
+        task.wait(0.04)
+    end
+end)
 
 local totalTime = 2.5
 task.spawn(function()
@@ -645,6 +746,8 @@ task.delay(3.2, function()
     TweenService:Create(statusLabel, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
     TweenService:Create(barBg, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
     TweenService:Create(barFill, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
+    TweenService:Create(barGlow, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
+    TweenService:Create(barBgStroke, TweenInfo.new(0.5), {Transparency = 1}):Play()
     TweenService:Create(borderStroke, TweenInfo.new(0.5), {Transparency = 1}):Play()
     task.wait(0.6)
     sg:Destroy()
@@ -659,13 +762,13 @@ statsGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 statsGui.Parent = uiParent
 
 local box = Instance.new("Frame")
-box.Size = UDim2.new(0, 150, 0, 92)
-box.Position = UDim2.new(1, -160, 1, -102)
+box.Size = UDim2.new(0, 175, 0, 108)
+box.Position = UDim2.new(1, -185, 1, -118)
 box.AnchorPoint = Vector2.new(1, 0)
 box.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 box.BackgroundTransparency = 0.3
 box.BorderSizePixel = 0
-box.Active = true
+box.Active = false
 box.Parent = statsGui
 Instance.new("UICorner", box).CornerRadius = UDim.new(0, 8)
 
@@ -676,7 +779,7 @@ bxStroke.Transparency = 0.5
 bxStroke.Parent = box
 
 local header = Instance.new("Frame")
-header.Size = UDim2.new(1, 0, 0, 14)
+header.Size = UDim2.new(1, 0, 0, 16)
 header.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
 header.BackgroundTransparency = 0.7
 header.BorderSizePixel = 0
@@ -685,12 +788,12 @@ Instance.new("UICorner", header).CornerRadius = UDim.new(0, 8)
 
 local function mkLabel(t, y)
     local l = Instance.new("TextLabel")
-    l.Size = UDim2.new(0, 40, 0, 16)
-    l.Position = UDim2.new(0, 10, 0, y)
+    l.Size = UDim2.new(0, 45, 0, 18)
+    l.Position = UDim2.new(0, 12, 0, y)
     l.BackgroundTransparency = 1
     l.Text = t
     l.Font = Enum.Font.GothamBold
-    l.TextSize = 10
+    l.TextSize = 11
     l.TextColor3 = Color3.fromRGB(180, 180, 180)
     l.TextXAlignment = Enum.TextXAlignment.Left
     l.Parent = box
@@ -698,24 +801,24 @@ end
 
 local function mkValue(y)
     local v = Instance.new("TextLabel")
-    v.Size = UDim2.new(0, 70, 0, 16)
-    v.Position = UDim2.new(1, -80, 0, y)
+    v.Size = UDim2.new(0, 80, 0, 18)
+    v.Position = UDim2.new(1, -92, 0, y)
     v.BackgroundTransparency = 1
     v.Text = "--"
     v.Font = Enum.Font.GothamBold
-    v.TextSize = 12
+    v.TextSize = 13
     v.TextColor3 = Color3.fromRGB(0, 255, 120)
     v.TextXAlignment = Enum.TextXAlignment.Right
     v.Parent = box
     return v
 end
 
-mkLabel("FPS", 20)
-local fpsV = mkValue(20)
-mkLabel("PING", 38)
-local pingV = mkValue(38)
-mkLabel("TIME", 56)
-local timeV = mkValue(56)
+mkLabel("FPS", 24)
+local fpsV = mkValue(24)
+mkLabel("PING", 44)
+local pingV = mkValue(44)
+mkLabel("TIME", 64)
+local timeV = mkValue(64)
 timeV.TextColor3 = Color3.fromRGB(255, 100, 100)
 timeV.Text = "00:00"
 
@@ -731,336 +834,55 @@ credit.TextTransparency = 0.3
 credit.TextXAlignment = Enum.TextXAlignment.Center
 credit.Parent = box
 
-local cornerSize = 14
-local cornerThick = 2
-local cornerColor = Color3.fromRGB(255, 60, 60)
-
-local brH = Instance.new("Frame")
-brH.Size = UDim2.new(0, cornerSize, 0, cornerThick)
-brH.Position = UDim2.new(1, -(cornerSize + 2), 1, -(cornerThick + 2))
-brH.BackgroundColor3 = cornerColor
-brH.BorderSizePixel = 0
-brH.ZIndex = 30
-brH.Parent = box
-
-local brV = Instance.new("Frame")
-brV.Size = UDim2.new(0, cornerThick, 0, cornerSize)
-brV.Position = UDim2.new(1, -(cornerThick + 2), 1, -(cornerSize + 2))
-brV.BackgroundColor3 = cornerColor
-brV.BorderSizePixel = 0
-brV.ZIndex = 30
-brV.Parent = box
-
-local blH = Instance.new("Frame")
-blH.Size = UDim2.new(0, cornerSize, 0, cornerThick)
-blH.Position = UDim2.new(0, 2, 1, -(cornerThick + 2))
-blH.BackgroundColor3 = cornerColor
-blH.BorderSizePixel = 0
-blH.ZIndex = 30
-blH.Parent = box
-
-local blV = Instance.new("Frame")
-blV.Size = UDim2.new(0, cornerThick, 0, cornerSize)
-blV.Position = UDim2.new(0, 2, 1, -(cornerSize + 2))
-blV.BackgroundColor3 = cornerColor
-blV.BorderSizePixel = 0
-blV.ZIndex = 30
-blV.Parent = box
-
-local trH = Instance.new("Frame")
-trH.Size = UDim2.new(0, cornerSize, 0, cornerThick)
-trH.Position = UDim2.new(1, -(cornerSize + 2), 0, 2)
-trH.BackgroundColor3 = cornerColor
-trH.BorderSizePixel = 0
-trH.ZIndex = 30
-trH.Parent = box
-
-local trV = Instance.new("Frame")
-trV.Size = UDim2.new(0, cornerThick, 0, cornerSize)
-trV.Position = UDim2.new(1, -(cornerThick + 2), 0, 2)
-trV.BackgroundColor3 = cornerColor
-trV.BorderSizePixel = 0
-trV.ZIndex = 30
-trV.Parent = box
-
-local tlH = Instance.new("Frame")
-tlH.Size = UDim2.new(0, cornerSize, 0, cornerThick)
-tlH.Position = UDim2.new(0, 2, 0, 2)
-tlH.BackgroundColor3 = cornerColor
-tlH.BorderSizePixel = 0
-tlH.ZIndex = 30
-tlH.Parent = box
-
-local tlV = Instance.new("Frame")
-tlV.Size = UDim2.new(0, cornerThick, 0, cornerSize)
-tlV.Position = UDim2.new(0, 2, 0, 2)
-tlV.BackgroundColor3 = cornerColor
-tlV.BorderSizePixel = 0
-tlV.ZIndex = 30
-tlV.Parent = box
-
-local edgeLeft = Instance.new("TextButton")
-edgeLeft.Size = UDim2.new(0, 12, 0.7, 0)
-edgeLeft.Position = UDim2.new(0, -4, 0.15, 0)
-edgeLeft.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
-edgeLeft.BackgroundTransparency = 0.7
-edgeLeft.Text = ""
-edgeLeft.BorderSizePixel = 0
-edgeLeft.ZIndex = 25
-edgeLeft.Parent = box
-
-local edgeRight = Instance.new("TextButton")
-edgeRight.Size = UDim2.new(0, 12, 0.7, 0)
-edgeRight.Position = UDim2.new(1, -8, 0.15, 0)
-edgeRight.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
-edgeRight.BackgroundTransparency = 0.7
-edgeRight.Text = ""
-edgeRight.BorderSizePixel = 0
-edgeRight.ZIndex = 25
-edgeRight.Parent = box
-
-local edgeTop = Instance.new("TextButton")
-edgeTop.Size = UDim2.new(0.7, 0, 0, 12)
-edgeTop.Position = UDim2.new(0.15, 0, 0, -4)
-edgeTop.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
-edgeTop.BackgroundTransparency = 0.7
-edgeTop.Text = ""
-edgeTop.BorderSizePixel = 0
-edgeTop.ZIndex = 25
-edgeTop.Parent = box
-
-local edgeBottom = Instance.new("TextButton")
-edgeBottom.Size = UDim2.new(0.7, 0, 0, 12)
-edgeBottom.Position = UDim2.new(0.15, 0, 1, -8)
-edgeBottom.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
-edgeBottom.BackgroundTransparency = 0.7
-edgeBottom.Text = ""
-edgeBottom.BorderSizePixel = 0
-edgeBottom.ZIndex = 25
-edgeBottom.Parent = box
-
-local brHandle = Instance.new("TextButton")
-brHandle.Size = UDim2.new(0, 22, 0, 22)
-brHandle.Position = UDim2.new(1, -22, 1, -22)
-brHandle.BackgroundTransparency = 1
-brHandle.Text = ""
-brHandle.BorderSizePixel = 0
-brHandle.ZIndex = 40
-brHandle.Parent = box
-
-local blHandle = Instance.new("TextButton")
-blHandle.Size = UDim2.new(0, 22, 0, 22)
-blHandle.Position = UDim2.new(0, 0, 1, -22)
-blHandle.BackgroundTransparency = 1
-blHandle.Text = ""
-blHandle.BorderSizePixel = 0
-blHandle.ZIndex = 40
-blHandle.Parent = box
-
-local trHandle = Instance.new("TextButton")
-trHandle.Size = UDim2.new(0, 22, 0, 22)
-trHandle.Position = UDim2.new(1, -22, 0, 0)
-trHandle.BackgroundTransparency = 1
-trHandle.Text = ""
-trHandle.BorderSizePixel = 0
-trHandle.ZIndex = 40
-trHandle.Parent = box
-
-local tlHandle = Instance.new("TextButton")
-tlHandle.Size = UDim2.new(0, 22, 0, 22)
-tlHandle.Position = UDim2.new(0, 0, 0, 0)
-tlHandle.BackgroundTransparency = 1
-tlHandle.Text = ""
-tlHandle.BorderSizePixel = 0
-tlHandle.ZIndex = 40
-tlHandle.Parent = box
-
-local MIN_W = 120
-local MIN_H = 80
-
-local function clampSize(w, h)
-    return math.clamp(w, MIN_W, 600), math.clamp(h, MIN_H, 500)
-end
-
-local resizeMode = nil
-local resizeStartPos = nil
-local resizeStartSize = nil
-local resizeStartBoxPos = nil
-
-local function beginResize(mode, input)
-    resizeMode = mode
-    resizeStartPos = input.Position
-    resizeStartSize = box.AbsoluteSize
-    resizeStartBoxPos = box.AbsolutePosition
-end
-
-local function doResize(input)
-    if not resizeMode then return end
-    local dx = input.Position.X - resizeStartPos.X
-    local dy = input.Position.Y - resizeStartPos.Y
-    local startW = resizeStartSize.X
-    local startH = resizeStartSize.Y
-    local startX = resizeStartBoxPos.X
-    local startY = resizeStartBoxPos.Y
-    
-    local newW, newH = startW, startH
-    local newX, newY = startX, startY
-    
-    if resizeMode == "br" then
-        newW = startW + dx
-        newH = startH + dy
-        newW, newH = clampSize(newW, newH)
-    elseif resizeMode == "bl" then
-        newW = startW - dx
-        newH = startH + dy
-        newW, newH = clampSize(newW, newH)
-        newX = startX + (startW - newW)
-    elseif resizeMode == "tr" then
-        newW = startW + dx
-        newH = startH - dy
-        newW, newH = clampSize(newW, newH)
-        newY = startY + (startH - newH)
-    elseif resizeMode == "tl" then
-        newW = startW - dx
-        newH = startH - dy
-        newW, newH = clampSize(newW, newH)
-        newX = startX + (startW - newW)
-        newY = startY + (startH - newH)
-    elseif resizeMode == "left" then
-        newW = startW - dx
-        newW = clampSize(newW, startH)
-        newX = startX + (startW - newW)
-    elseif resizeMode == "right" then
-        newW = startW + dx
-        newW = clampSize(newW, startH)
-    elseif resizeMode == "top" then
-        newH = startH - dy
-        newH = clampSize(startW, newH)
-        newY = startY + (startH - newH)
-    elseif resizeMode == "bottom" then
-        newH = startH + dy
-        newH = clampSize(startW, newH)
-    end
-    
-    box.Size = UDim2.new(0, newW, 0, newH)
-    box.Position = UDim2.new(0, newX, 0, newY)
-end
-
-local function endResize()
-    resizeMode = nil
-end
-
-brHandle.InputBegan:Connect(function(i)
-    if i.UserInputType == Enum.UserInputType.Touch or i.UserInputType == Enum.UserInputType.MouseButton1 then
-        beginResize("br", i)
-    end
-end)
-
-blHandle.InputBegan:Connect(function(i)
-    if i.UserInputType == Enum.UserInputType.Touch or i.UserInputType == Enum.UserInputType.MouseButton1 then
-        beginResize("bl", i)
-    end
-end)
-
-trHandle.InputBegan:Connect(function(i)
-    if i.UserInputType == Enum.UserInputType.Touch or i.UserInputType == Enum.UserInputType.MouseButton1 then
-        beginResize("tr", i)
-    end
-end)
-
-tlHandle.InputBegan:Connect(function(i)
-    if i.UserInputType == Enum.UserInputType.Touch or i.UserInputType == Enum.UserInputType.MouseButton1 then
-        beginResize("tl", i)
-    end
-end)
-
-edgeLeft.InputBegan:Connect(function(i)
-    if i.UserInputType == Enum.UserInputType.Touch or i.UserInputType == Enum.UserInputType.MouseButton1 then
-        beginResize("left", i)
-    end
-end)
-
-edgeRight.InputBegan:Connect(function(i)
-    if i.UserInputType == Enum.UserInputType.Touch or i.UserInputType == Enum.UserInputType.MouseButton1 then
-        beginResize("right", i)
-    end
-end)
-
-edgeTop.InputBegan:Connect(function(i)
-    if i.UserInputType == Enum.UserInputType.Touch or i.UserInputType == Enum.UserInputType.MouseButton1 then
-        beginResize("top", i)
-    end
-end)
-
-edgeBottom.InputBegan:Connect(function(i)
-    if i.UserInputType == Enum.UserInputType.Touch or i.UserInputType == Enum.UserInputType.MouseButton1 then
-        beginResize("bottom", i)
-    end
-end)
-
-UserInputService.InputChanged:Connect(function(i)
-    if resizeMode then
-        if i.UserInputType == Enum.UserInputType.Touch or i.UserInputType == Enum.UserInputType.MouseMovement then
-            doResize(i)
-        end
-    end
-end)
-
-UserInputService.InputEnded:Connect(function(i)
-    if i.UserInputType == Enum.UserInputType.Touch or i.UserInputType == Enum.UserInputType.MouseButton1 then
-        endResize()
-    end
-end)
-
 local closeB = Instance.new("TextButton")
-closeB.Size = UDim2.new(0, 22, 0, 22)
-closeB.Position = UDim2.new(1, -26, 0, -3)
+closeB.Size = UDim2.new(0, 24, 0, 24)
+closeB.Position = UDim2.new(1, -28, 0, -4)
 closeB.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
 closeB.Text = "x"
 closeB.Font = Enum.Font.GothamBold
-closeB.TextSize = 13
+closeB.TextSize = 14
 closeB.TextColor3 = Color3.new(1, 1, 1)
 closeB.BorderSizePixel = 0
-closeB.ZIndex = 50
+closeB.ZIndex = 10
 closeB.Parent = box
 Instance.new("UICorner", closeB).CornerRadius = UDim.new(1, 0)
 
 local hideB = Instance.new("TextButton")
-hideB.Size = UDim2.new(0, 22, 0, 22)
-hideB.Position = UDim2.new(1, -52, 0, -3)
+hideB.Size = UDim2.new(0, 24, 0, 24)
+hideB.Position = UDim2.new(1, -56, 0, -4)
 hideB.BackgroundColor3 = Color3.fromRGB(255, 150, 50)
 hideB.Text = "-"
 hideB.Font = Enum.Font.GothamBold
-hideB.TextSize = 15
+hideB.TextSize = 16
 hideB.TextColor3 = Color3.new(1, 1, 1)
 hideB.BorderSizePixel = 0
-hideB.ZIndex = 50
+hideB.ZIndex = 10
 hideB.Parent = box
 Instance.new("UICorner", hideB).CornerRadius = UDim.new(1, 0)
 
 local lockB = Instance.new("TextButton")
-lockB.Size = UDim2.new(0, 22, 0, 22)
-lockB.Position = UDim2.new(1, -78, 0, -3)
+lockB.Size = UDim2.new(0, 24, 0, 24)
+lockB.Position = UDim2.new(1, -84, 0, -4)
 lockB.BackgroundColor3 = Color3.fromRGB(80, 80, 90)
 lockB.Text = "🔓"
 lockB.Font = Enum.Font.GothamBold
-lockB.TextSize = 11
+lockB.TextSize = 12
 lockB.TextColor3 = Color3.new(1, 1, 1)
 lockB.BorderSizePixel = 0
-lockB.ZIndex = 50
+lockB.ZIndex = 10
 lockB.Parent = box
 Instance.new("UICorner", lockB).CornerRadius = UDim.new(1, 0)
 
 local opacityB = Instance.new("TextButton")
-opacityB.Size = UDim2.new(0, 22, 0, 22)
-opacityB.Position = UDim2.new(1, -104, 0, -3)
+opacityB.Size = UDim2.new(0, 24, 0, 24)
+opacityB.Position = UDim2.new(1, -112, 0, -4)
 opacityB.BackgroundColor3 = Color3.fromRGB(80, 100, 200)
 opacityB.Text = "◐"
 opacityB.Font = Enum.Font.GothamBold
-opacityB.TextSize = 13
+opacityB.TextSize = 14
 opacityB.TextColor3 = Color3.new(1, 1, 1)
 opacityB.BorderSizePixel = 0
-opacityB.ZIndex = 50
+opacityB.ZIndex = 10
 opacityB.Parent = box
 Instance.new("UICorner", opacityB).CornerRadius = UDim.new(1, 0)
 
@@ -1083,7 +905,7 @@ sliderPanel.Position = UDim2.new(0, 10, 1, -34)
 sliderPanel.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
 sliderPanel.BorderSizePixel = 0
 sliderPanel.Visible = false
-sliderPanel.ZIndex = 60
+sliderPanel.ZIndex = 20
 sliderPanel.Parent = box
 Instance.new("UICorner", sliderPanel).CornerRadius = UDim.new(0, 6)
 
@@ -1092,7 +914,7 @@ sliderBg.Size = UDim2.new(1, -20, 0, 6)
 sliderBg.Position = UDim2.new(0, 10, 0.5, -3)
 sliderBg.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
 sliderBg.BorderSizePixel = 0
-sliderBg.ZIndex = 61
+sliderBg.ZIndex = 21
 sliderBg.Parent = sliderPanel
 Instance.new("UICorner", sliderBg).CornerRadius = UDim.new(1, 0)
 
@@ -1100,7 +922,7 @@ local sliderFill = Instance.new("Frame")
 sliderFill.Size = UDim2.new(0.5, 0, 1, 0)
 sliderFill.BackgroundColor3 = Color3.fromRGB(80, 150, 255)
 sliderFill.BorderSizePixel = 0
-sliderFill.ZIndex = 62
+sliderFill.ZIndex = 22
 sliderFill.Parent = sliderBg
 Instance.new("UICorner", sliderFill).CornerRadius = UDim.new(1, 0)
 
@@ -1110,7 +932,7 @@ sliderKnob.Position = UDim2.new(0.5, -8, 0.5, -8)
 sliderKnob.BackgroundColor3 = Color3.fromRGB(150, 200, 255)
 sliderKnob.Text = ""
 sliderKnob.BorderSizePixel = 0
-sliderKnob.ZIndex = 63
+sliderKnob.ZIndex = 23
 sliderKnob.Parent = sliderBg
 Instance.new("UICorner", sliderKnob).CornerRadius = UDim.new(1, 0)
 
@@ -1210,7 +1032,7 @@ end)
 local dragging = false
 local ds, sp
 
-header.InputBegan:Connect(function(i)
+box.InputBegan:Connect(function(i)
     if locked then return end
     if i.UserInputType == Enum.UserInputType.Touch or i.UserInputType == Enum.UserInputType.MouseButton1 then
         dragging = true
@@ -1272,4 +1094,4 @@ end)
 task.wait(0.1)
 applyOpacity(0.5)
 
-print("fix lag + anti-afk v1.1 by kudo29001 loaded")
+print("fix lag + anti-fok v1.1 by kudo29001 loaded")

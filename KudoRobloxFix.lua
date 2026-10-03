@@ -20,8 +20,8 @@ pcall(function()
 end)
 
 local function destroyOldUI()
-    local namesToKill = {"kudo", "fixlag", "mailbox", "sender", "kudostats", "kudotoggle", "kudopopup", "kudoloader", "smvll", "overhaul"}
-    local structMarkers = {"BorderHolder", "Runner", "RunnerDot", "KudoLoaderV2", "KudoBackdrop"}
+    local namesToKill = {"kudo", "fixlag", "mailbox", "sender", "kudostats", "kudotoggle", "kudopopup", "kudoloader", "smvll", "overhaul", "legacy"}
+    local structMarkers = {"BorderHolder", "Runner", "RunnerDot", "KudoLoaderV2", "KudoBackdrop", "LegacyLoader"}
     for _, container in ipairs({PlayerGui, CoreGui}) do
         pcall(function()
             for _, v in ipairs(container:GetChildren()) do
@@ -348,16 +348,11 @@ local fflagTable = {
     ["FFlagGraphicsAutoQualityOverride"] = "True",
     ["DFIntGraphicsQualityOverride"] = "1",
     ["FIntGraphicsQualityOverride"] = "1",
-    ["DFFlagDisableD3D11"] = "False",
     ["FFlagDisableD3D11ShaderCache"] = "True",
     ["FFlagUseDefaultGPUCap"] = "False",
-    ["FFlagDebugGraphicsDisableDirect3D11"] = "False",
     ["FFlagDebugGraphicsDisableOpenGL"] = "True",
     ["FFlagDebugGraphicsDisableMetal"] = "True",
     ["FFlagDebugGraphicsDisableVulkan"] = "True",
-    ["FFlagDebugGraphicsPreferOpenGL"] = "False",
-    ["FFlagDebugGraphicsPreferVulkan"] = "False",
-    ["FFlagDebugGraphicsPreferMetal"] = "False",
 
     ["DFIntMaxParticleCount"] = "0",
     ["DFIntMinParticleCount"] = "0",
@@ -375,8 +370,6 @@ local fflagTable = {
     ["FFlagDisableAtmosphereEffects"] = "True",
     ["FFlagDisableSkyGradient"] = "True",
     ["FFlagDisableSunMoon"] = "True",
-    ["FFlagDisableStars"] = "True",
-    ["FFlagDisableClouds"] = "True",
     ["FFlagDisableFogEffect"] = "True",
 
     ["FFlagEnableFastCluster"] = "True",
@@ -396,20 +389,31 @@ local fflagTable = {
     ["FFlagDisableTerrainClutter"] = "True",
     ["DFIntTerrainQuality"] = "0",
 
-    ["FFlagDisableHumanoidAnimations"] = "False",
     ["DFIntHumanoidAnimationQuality"] = "1",
     ["FFlagSimplifyHumanoidAnimations"] = "True",
     ["DFIntHumanoidAnimationRate"] = "15",
 
-    ["FFlagDisableGUIRendering"] = "False",
     ["DFIntGUIRenderQuality"] = "0",
     ["FFlagCacheGUIRendering"] = "True",
     ["FFlagGUIRenderOptimization"] = "True",
+    ["FFlagOptimizeGUIRendering2"] = "True",
+    ["FFlagReduceGUIRedraw"] = "True",
+    ["DFIntGUIRedrawRate"] = "30",
+    ["FFlagDisableGUIShadows"] = "True",
+    ["FFlagDisableGUIGradients"] = "True",
 
     ["DFIntMemoryPressureReduction"] = "100",
     ["FFlagAggressiveMemoryCleanup"] = "True",
     ["FFlagEnableMemoryDefrag"] = "True",
     ["DFIntMemoryCleanupInterval"] = "10",
+    ["FFlagGCBatchEnabled"] = "True",
+    ["DFIntGCBatchSize"] = "1000",
+    ["FFlagGCParallel"] = "True",
+    ["DFIntGCInterval"] = "30",
+    ["FFlagReduceAllocationRate"] = "True",
+    ["FFlagOptimizeStringAllocations"] = "True",
+    ["FFlagOptimizeTableAllocations"] = "True",
+    ["FFlagUseObjectPooling"] = "True",
 
     ["DFIntNetworkIncomingBufferSize"] = "1048576",
     ["DFIntNetworkOutgoingBufferSize"] = "1048576",
@@ -433,6 +437,10 @@ local fflagTable = {
     ["FFlagTextureStreaming"] = "False",
     ["DFIntTextureStreamingBudget"] = "0",
     ["FFlagPreloadTextures"] = "False",
+    ["FFlagAsyncTextureLoading"] = "True",
+    ["FFlagAsyncMeshLoading"] = "True",
+    ["DFIntAsyncLoadThreads"] = "4",
+    ["FFlagBackgroundLoading"] = "True",
 
     ["FFlagDisableVoxelLighting"] = "True",
     ["FFlagDisableFutureLighting"] = "True",
@@ -455,17 +463,6 @@ local fflagTable = {
     ["FFlagDisableSoundReverb"] = "True",
     ["FFlagDisableSoundEcho"] = "True",
     ["FFlagDisableSoundReverbEffect"] = "True",
-
-    ["FFlagOptimizeGUIRendering2"] = "True",
-    ["FFlagReduceGUIRedraw"] = "True",
-    ["DFIntGUIRedrawRate"] = "30",
-    ["FFlagDisableGUIShadows"] = "True",
-    ["FFlagDisableGUIGradients"] = "True",
-
-    ["FFlagAsyncTextureLoading"] = "True",
-    ["FFlagAsyncMeshLoading"] = "True",
-    ["DFIntAsyncLoadThreads"] = "4",
-    ["FFlagBackgroundLoading"] = "True",
 
     ["FFlagReduceCameraUpdateRate"] = "True",
     ["DFIntCameraUpdateRate"] = "30",
@@ -490,16 +487,6 @@ local fflagTable = {
     ["FFlagOptimizeWait"] = "True",
     ["DFIntSchedulerMaxFps"] = "9999",
     ["FFlagHighPrecisionScheduler"] = "False",
-
-    ["FFlagGCBatchEnabled"] = "True",
-    ["DFIntGCBatchSize"] = "1000",
-    ["FFlagGCParallel"] = "True",
-    ["DFIntGCInterval"] = "30",
-
-    ["FFlagReduceAllocationRate"] = "True",
-    ["FFlagOptimizeStringAllocations"] = "True",
-    ["FFlagOptimizeTableAllocations"] = "True",
-    ["FFlagUseObjectPooling"] = "True",
 }
 
 local formatFlag = function(z)
@@ -840,7 +827,7 @@ task.spawn(function()
 end)
 
 local notifGui = Instance.new("ScreenGui")
-notifGui.Name = "KudoNotif_" .. HttpService:GenerateGUID(false):sub(1, 8)
+notifGui.Name = "LegacyNotif_" .. HttpService:GenerateGUID(false):sub(1, 8)
 notifGui.ResetOnSpawn = false
 notifGui.DisplayOrder = 2147483647
 notifGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
@@ -957,7 +944,7 @@ local function showNotif(titleText, messageText, duration)
 end
 
 local sg = Instance.new("ScreenGui")
-sg.Name = "KudoLoaderV2"
+sg.Name = "LegacyLoader"
 sg.ResetOnSpawn = false
 sg.IgnoreGuiInset = true
 sg.DisplayOrder = 2147483647
@@ -965,66 +952,85 @@ sg.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 sg.Parent = uiParent
 
 local backdrop = Instance.new("Frame")
-backdrop.Name = "KudoBackdrop"
+backdrop.Name = "LegacyBackdrop"
 backdrop.Size = UDim2.new(1, 0, 1, 0)
 backdrop.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-backdrop.BackgroundTransparency = 0.5
+backdrop.BackgroundTransparency = 1
 backdrop.BorderSizePixel = 0
 backdrop.ZIndex = 999
 backdrop.Parent = sg
 
+TweenService:Create(backdrop, TweenInfo.new(0.5), {BackgroundTransparency = 0.5}):Play()
+
 local popup = Instance.new("Frame")
-popup.Size = UDim2.new(0, 320, 0, 90)
-popup.Position = UDim2.new(0.5, -160, 0.5, -45)
+popup.Size = UDim2.new(0, 320, 0, 100)
+popup.Position = UDim2.new(0.5, -160, 0.5, -50)
 popup.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
+popup.BackgroundTransparency = 1
 popup.BorderSizePixel = 0
 popup.ZIndex = 1000
 popup.Parent = sg
 Instance.new("UICorner", popup).CornerRadius = UDim.new(0, 8)
 
+local popupScale = Instance.new("UIScale")
+popupScale.Scale = 0.6
+popupScale.Parent = popup
+
+TweenService:Create(popup, TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {BackgroundTransparency = 0}):Play()
+TweenService:Create(popupScale, TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Scale = 1}):Play()
+
 local borderStroke = Instance.new("UIStroke")
 borderStroke.Color = Color3.fromRGB(80, 30, 30)
 borderStroke.Thickness = 1
+borderStroke.Transparency = 1
 borderStroke.Parent = popup
+TweenService:Create(borderStroke, TweenInfo.new(0.6), {Transparency = 0}):Play()
 
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, -30, 0, 20)
+title.Size = UDim2.new(1, -30, 0, 22)
 title.Position = UDim2.new(0, 15, 0, 14)
 title.BackgroundTransparency = 1
-title.Text = "fix lag + anti-afk"
-title.Font = Enum.Font.GothamMedium
-title.TextSize = 15
+title.Text = "Legacy optimizer"
+title.Font = Enum.Font.GothamBold
+title.TextSize = 17
 title.TextColor3 = Color3.fromRGB(240, 240, 240)
 title.TextXAlignment = Enum.TextXAlignment.Left
+title.TextTransparency = 1
 title.ZIndex = 1010
 title.Parent = popup
+TweenService:Create(title, TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 0}):Play()
 
 local sub = Instance.new("TextLabel")
 sub.Size = UDim2.new(1, -30, 0, 14)
-sub.Position = UDim2.new(0, 15, 0, 34)
+sub.Position = UDim2.new(0, 15, 0, 38)
 sub.BackgroundTransparency = 1
-sub.Text = "made by @kudo29001.      v1.1"
+sub.Text = "by @realz29001 on tiktok     v1.2.0"
 sub.Font = Enum.Font.Gotham
-sub.TextSize = 10
-sub.TextColor3 = Color3.fromRGB(140, 140, 140)
+sub.TextSize = 11
+sub.TextColor3 = Color3.fromRGB(150, 150, 150)
 sub.TextXAlignment = Enum.TextXAlignment.Left
+sub.TextTransparency = 1
 sub.ZIndex = 1010
 sub.Parent = popup
+TweenService:Create(sub, TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 0}):Play()
 
 local barBg = Instance.new("Frame")
 barBg.Size = UDim2.new(1, -30, 0, 5)
-barBg.Position = UDim2.new(0, 15, 0, 60)
+barBg.Position = UDim2.new(0, 15, 0, 68)
 barBg.BackgroundColor3 = Color3.fromRGB(40, 25, 25)
+barBg.BackgroundTransparency = 1
 barBg.BorderSizePixel = 0
 barBg.ZIndex = 1010
 barBg.Parent = popup
 Instance.new("UICorner", barBg).CornerRadius = UDim.new(1, 0)
+TweenService:Create(barBg, TweenInfo.new(0.6), {BackgroundTransparency = 0}):Play()
 
 local barBgStroke = Instance.new("UIStroke")
 barBgStroke.Color = Color3.fromRGB(180, 50, 50)
 barBgStroke.Thickness = 1
-barBgStroke.Transparency = 0.5
+barBgStroke.Transparency = 1
 barBgStroke.Parent = barBg
+TweenService:Create(barBgStroke, TweenInfo.new(0.6), {Transparency = 0.5}):Play()
 
 local barFill = Instance.new("Frame")
 barFill.Size = UDim2.new(0, 0, 1, 0)
@@ -1046,27 +1052,31 @@ Instance.new("UICorner", barGlow).CornerRadius = UDim.new(1, 0)
 
 local statusLabel = Instance.new("TextLabel")
 statusLabel.Size = UDim2.new(1, -100, 0, 14)
-statusLabel.Position = UDim2.new(0, 15, 0, 70)
+statusLabel.Position = UDim2.new(0, 15, 0, 80)
 statusLabel.BackgroundTransparency = 1
 statusLabel.Text = "optimizing..."
 statusLabel.Font = Enum.Font.Gotham
 statusLabel.TextSize = 10
 statusLabel.TextColor3 = Color3.fromRGB(160, 120, 120)
 statusLabel.TextXAlignment = Enum.TextXAlignment.Left
+statusLabel.TextTransparency = 1
 statusLabel.ZIndex = 1010
 statusLabel.Parent = popup
+TweenService:Create(statusLabel, TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 0}):Play()
 
 local percentL = Instance.new("TextLabel")
 percentL.Size = UDim2.new(0, 60, 0, 14)
-percentL.Position = UDim2.new(1, -75, 0, 70)
+percentL.Position = UDim2.new(1, -75, 0, 80)
 percentL.BackgroundTransparency = 1
 percentL.Text = "0%"
 percentL.Font = Enum.Font.GothamMedium
 percentL.TextSize = 10
 percentL.TextColor3 = Color3.fromRGB(255, 130, 130)
 percentL.TextXAlignment = Enum.TextXAlignment.Right
+percentL.TextTransparency = 1
 percentL.ZIndex = 1010
 percentL.Parent = popup
+TweenService:Create(percentL, TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 0}):Play()
 
 task.spawn(function()
     while barBg.Parent do
@@ -1077,56 +1087,73 @@ task.spawn(function()
     end
 end)
 
+local barDone = false
 task.spawn(function()
-    local startT = tick()
     local currentP = 0
-    while true do
+    local minDuration = 4.5
+    local startT = tick()
+
+    while not barDone do
+        local elapsed = tick() - startT
+
         if scanFinished then
-            currentP = currentP + (100 - currentP) * 0.15
-            if currentP > 99.5 then
-                currentP = 100
-            end
+            local progress = math.min(elapsed / minDuration, 1)
+            currentP = progress * 100
         else
-            local elapsed = tick() - startT
-            local target = math.min(elapsed / 1.5 * 95, 95)
-            currentP = currentP + (target - currentP) * 0.08
+            local progress = math.min(elapsed / minDuration, 0.95)
+            currentP = progress * 100
         end
+
         barFill.Size = UDim2.new(currentP / 100, 0, 1, 0)
         percentL.Text = math.floor(currentP) .. "%"
+
         if currentP >= 100 then
-            statusLabel.Text = "done"
-            statusLabel.TextColor3 = Color3.fromRGB(120, 220, 140)
-            barFill.BackgroundColor3 = Color3.fromRGB(120, 220, 140)
-            barGlow.BackgroundColor3 = Color3.fromRGB(120, 220, 140)
-            barBgStroke.Color = Color3.fromRGB(120, 220, 140)
-            break
+            barDone = true
         end
         task.wait(0.03)
     end
+
+    percentL.Text = "100%"
+    statusLabel.Text = "done"
+    statusLabel.TextColor3 = Color3.fromRGB(120, 220, 140)
+    barFill.BackgroundColor3 = Color3.fromRGB(120, 220, 140)
+    barGlow.BackgroundColor3 = Color3.fromRGB(120, 220, 140)
+    barBgStroke.Color = Color3.fromRGB(120, 220, 140)
 end)
 
 task.spawn(function()
-    while not scanFinished do
+    while not barDone do
         task.wait(0.1)
     end
-    task.wait(1.2)
-    TweenService:Create(backdrop, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
-    TweenService:Create(popup, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
-    TweenService:Create(title, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
-    TweenService:Create(sub, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
-    TweenService:Create(percentL, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
-    TweenService:Create(statusLabel, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
-    TweenService:Create(barBg, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
-    TweenService:Create(barFill, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
-    TweenService:Create(barGlow, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
-    TweenService:Create(barBgStroke, TweenInfo.new(0.5), {Transparency = 1}):Play()
-    TweenService:Create(borderStroke, TweenInfo.new(0.5), {Transparency = 1}):Play()
-    task.wait(0.6)
+    task.wait(1.5)
+
+    local fadeItems = {
+        {obj = backdrop, prop = "BackgroundTransparency", target = 1},
+        {obj = popup, prop = "BackgroundTransparency", target = 1},
+        {obj = title, prop = "TextTransparency", target = 1},
+        {obj = sub, prop = "TextTransparency", target = 1},
+        {obj = percentL, prop = "TextTransparency", target = 1},
+        {obj = statusLabel, prop = "TextTransparency", target = 1},
+        {obj = barBg, prop = "BackgroundTransparency", target = 1},
+        {obj = barFill, prop = "BackgroundTransparency", target = 1},
+        {obj = barGlow, prop = "BackgroundTransparency", target = 1},
+    }
+
+    for _, item in ipairs(fadeItems) do
+        TweenService:Create(item.obj, TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {[item.prop] = item.target}):Play()
+    end
+    TweenService:Create(barBgStroke, TweenInfo.new(0.8), {Transparency = 1}):Play()
+    TweenService:Create(borderStroke, TweenInfo.new(0.8), {Transparency = 1}):Play()
+
+    local scaleTween = TweenService:Create(popupScale, TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Scale = 0.85})
+    scaleTween:Play()
+    scaleTween.Completed:Wait()
+    task.wait(0.3)
     sg:Destroy()
 end)
 
 local statsGui = Instance.new("ScreenGui")
-statsGui.Name = "KudoStats"
+statsGui.Name = "LegacyStats"
 statsGui.ResetOnSpawn = false
 statsGui.IgnoreGuiInset = true
 statsGui.DisplayOrder = 2147483647
@@ -1198,7 +1225,7 @@ local credit = Instance.new("TextLabel")
 credit.Size = UDim2.new(1, -10, 0, 12)
 credit.Position = UDim2.new(0, 5, 1, -14)
 credit.BackgroundTransparency = 1
-credit.Text = "@script by kudo29001"
+credit.Text = "@realz29001 on tiktok"
 credit.Font = Enum.Font.GothamBold
 credit.TextSize = 10
 credit.TextColor3 = Color3.fromRGB(255, 100, 100)
@@ -1367,7 +1394,7 @@ opacityB.MouseButton1Click:Connect(function()
 end)
 
 local showSg = Instance.new("ScreenGui")
-showSg.Name = "KudoToggle"
+showSg.Name = "LegacyToggle"
 showSg.ResetOnSpawn = false
 showSg.IgnoreGuiInset = true
 showSg.DisplayOrder = 2147483647
@@ -1468,4 +1495,4 @@ applyOpacity(0.5)
 
 showNotif("Script successfully loaded!", "FFlags applied. Optimization active.", 6)
 
-print("fix lag + anti-afk v1.1 by kudo29001 loaded")
+print("Legacy optimizer v1.2.0 by @realz29001 loaded")

@@ -161,6 +161,55 @@ for k, v in pairs(fflagTable) do
     pcall(setfflag, k, v)
 end
 
+task.wait(1)
+
+local SKY_GRAY = Color3.fromRGB(128, 128, 128)
+
+local function applySky()
+    pcall(function()
+        for _, v in ipairs(Lighting:GetChildren()) do
+            if v:IsA("PostEffect") or v:IsA("Sky") or v:IsA("Atmosphere") or v:IsA("Clouds") then
+                pcall(function() v:Destroy() end)
+            end
+        end
+        local sky = Instance.new("Sky")
+        sky.SkyboxBk = ""
+        sky.SkyboxDn = ""
+        sky.SkyboxFt = ""
+        sky.SkyboxLf = ""
+        sky.SkyboxRt = ""
+        sky.SkyboxUp = ""
+        sky.SunTextureId = ""
+        sky.MoonTextureId = ""
+        sky.StarCount = 0
+        sky.CelestialBodiesShown = false
+        sky.Parent = Lighting
+        Lighting.GlobalShadows = false
+        Lighting.Brightness = 1.6
+        Lighting.ClockTime = 14
+        Lighting.Ambient = SKY_GRAY
+        Lighting.OutdoorAmbient = SKY_GRAY
+        Lighting.EnvironmentDiffuseScale = 0
+        Lighting.EnvironmentSpecularScale = 0
+        Lighting.ExposureCompensation = 0
+        Lighting.ShadowSoftness = 0
+        Lighting.FogColor = SKY_GRAY
+        Lighting.FogStart = 0
+        Lighting.FogEnd = 5000
+        Lighting.ColorShift_Top = SKY_GRAY
+        Lighting.ColorShift_Bottom = SKY_GRAY
+    end)
+end
+
+applySky()
+
+task.spawn(function()
+    while true do
+        task.wait(3)
+        applySky()
+    end
+end)
+
 pcall(function()
     if Terrain then
         Terrain.WaterWaveSize = 0

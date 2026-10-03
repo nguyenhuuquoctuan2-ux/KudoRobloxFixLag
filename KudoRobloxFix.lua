@@ -1,14 +1,3 @@
---[[
-    KudoRobloxFix v1.1 - Tối ưu giảm lag & ping nâng cao
-    Tác giả: kudo29001
-    Mô tả: Tối ưu FPS, giảm ping, chống AFK, culling thông minh,
-           quản lý bộ nhớ, tối ưu render, physics, network.
-           KHÔNG can thiệp vào âm thanh.
-    Cơ chế: Multi-thread batch optimizer, priority queue, async scanning,
-            aggressive early-boot tuning, self-cleaning UI.
---]]
-
--- ==================== KHỞI TẠO ====================
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
@@ -20,8 +9,6 @@ local Terrain = Workspace:FindFirstChildOfClass("Terrain")
 local Camera = Workspace.CurrentCamera
 local VirtualUser = game:GetService("VirtualUser")
 local CoreGui = game:GetService("CoreGui")
-local CollectionService = game:GetService("CollectionService")
-local Debris = game:GetService("Debris")
 
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
@@ -31,13 +18,10 @@ pcall(function()
     if gethui then uiParent = gethui() end
 end)
 
--- ==================== DỌN UI CŨ TRIỆT ĐỂ ====================
--- Quét mọi container có thể chứa UI cũ, xóa theo tên và theo cấu trúc
 local function destroyOldUI()
     local namesToKill = {"kudo", "fixlag", "mailbox", "sender", "kudostats", "kudotoggle", "kudopopup", "kudoloader"}
     local structMarkers = {"BorderHolder", "Runner", "RunnerDot", "KudoLoaderV2", "KudoBackdrop"}
     local containers = {PlayerGui, CoreGui}
-    
     for _, container in ipairs(containers) do
         pcall(function()
             for _, v in ipairs(container:GetChildren()) do
@@ -59,8 +43,6 @@ local function destroyOldUI()
             end
         end)
     end
-    
-    -- Quét sâu vào PlayerGui con (một số game nhét UI vào folder)
     pcall(function()
         for _, v in ipairs(PlayerGui:GetDescendants()) do
             if v:IsA("ScreenGui") then
@@ -76,13 +58,11 @@ local function destroyOldUI()
     end)
 end
 
--- Chạy dọn 5 lần liên tiếp với delay ngắn để đảm bảo sạch
 for i = 1, 5 do
     destroyOldUI()
     task.wait(0.05)
 end
 
--- Đăng ký dọn UI định kỳ trong 3 giây đầu để tránh script cũ respawn
 local cleanStart = tick()
 task.spawn(function()
     while tick() - cleanStart < 3 do
@@ -91,10 +71,7 @@ task.spawn(function()
     end
 end)
 
--- ==================== EARLY BOOT: FFLAG NGAY LẬP TỨC ====================
--- Chạy song song nhiều batch, ưu tiên các flag ảnh hưởng FPS ngay frame đầu
 local fflagBatches = {
-    -- Batch 1: FPS & VSync (ưu tiên cao nhất)
     {
         {"DFIntTaskSchedulerTargetFps", "9999"},
         {"DFIntFrameRateCap", "9999"},
@@ -102,7 +79,6 @@ local fflagBatches = {
         {"FFlagDisableVSync", "True"},
         {"DFIntDebugFRMQualityLevelOverride", "1"},
     },
-    -- Batch 2: Texture
     {
         {"DFIntTextureQualityOverride", "0"},
         {"DFFlagTextureQualityOverrideEnabled", "True"},
@@ -111,7 +87,6 @@ local fflagBatches = {
         {"FFlagDisableSurfaceAppearance", "True"},
         {"FFlagDisableDecals", "True"},
     },
-    -- Batch 3: PostFX
     {
         {"DFFlagDisableSSAO", "True"},
         {"FFlagDisableSSAO", "True"},
@@ -125,7 +100,6 @@ local fflagBatches = {
         {"FFlagDisableToneMapping", "True"},
         {"FFlagDisableMultiSample", "True"},
     },
-    -- Batch 4: Shadow & Env
     {
         {"FFlagRenderShadowIntensity", "0"},
         {"FFlagRenderShadowIntensityOverride", "True"},
@@ -137,14 +111,12 @@ local fflagBatches = {
         {"FFlagDisableTerrainDecoration", "True"},
         {"FIntFRMMaxGrassDistance", "0"},
     },
-    -- Batch 5: LOD
     {
         {"DFIntCSGLevelOfDetailSwitchingDistance", "0"},
         {"FFlagDisableLODTransitions", "True"},
         {"FFlagForceLOD0", "True"},
         {"DFIntLODBias", "8"},
     },
-    -- Batch 6: Physics
     {
         {"DFFlagDebugRenderForceTechnologyVoxel", "True"},
         {"FFlagDebugPauseVoxelizer", "True"},
@@ -154,7 +126,6 @@ local fflagBatches = {
         {"DFIntMaximumCollisionIterations", "1"},
         {"DFIntSolverConvergenceIterations", "1"},
     },
-    -- Batch 7: Render pipeline
     {
         {"DFIntFrameBufferPoolSize", "1"},
         {"DFIntDebugEngineOptimizationLevel", "3"},
@@ -163,7 +134,6 @@ local fflagBatches = {
         {"DFIntNumberOfRenderPasses", "1"},
         {"DFIntMaxConcurrentRenderPasses", "1"},
     },
-    -- Batch 8: Network
     {
         {"DFIntMaxDataPacketsPerFrame", "1"},
         {"DFIntMaxDataPacketsPerSecond", "60"},
@@ -172,7 +142,6 @@ local fflagBatches = {
         {"FFlagOptimizeNetworkSend", "True"},
         {"DFIntNetworkClusterPacketCache", "1"},
     },
-    -- Batch 9: Bổ sung tối ưu mới
     {
         {"FFlagDisableTerrain", "True"},
         {"FFlagDisableWater", "True"},
@@ -187,7 +156,6 @@ local fflagBatches = {
     },
 }
 
--- Thực thi song song tất cả batch bằng coroutine riêng
 for _, batch in ipairs(fflagBatches) do
     task.spawn(function()
         for _, pair in ipairs(batch) do
@@ -196,10 +164,8 @@ for _, batch in ipairs(fflagBatches) do
     end)
 end
 
--- Chờ ngắn để flag được apply
 task.wait(0.1)
 
--- ==================== RENDERING & WORKSPACE NGAY LẬP TỨC ====================
 pcall(function()
     settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
     settings().Rendering.MeshPartDetailLevel = Enum.MeshPartDetailLevel.Level01
@@ -209,11 +175,11 @@ end)
 
 pcall(function()
     if Camera then
-        Camera.FieldOfView = 70
+        Camera.FieldOfView = 75
     end
     Workspace.StreamingEnabled = true
-    Workspace.StreamingTargetRadius = 56
-    Workspace.StreamingMinRadius = 28
+    Workspace.StreamingTargetRadius = 48
+    Workspace.StreamingMinRadius = 24
 end)
 
 pcall(function()
@@ -222,19 +188,33 @@ pcall(function()
             v:Destroy()
         end
     end
+    local sky = Instance.new("Sky")
+    sky.SkyboxBk = ""
+    sky.SkyboxDn = ""
+    sky.SkyboxFt = ""
+    sky.SkyboxLf = ""
+    sky.SkyboxRt = ""
+    sky.SkyboxUp = ""
+    sky.SunTextureId = ""
+    sky.MoonTextureId = ""
+    sky.StarCount = 0
+    sky.CelestialBodiesShown = false
+    sky.Parent = Lighting
     Lighting.GlobalShadows = false
-    Lighting.FogEnd = 100000
-    Lighting.FogStart = 100000
-    Lighting.Brightness = 0.8
-    Lighting.ClockTime = 13
-    Lighting.Ambient = Color3.fromRGB(70, 70, 70)
-    Lighting.OutdoorAmbient = Color3.fromRGB(90, 90, 90)
-    Lighting.EnvironmentDiffuseScale = 0
+    Lighting.Brightness = 2.5
+    Lighting.ClockTime = 14
+    Lighting.GeographicLatitude = 0
+    Lighting.Ambient = Color3.fromRGB(150, 150, 150)
+    Lighting.OutdoorAmbient = Color3.fromRGB(160, 160, 160)
+    Lighting.EnvironmentDiffuseScale = 0.5
     Lighting.EnvironmentSpecularScale = 0
-    Lighting.ExposureCompensation = -0.3
+    Lighting.ExposureCompensation = 0.5
     Lighting.ShadowSoftness = 0
-    Lighting.FogColor = Color3.fromRGB(120, 120, 130)
-    Lighting.FogEnd = 2500
+    Lighting.FogColor = Color3.fromRGB(128, 128, 128)
+    Lighting.FogStart = 0
+    Lighting.FogEnd = 10000
+    Lighting.ColorShift_Top = Color3.fromRGB(128, 128, 128)
+    Lighting.ColorShift_Bottom = Color3.fromRGB(128, 128, 128)
 end)
 
 pcall(function()
@@ -242,13 +222,12 @@ pcall(function()
         Terrain.WaterWaveSize = 0
         Terrain.WaterWaveSpeed = 0
         Terrain.WaterReflectance = 0
-        Terrain.WaterTransparency = 0
-        Terrain.WaterColor = Color3.fromRGB(60, 120, 200)
+        Terrain.WaterTransparency = 0.3
+        Terrain.WaterColor = Color3.fromRGB(0, 100, 200)
         Terrain.Decoration = false
     end
 end)
 
--- ==================== CHỐNG AFK ====================
 task.spawn(function()
     while true do
         task.wait(120)
@@ -268,7 +247,6 @@ pcall(function()
     end)
 end)
 
--- ==================== CACHE NHÂN VẬT ====================
 local charModels = {}
 local function watchChar(plr)
     if plr.Character then charModels[plr.Character] = true end
@@ -294,7 +272,6 @@ local function isName(v)
     return v:IsA("BillboardGui") or v:IsA("TextLabel") or v:IsA("TextButton") or v:IsA("Humanoid")
 end
 
--- ==================== LOẠI BỎ VẬT THỂ GÂY LAG (KHÔNG SOUND) ====================
 local killTypes = {
     ParticleEmitter = true, Trail = true, Smoke = true, Fire = true,
     Sparkles = true, Beam = true, Highlight = true, SelectionBox = true,
@@ -308,6 +285,12 @@ local killTypes = {
     ColorCorrectionEffect = true, SunRaysEffect = true,
 }
 
+local flatMaterials = {
+    Enum.Material.SmoothPlastic,
+    Enum.Material.SmoothPlastic,
+    Enum.Material.SmoothPlastic,
+}
+
 local function handleObject(v)
     if isName(v) or isChar(v) then return end
     local cn = v.ClassName
@@ -318,21 +301,30 @@ local function handleObject(v)
             v.Material = Enum.Material.SmoothPlastic
             v.Reflectance = 0
             v.CastShadow = false
+            v.Transparency = 0
             if v:IsA("MeshPart") then
                 v.RenderFidelity = Enum.RenderFidelity.Performance
+                v.TextureID = ""
+                v.MeshId = v.MeshId
             end
         end)
     elseif cn == "Model" then
         pcall(function()
             v.LevelOfDetail = Enum.ModelLevelOfDetail.StreamingMesh
         end)
+    elseif cn == "Water" then
+        pcall(function()
+            v.WaterColor = Color3.fromRGB(0, 100, 200)
+            v.WaterTransparency = 0.3
+            v.WaterReflectance = 0
+            v.WaterWaveSize = 0
+            v.WaterWaveSpeed = 0
+        end)
     end
 end
 
--- ==================== BATCH SCANNER SIÊU NHANH ====================
--- Chia workspace thành nhiều batch, chạy song song, ưu tiên part gần camera
-local BATCH_SIZE = 300
-local MAX_CONCURRENT = 8
+local BATCH_SIZE = 500
+local MAX_CONCURRENT = 12
 
 local function processBatch(list)
     for _, v in ipairs(list) do
@@ -344,8 +336,6 @@ local function fastScan()
     local descendants = Workspace:GetDescendants()
     local total = #descendants
     if total == 0 then return end
-    
-    -- Chia thành các batch
     local batches = {}
     local current = {}
     for i = 1, total do
@@ -356,12 +346,9 @@ local function fastScan()
         end
     end
     if #current > 0 then batches[#batches + 1] = current end
-    
-    -- Chạy song song tối đa MAX_CONCURRENT batch
     local running = 0
     local index = 1
     local done = false
-    
     task.spawn(function()
         while not done do
             if running < MAX_CONCURRENT and index <= #batches then
@@ -382,15 +369,13 @@ end
 
 task.spawn(fastScan)
 
--- Xử lý object mới thêm vào ngay lập tức
 Workspace.DescendantAdded:Connect(function(v)
     task.defer(function()
         pcall(function() handleObject(v) end)
     end)
 end)
 
--- ==================== CULLING THÔNG MINH ====================
-local CULL_DIST_SQ = 55 * 55
+local CULL_DIST_SQ = 45 * 45
 local culled = {}
 
 task.spawn(function()
@@ -421,34 +406,32 @@ task.spawn(function()
     end
 end)
 
--- ==================== GIỚI HẠN LIGHT ====================
 pcall(function()
     local count = 0
     for _, v in ipairs(Lighting:GetDescendants()) do
         if v:IsA("PointLight") or v:IsA("SpotLight") or v:IsA("SurfaceLight") then
             count = count + 1
-            if count > 6 then
+            if count > 4 then
                 v.Enabled = false
             end
         end
     end
 end)
 
--- ==================== QUẢN LÝ BỘ NHỚ ====================
 task.spawn(function()
     while true do
-        task.wait(40)
+        task.wait(30)
         pcall(function()
+            collectgarbage("collect")
             collectgarbage("collect")
             collectgarbage("collect")
         end)
     end
 end)
 
--- ==================== TỐI ƯU NETWORK ====================
 task.spawn(function()
     while true do
-        task.wait(3)
+        task.wait(2)
         pcall(function()
             for _, v in ipairs(Workspace:GetDescendants()) do
                 if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam") then
@@ -461,7 +444,6 @@ task.spawn(function()
     end
 end)
 
--- ==================== LOADER UI V2 ====================
 local sg = Instance.new("ScreenGui")
 sg.Name = "KudoLoaderV2"
 sg.ResetOnSpawn = false
@@ -470,421 +452,120 @@ sg.DisplayOrder = 2147483647
 sg.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 sg.Parent = uiParent
 
--- Backdrop với hiệu ứng tối dần
 local backdrop = Instance.new("Frame")
 backdrop.Name = "KudoBackdrop"
 backdrop.Size = UDim2.new(1, 0, 1, 0)
 backdrop.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-backdrop.BackgroundTransparency = 0.3
+backdrop.BackgroundTransparency = 0.5
 backdrop.BorderSizePixel = 0
 backdrop.ZIndex = 999
 backdrop.Parent = sg
-TweenService:Create(backdrop, TweenInfo.new(0.4), {BackgroundTransparency = 0.6}):Play()
 
--- Khung chính
 local popup = Instance.new("Frame")
-popup.Size = UDim2.new(0, 440, 0, 200)
-popup.Position = UDim2.new(0.5, -220, 0.5, -100)
-popup.BackgroundColor3 = Color3.fromRGB(10, 10, 16)
+popup.Size = UDim2.new(0, 400, 0, 120)
+popup.Position = UDim2.new(0.5, -200, 0.5, -60)
+popup.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 popup.BorderSizePixel = 0
 popup.Active = false
 popup.ZIndex = 1000
-popup.ClipsDescendants = true
 popup.Parent = sg
-Instance.new("UICorner", popup).CornerRadius = UDim.new(0, 18)
+Instance.new("UICorner", popup).CornerRadius = UDim.new(0, 10)
 
--- Gradient nền 4 màu
-local gradient = Instance.new("UIGradient")
-gradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(18, 12, 24)),
-    ColorSequenceKeypoint.new(0.35, Color3.fromRGB(24, 10, 18)),
-    ColorSequenceKeypoint.new(0.7, Color3.fromRGB(16, 14, 26)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(22, 8, 20)),
-})
-gradient.Rotation = 135
-gradient.Parent = popup
-
--- Viền phát sáng với hiệu ứng chạy màu
 local borderHolder = Instance.new("Frame")
 borderHolder.Name = "BorderHolder"
-borderHolder.Size = UDim2.new(1, -4, 1, -4)
-borderHolder.Position = UDim2.new(0, 2, 0, 2)
+borderHolder.Size = UDim2.new(1, -2, 1, -2)
+borderHolder.Position = UDim2.new(0, 1, 0, 1)
 borderHolder.BackgroundTransparency = 1
 borderHolder.ZIndex = 1001
-borderHolder.Active = false
 borderHolder.Parent = popup
-Instance.new("UICorner", borderHolder).CornerRadius = UDim.new(0, 17)
+Instance.new("UICorner", borderHolder).CornerRadius = UDim.new(0, 9)
 
 local borderStroke = Instance.new("UIStroke")
 borderStroke.Color = Color3.fromRGB(255, 60, 60)
-borderStroke.Thickness = 1.6
-borderStroke.Transparency = 0
-borderStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+borderStroke.Thickness = 1.5
 borderStroke.Parent = borderHolder
 
--- Hiệu ứng border chạy màu đỏ-cam-hồng
-task.spawn(function()
-    while borderStroke.Parent do
-        local t = tick() * 1.5
-        local r = 200 + math.sin(t) * 55
-        local g = 60 + math.sin(t * 1.3) * 40
-        local b = 80 + math.sin(t * 0.7) * 50
-        borderStroke.Color = Color3.fromRGB(r, g, b)
-        borderStroke.Thickness = 1.4 + math.abs(math.sin(t * 2)) * 0.8
-        borderStroke.Transparency = 0.05 + math.abs(math.sin(t * 1.7)) * 0.15
-        task.wait(0.03)
-    end
-end)
-
--- Icon với vòng xoay kép
-local iconWrap = Instance.new("Frame")
-iconWrap.Size = UDim2.new(0, 70, 0, 70)
-iconWrap.Position = UDim2.new(0, 26, 0, 28)
-iconWrap.BackgroundColor3 = Color3.fromRGB(22, 14, 22)
-iconWrap.BorderSizePixel = 0
-iconWrap.ZIndex = 1010
-iconWrap.Active = false
-iconWrap.Parent = popup
-Instance.new("UICorner", iconWrap).CornerRadius = UDim.new(1, 0)
-
-local iconStroke = Instance.new("UIStroke")
-iconStroke.Color = Color3.fromRGB(120, 60, 70)
-iconStroke.Thickness = 1.8
-iconStroke.Parent = iconWrap
-
--- Vòng ngoài xoay chậm
-local outerRing = Instance.new("Frame")
-outerRing.Size = UDim2.new(0, 54, 0, 54)
-outerRing.Position = UDim2.new(0.5, -27, 0.5, -27)
-outerRing.BackgroundTransparency = 1
-outerRing.ZIndex = 1011
-outerRing.Active = false
-outerRing.Parent = iconWrap
-Instance.new("UICorner", outerRing).CornerRadius = UDim.new(1, 0)
-
-local outerStroke = Instance.new("UIStroke")
-outerStroke.Color = Color3.fromRGB(255, 100, 80)
-outerStroke.Thickness = 2
-outerStroke.Parent = outerRing
-
-local outerMask1 = Instance.new("Frame")
-outerMask1.Size = UDim2.new(0, 30, 0, 30)
-outerMask1.Position = UDim2.new(0, -6, 0, -6)
-outerMask1.BackgroundColor3 = Color3.fromRGB(22, 14, 22)
-outerMask1.BorderSizePixel = 0
-outerMask1.ZIndex = 1012
-outerMask1.Active = false
-outerMask1.Parent = outerRing
-Instance.new("UICorner", outerMask1).CornerRadius = UDim.new(0, 8)
-
-local outerMask2 = Instance.new("Frame")
-outerMask2.Size = UDim2.new(0, 30, 0, 30)
-outerMask2.Position = UDim2.new(1, -24, 1, -24)
-outerMask2.BackgroundColor3 = Color3.fromRGB(22, 14, 22)
-outerMask2.BorderSizePixel = 0
-outerMask2.ZIndex = 1012
-outerMask2.Active = false
-outerMask2.Parent = outerRing
-Instance.new("UICorner", outerMask2).CornerRadius = UDim.new(0, 8)
-
--- Vòng trong xoay ngược
-local innerRing = Instance.new("Frame")
-innerRing.Size = UDim2.new(0, 36, 0, 36)
-innerRing.Position = UDim2.new(0.5, -18, 0.5, -18)
-innerRing.BackgroundTransparency = 1
-innerRing.ZIndex = 1013
-innerRing.Active = false
-innerRing.Parent = iconWrap
-Instance.new("UICorner", innerRing).CornerRadius = UDim.new(1, 0)
-
-local innerStroke = Instance.new("UIStroke")
-innerStroke.Color = Color3.fromRGB(100, 180, 255)
-innerStroke.Thickness = 1.5
-innerStroke.Parent = innerRing
-
-local innerMask1 = Instance.new("Frame")
-innerMask1.Size = UDim2.new(0, 20, 0, 20)
-innerMask1.Position = UDim2.new(0, -4, 0, -4)
-innerMask1.BackgroundColor3 = Color3.fromRGB(22, 14, 22)
-innerMask1.BorderSizePixel = 0
-innerMask1.ZIndex = 1014
-innerMask1.Active = false
-innerMask1.Parent = innerRing
-Instance.new("UICorner", innerMask1).CornerRadius = UDim.new(0, 6)
-
-local innerMask2 = Instance.new("Frame")
-innerMask2.Size = UDim2.new(0, 20, 0, 20)
-innerMask2.Position = UDim2.new(1, -16, 1, -16)
-innerMask2.BackgroundColor3 = Color3.fromRGB(22, 14, 22)
-innerMask2.BorderSizePixel = 0
-innerMask2.ZIndex = 1014
-innerMask2.Active = false
-innerMask2.Parent = innerRing
-Instance.new("UICorner", innerMask2).CornerRadius = UDim.new(0, 6)
-
--- Chấm trung tâm pulse
-local centerDot = Instance.new("Frame")
-centerDot.Size = UDim2.new(0, 10, 0, 10)
-centerDot.Position = UDim2.new(0.5, -5, 0.5, -5)
-centerDot.BackgroundColor3 = Color3.fromRGB(255, 120, 80)
-centerDot.BorderSizePixel = 0
-centerDot.ZIndex = 1015
-centerDot.Parent = iconWrap
-Instance.new("UICorner", centerDot).CornerRadius = UDim.new(1, 0)
-
--- Hoạt ảnh xoay 2 vòng
-task.spawn(function()
-    while outerRing.Parent do
-        outerRing.Rotation = (outerRing.Rotation + 10) % 360
-        innerRing.Rotation = (innerRing.Rotation - 16) % 360
-        task.wait(0.025)
-    end
-end)
-
-task.spawn(function()
-    while centerDot.Parent do
-        local pulse = math.abs(math.sin(tick() * 3))
-        centerDot.Size = UDim2.new(0, 8 + pulse * 6, 0, 8 + pulse * 6)
-        centerDot.Position = UDim2.new(0.5, -(4 + pulse * 3), 0.5, -(4 + pulse * 3))
-        centerDot.BackgroundColor3 = Color3.fromRGB(255, 100 + pulse * 100, 60 + pulse * 60)
-        task.wait(0.03)
-    end
-end)
-
-task.spawn(function()
-    while iconWrap.Parent do
-        local pulse = math.abs(math.sin(tick() * 2.2))
-        iconStroke.Color = Color3.fromRGB(120 + pulse * 100, 60 + pulse * 50, 70 + pulse * 40)
-        iconStroke.Thickness = 1.5 + pulse * 1.3
-        task.wait(0.04)
-    end
-end)
-
--- Tiêu đề
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, -240, 0, 32)
-title.Position = UDim2.new(0, 112, 0, 26)
+title.Size = UDim2.new(1, -40, 0, 24)
+title.Position = UDim2.new(0, 20, 0, 16)
 title.BackgroundTransparency = 1
 title.Text = "fix lag + anti-afk"
-title.Font = Enum.Font.GothamBlack
-title.TextSize = 22
-title.TextColor3 = Color3.fromRGB(255, 100, 100)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 18
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.TextXAlignment = Enum.TextXAlignment.Left
 title.ZIndex = 1010
-title.Active = false
 title.Parent = popup
 
-local titleGradient = Instance.new("UIGradient")
-titleGradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 80, 80)),
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 190, 120)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 80, 80)),
-})
-titleGradient.Parent = title
-
--- Dấu tick với hiệu ứng scale
-local checkMark = Instance.new("TextLabel")
-checkMark.Size = UDim2.new(0, 32, 0, 32)
-checkMark.Position = UDim2.new(1, -44, 0, 26)
-checkMark.BackgroundTransparency = 1
-checkMark.Text = "✓"
-checkMark.Font = Enum.Font.GothamBlack
-checkMark.TextSize = 26
-checkMark.TextColor3 = Color3.fromRGB(80, 255, 130)
-checkMark.ZIndex = 1010
-checkMark.Active = false
-checkMark.Parent = popup
-
-task.spawn(function()
-    while checkMark.Parent do
-        local pulse = 0.85 + math.abs(math.sin(tick() * 2.5)) * 0.3
-        checkMark.TextSize = 26 * pulse
-        task.wait(0.03)
-    end
-end)
-
--- Credit
 local sub = Instance.new("TextLabel")
-sub.Size = UDim2.new(1, -220, 0, 20)
-sub.Position = UDim2.new(0, 112, 0, 58)
+sub.Size = UDim2.new(1, -40, 0, 16)
+sub.Position = UDim2.new(0, 20, 0, 38)
 sub.BackgroundTransparency = 1
 sub.Text = "made by @kudo29001.      v1.1"
-sub.Font = Enum.Font.GothamMedium
-sub.TextSize = 13
-sub.TextColor3 = Color3.fromRGB(180, 180, 190)
+sub.Font = Enum.Font.Gotham
+sub.TextSize = 12
+sub.TextColor3 = Color3.fromRGB(180, 180, 180)
 sub.TextXAlignment = Enum.TextXAlignment.Left
 sub.ZIndex = 1010
-sub.Active = false
 sub.Parent = popup
 
--- Nhãn trạng thái động (thay đổi theo tiến trình)
-local statusLabel = Instance.new("TextLabel")
-statusLabel.Size = UDim2.new(1, -60, 0, 18)
-statusLabel.Position = UDim2.new(0, 30, 0, 96)
-statusLabel.BackgroundTransparency = 1
-statusLabel.Text = "initializing..."
-statusLabel.Font = Enum.Font.GothamBold
-statusLabel.TextSize = 12
-statusLabel.TextColor3 = Color3.fromRGB(150, 220, 255)
-statusLabel.TextXAlignment = Enum.TextXAlignment.Left
-statusLabel.ZIndex = 1010
-statusLabel.Active = false
-statusLabel.Parent = popup
+local barBg = Instance.new("Frame")
+barBg.Size = UDim2.new(1, -40, 0, 6)
+barBg.Position = UDim2.new(0, 20, 0, 72)
+barBg.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+barBg.BorderSizePixel = 0
+barBg.ZIndex = 1010
+barBg.Parent = popup
+Instance.new("UICorner", barBg).CornerRadius = UDim.new(1, 0)
 
--- Phần trăm lớn
+local barFill = Instance.new("Frame")
+barFill.Size = UDim2.new(0, 0, 1, 0)
+barFill.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+barFill.BorderSizePixel = 0
+barFill.ZIndex = 1011
+barFill.Parent = barBg
+Instance.new("UICorner", barFill).CornerRadius = UDim.new(1, 0)
+
 local percentL = Instance.new("TextLabel")
-percentL.Size = UDim2.new(0, 100, 0, 26)
-percentL.Position = UDim2.new(1, -130, 0, 96)
+percentL.Size = UDim2.new(0, 60, 0, 16)
+percentL.Position = UDim2.new(1, -80, 0, 38)
 percentL.BackgroundTransparency = 1
 percentL.Text = "0%"
-percentL.Font = Enum.Font.GothamBlack
-percentL.TextSize = 18
-percentL.TextColor3 = Color3.fromRGB(255, 140, 100)
+percentL.Font = Enum.Font.GothamBold
+percentL.TextSize = 14
+percentL.TextColor3 = Color3.fromRGB(255, 255, 255)
 percentL.TextXAlignment = Enum.TextXAlignment.Right
 percentL.ZIndex = 1010
-percentL.Active = false
 percentL.Parent = popup
 
--- Thanh tiến trình nền
-local pBg = Instance.new("Frame")
-pBg.Size = UDim2.new(1, -60, 0, 12)
-pBg.Position = UDim2.new(0, 30, 0, 138)
-pBg.BackgroundColor3 = Color3.fromRGB(35, 25, 30)
-pBg.BorderSizePixel = 0
-pBg.ZIndex = 1010
-pBg.Active = false
-pBg.Parent = popup
-Instance.new("UICorner", pBg).CornerRadius = UDim.new(1, 0)
-
--- Viền phát sáng cho thanh tiến trình
-local pBgStroke = Instance.new("UIStroke")
-pBgStroke.Color = Color3.fromRGB(255, 80, 80)
-pBgStroke.Thickness = 1
-pBgStroke.Transparency = 0.6
-pBgStroke.Parent = pBg
-
--- Thanh tiến trình fill với gradient 3 màu
-local pFill = Instance.new("Frame")
-pFill.Size = UDim2.new(0, 0, 1, 0)
-pFill.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
-pFill.BorderSizePixel = 0
-pFill.ZIndex = 1011
-pFill.Active = false
-pFill.Parent = pBg
-Instance.new("UICorner", pFill).CornerRadius = UDim.new(1, 0)
-
-local fillGradient = Instance.new("UIGradient")
-fillGradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 60, 60)),
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 170, 80)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(80, 255, 140)),
-})
-fillGradient.Parent = pFill
-
--- Hiệu ứng shine chạy liên tục trên fill
-local shine = Instance.new("Frame")
-shine.Size = UDim2.new(0, 60, 1, 0)
-shine.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-shine.BackgroundTransparency = 0.6
-shine.BorderSizePixel = 0
-shine.ZIndex = 1012
-shine.Parent = pFill
-Instance.new("UICorner", shine).CornerRadius = UDim.new(1, 0)
-
+local totalTime = 3.5
 task.spawn(function()
-    while shine.Parent do
-        shine.Position = UDim2.new(-0.3, 0, 0, 0)
-        TweenService:Create(shine, TweenInfo.new(0.9, Enum.EasingStyle.Linear), {Position = UDim2.new(1.3, 0, 0, 0)}):Play()
-        task.wait(1.0)
+    local startT = tick()
+    while tick() - startT < totalTime do
+        local t = (tick() - startT) / totalTime
+        if t > 1 then t = 1 end
+        local eased = 1 - (1 - t) * (1 - t) * (1 - t)
+        barFill.Size = UDim2.new(eased, 0, 1, 0)
+        percentL.Text = math.floor(eased * 100) .. "%"
+        task.wait(0.016)
     end
+    barFill.Size = UDim2.new(1, 0, 1, 0)
+    percentL.Text = "100%"
 end)
 
--- Hiệu ứng particles bay lên từ thanh tiến trình
-task.spawn(function()
-    while pBg.Parent do
-        task.wait(0.15)
-        pcall(function()
-            local dot = Instance.new("Frame")
-            dot.Size = UDim2.new(0, 4, 0, 4)
-            dot.Position = UDim2.new(math.random(), 0, 0.5, -2)
-            dot.BackgroundColor3 = Color3.fromRGB(255, 120 + math.random(0, 100), 80)
-            dot.BorderSizePixel = 0
-            dot.ZIndex = 1013
-            dot.Parent = pBg
-            Instance.new("UICorner", dot).CornerRadius = UDim.new(1, 0)
-            TweenService:Create(dot, TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                Position = UDim2.new(dot.Position.X.Scale, 0, -2, 0),
-                BackgroundTransparency = 1,
-                Size = UDim2.new(0, 1, 0, 1)
-            }):Play()
-            Debris:AddItem(dot, 0.9)
-        end)
-    end
-end)
-
--- ==================== TIẾN TRÌNH LOADING THỰC TẾ ====================
--- Tiến trình phản ánh công việc thực đang chạy, không phải giả
-local progress = 0
-local progressSteps = {
-    {p = 5,  label = "cleaning old ui..."},
-    {p = 15, label = "applying fflags..."},
-    {p = 25, label = "tuning rendering..."},
-    {p = 35, label = "optimizing lighting..."},
-    {p = 45, label = "scanning workspace..."},
-    {p = 65, label = "removing lag objects..."},
-    {p = 78, label = "starting culling..."},
-    {p = 88, label = "patching network..."},
-    {p = 95, label = "finalizing..."},
-    {p = 100, label = "done ✓"},
-}
-
-task.spawn(function()
-    for _, step in ipairs(progressSteps) do
-        local startP = progress
-        local targetP = step.p
-        statusLabel.Text = step.label
-        -- Animate mượt giữa các bước
-        local steps = 8
-        for i = 1, steps do
-            local t = i / steps
-            local cur = startP + (targetP - startP) * t
-            percentL.Text = math.floor(cur) .. "%"
-            pFill.Size = UDim2.new(cur / 100, 0, 1, 0)
-            task.wait(0.03)
-        end
-        progress = targetP
-        task.wait(0.08)
-    end
-    percentL.Text = "DONE ✓"
-    percentL.TextColor3 = Color3.fromRGB(80, 255, 130)
-    statusLabel.Text = "fix lag + anti-afk v1.1 loaded"
-    statusLabel.TextColor3 = Color3.fromRGB(80, 255, 130)
-    pFill.Size = UDim2.new(1, 0, 1, 0)
-    pBgStroke.Color = Color3.fromRGB(80, 255, 130)
-end)
-
--- Fade out loader
-task.delay(4.8, function()
-    local fadeItems = {
-        popup, title, checkMark, sub, percentL, pBg, pFill,
-        iconWrap, outerStroke, innerStroke, outerMask1, outerMask2,
-        innerMask1, innerMask2, iconStroke, borderStroke, backdrop,
-        shine, centerDot, statusLabel, pBgStroke
-    }
-    for _, item in ipairs(fadeItems) do
-        if item:IsA("TextLabel") then
-            TweenService:Create(item, TweenInfo.new(0.9), {TextTransparency = 1}):Play()
-        elseif item:IsA("Frame") then
-            TweenService:Create(item, TweenInfo.new(0.9), {BackgroundTransparency = 1}):Play()
-        elseif item:IsA("UIStroke") then
-            TweenService:Create(item, TweenInfo.new(0.9), {Transparency = 1}):Play()
-        end
-    end
-    task.wait(1.0)
+task.delay(4.2, function()
+    TweenService:Create(backdrop, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
+    TweenService:Create(popup, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
+    TweenService:Create(title, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
+    TweenService:Create(sub, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
+    TweenService:Create(percentL, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
+    TweenService:Create(barBg, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
+    TweenService:Create(barFill, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
+    TweenService:Create(borderStroke, TweenInfo.new(0.5), {Transparency = 1}):Play()
+    task.wait(0.6)
     sg:Destroy()
 end)
 
--- ==================== UI FPS/PING/TIME ====================
 local statsGui = Instance.new("ScreenGui")
 statsGui.Name = "KudoStats"
 statsGui.ResetOnSpawn = false
@@ -897,27 +578,26 @@ local box = Instance.new("Frame")
 box.Size = UDim2.new(0, 150, 0, 92)
 box.Position = UDim2.new(1, -160, 1, -102)
 box.AnchorPoint = Vector2.new(1, 0)
-box.BackgroundColor3 = Color3.fromRGB(14, 14, 20)
-box.BackgroundTransparency = 0.4
+box.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+box.BackgroundTransparency = 0.3
 box.BorderSizePixel = 0
 box.Active = false
 box.Parent = statsGui
-Instance.new("UICorner", box).CornerRadius = UDim.new(0, 10)
+Instance.new("UICorner", box).CornerRadius = UDim.new(0, 8)
 
 local bxStroke = Instance.new("UIStroke")
 bxStroke.Color = Color3.fromRGB(255, 60, 60)
 bxStroke.Thickness = 1
-bxStroke.Transparency = 0.6
+bxStroke.Transparency = 0.5
 bxStroke.Parent = box
 
 local header = Instance.new("Frame")
-header.Size = UDim2.new(1, 0, 0, 16)
+header.Size = UDim2.new(1, 0, 0, 14)
 header.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
 header.BackgroundTransparency = 0.7
 header.BorderSizePixel = 0
-header.Active = false
 header.Parent = box
-Instance.new("UICorner", header).CornerRadius = UDim.new(0, 10)
+Instance.new("UICorner", header).CornerRadius = UDim.new(0, 8)
 
 local function mkLabel(t, y)
     local l = Instance.new("TextLabel")
@@ -929,7 +609,6 @@ local function mkLabel(t, y)
     l.TextSize = 10
     l.TextColor3 = Color3.fromRGB(180, 180, 180)
     l.TextXAlignment = Enum.TextXAlignment.Left
-    l.Active = false
     l.Parent = box
 end
 
@@ -943,7 +622,6 @@ local function mkValue(y)
     v.TextSize = 12
     v.TextColor3 = Color3.fromRGB(0, 255, 120)
     v.TextXAlignment = Enum.TextXAlignment.Right
-    v.Active = false
     v.Parent = box
     return v
 end
@@ -967,7 +645,6 @@ credit.TextSize = 10
 credit.TextColor3 = Color3.fromRGB(255, 100, 100)
 credit.TextTransparency = 0.3
 credit.TextXAlignment = Enum.TextXAlignment.Center
-credit.Active = false
 credit.Parent = box
 
 local closeB = Instance.new("TextButton")
@@ -1034,7 +711,6 @@ lockB.MouseButton1Click:Connect(function()
     end
 end)
 
--- SLIDER ĐỘ MỜ
 local sliderPanel = Instance.new("Frame")
 sliderPanel.Name = "OpacitySlider"
 sliderPanel.Size = UDim2.new(1, -20, 0, 30)
@@ -1078,7 +754,6 @@ local function applyOpacity(value)
     box.BackgroundTransparency = math.clamp(0.1 + transparency * 0.85, 0, 1)
     header.BackgroundTransparency = math.clamp(0.4 + transparency * 0.5, 0, 1)
     bxStroke.Transparency = math.clamp(0.4 + transparency * 0.55, 0, 1)
-    
     for _, child in ipairs(box:GetDescendants()) do
         local skip = false
         local parent = child.Parent
@@ -1090,7 +765,6 @@ local function applyOpacity(value)
             if parent == box then break end
             parent = parent.Parent
         end
-        
         if not skip then
             if child:IsA("TextLabel") then
                 child.TextTransparency = math.clamp(transparency * 0.9, 0, 1)
@@ -1133,7 +807,6 @@ opacityB.MouseButton1Click:Connect(function()
     sliderPanel.Visible = sliderVisible
 end)
 
--- NÚT HIỆN
 local showSg = Instance.new("ScreenGui")
 showSg.Name = "KudoToggle"
 showSg.ResetOnSpawn = false
@@ -1169,7 +842,6 @@ closeB.MouseButton1Click:Connect(function()
     showSg:Destroy()
 end)
 
--- DRAG
 local dragging = false
 local ds, sp
 
@@ -1195,7 +867,6 @@ UserInputService.InputEnded:Connect(function(i)
     end
 end)
 
--- TIMER
 local st = tick()
 task.spawn(function()
     while statsGui.Parent do
@@ -1205,7 +876,6 @@ task.spawn(function()
     end
 end)
 
--- FPS COUNTER
 local fr = 0
 RunService.RenderStepped:Connect(function()
     fr = fr + 1
@@ -1221,7 +891,6 @@ task.spawn(function()
             fpsV.TextColor3 = Color3.fromRGB(0, 255, 120)
         end
         fr = 0
-        
         local p = 0
         pcall(function()
             p = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
@@ -1238,4 +907,4 @@ end)
 task.wait(0.1)
 applyOpacity(0.5)
 
-print("✅ fix lag + anti-afk v1.1 by kudo29001 loaded")
+print("fix lag + anti-afk v1.1 by kudo29001 loaded")

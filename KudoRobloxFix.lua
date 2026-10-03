@@ -172,6 +172,7 @@ local fflagTable = {
     ["FLogNetwork"] = "7",
 
     ["DFIntTextureQualityOverride"] = "0",
+    ["DFFlagTextureQualityOverrideEnabled"] = "True",
     ["FFlagTextureQualityOverride"] = "True",
     ["FFlagDisableTextures"] = "True",
     ["FFlagDisableSurfaceAppearance"] = "True",
@@ -283,6 +284,16 @@ local fflagTable = {
     ["FFlagDisableStarfieldRendering"] = "True",
     ["FFlagDisableSunRendering"] = "True",
     ["FFlagDisableMoonRendering"] = "True",
+
+    ["FFlagDisableVSync"] = "True",
+    ["DFIntFrameRateCap"] = "9999",
+    ["DFIntMaxFrameRate"] = "9999",
+    ["DFIntDebugFRMQualityLevelOverride"] = "1",
+
+    ["FFlagDisableSunLight"] = "True",
+    ["FFlagDisableSunShadow"] = "True",
+    ["FFlagDisableSunGlow"] = "True",
+    ["FFlagDisableSunFlare"] = "True",
 
     ["DFIntMaxActiveSounds"] = "8",
     ["DFIntMaxSoundChannels"] = "8",

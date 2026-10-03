@@ -9,7 +9,6 @@ local Terrain = Workspace:FindFirstChildOfClass("Terrain")
 local Camera = Workspace.CurrentCamera
 local VirtualUser = game:GetService("VirtualUser")
 local CoreGui = game:GetService("CoreGui")
-local CollectionService = game:GetService("CollectionService")
 
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
@@ -87,6 +86,10 @@ local fflagBatches = {
         {"FFlagDisableTextures", "True"},
         {"FFlagDisableSurfaceAppearance", "True"},
         {"FFlagDisableDecals", "True"},
+        {"FFlagDisableMaterialTextures", "True"},
+        {"FFlagDisableBumpMap", "True"},
+        {"FFlagDisableNormalMap", "True"},
+        {"FFlagDisableSpecularMap", "True"},
     },
     {
         {"DFFlagDisableSSAO", "True"},
@@ -100,6 +103,10 @@ local fflagBatches = {
         {"FFlagDisableHDR", "True"},
         {"FFlagDisableToneMapping", "True"},
         {"FFlagDisableMultiSample", "True"},
+        {"FFlagDisableSunLight", "True"},
+        {"FFlagDisableSunShadow", "True"},
+        {"FFlagDisableSunGlow", "True"},
+        {"FFlagDisableSunFlare", "True"},
     },
     {
         {"FFlagRenderShadowIntensity", "0"},
@@ -111,12 +118,14 @@ local fflagBatches = {
         {"FFlagDisableFog", "True"},
         {"FFlagDisableTerrainDecoration", "True"},
         {"FIntFRMMaxGrassDistance", "0"},
+        {"FFlagDisableGrass", "True"},
     },
     {
         {"DFIntCSGLevelOfDetailSwitchingDistance", "0"},
         {"FFlagDisableLODTransitions", "True"},
         {"FFlagForceLOD0", "True"},
         {"DFIntLODBias", "8"},
+        {"DFIntMeshQualityOverride", "0"},
     },
     {
         {"DFFlagDebugRenderForceTechnologyVoxel", "True"},
@@ -126,6 +135,11 @@ local fflagBatches = {
         {"DFIntPhysicsStepPerFrame", "1"},
         {"DFIntMaximumCollisionIterations", "1"},
         {"DFIntSolverConvergenceIterations", "1"},
+        {"DFIntSolverIterations", "1"},
+        {"FFlagDisableFluidForces", "True"},
+        {"FFlagDisableAeroForces", "True"},
+        {"FFlagSimplifyPhysics", "True"},
+        {"DFIntPhysicsQualityOverride", "0"},
     },
     {
         {"DFIntFrameBufferPoolSize", "1"},
@@ -156,28 +170,10 @@ local fflagBatches = {
         {"DFIntMaxVisibleTrails", "0"},
     },
     {
-        {"FFlagDisableGrass", "True"},
-        {"FFlagDisableMeshes", "False"},
-        {"DFIntMeshQualityOverride", "0"},
-        {"FFlagDisableMeshTextures", "True"},
-        {"FFlagDisableMaterialTextures", "True"},
-        {"FFlagDisableBumpMap", "True"},
-        {"FFlagDisableNormalMap", "True"},
-        {"FFlagDisableSpecularMap", "True"},
-        {"DFIntReflectionQualityOverride", "0"},
         {"FFlagDisableReflections", "True"},
         {"FFlagDisableWaterReflections", "True"},
         {"FFlagDisableGlassReflections", "True"},
-    },
-    {
-        {"DFIntSolverIterations", "1"},
-        {"DFIntMaxSolverIterations", "1"},
-        {"FFlagDisableFluidForces", "True"},
-        {"FFlagDisableAeroForces", "True"},
-        {"DFIntMaxJointCount", "1"},
-        {"FFlagSimplifyPhysics", "True"},
-        {"DFIntPhysicsQualityOverride", "0"},
-        {"DFFlagPhysicsQualityOverrideEnabled", "True"},
+        {"DFIntReflectionQualityOverride", "0"},
     },
     {
         {"DFIntLightingQualityOverride", "0"},
@@ -196,13 +192,22 @@ local fflagBatches = {
         {"FFlagSimplifyAnimations", "True"},
     },
     {
-        {"FFlagDisableAudioEffects", "False"},
-        {"DFIntAudioQualityOverride", "0"},
-    },
-    {
         {"DFIntMaterialQualityOverride", "0"},
         {"FFlagDisableMaterialShaders", "True"},
         {"FFlagForceSimpleMaterial", "True"},
+    },
+    {
+        {"FFlagDisableParticleLighting", "True"},
+        {"FFlagDisableParticleShadows", "True"},
+        {"FFlagDisableParticleReflections", "True"},
+        {"DFIntParticleQualityOverride", "0"},
+    },
+    {
+        {"FFlagDisableClouds", "True"},
+        {"FFlagDisableStars", "True"},
+        {"FFlagDisableMoon", "True"},
+        {"FFlagDisableSun", "True"},
+        {"FFlagDisableCelestialBodies", "True"},
     },
 }
 
@@ -225,11 +230,11 @@ end)
 
 pcall(function()
     if Camera then
-        Camera.FieldOfView = 80
+        Camera.FieldOfView = 85
     end
     Workspace.StreamingEnabled = true
-    Workspace.StreamingTargetRadius = 40
-    Workspace.StreamingMinRadius = 20
+    Workspace.StreamingTargetRadius = 32
+    Workspace.StreamingMinRadius = 16
 end)
 
 local SKY_GRAY = Color3.fromRGB(128, 128, 128)
@@ -240,31 +245,19 @@ pcall(function()
             v:Destroy()
         end
     end
-    local sky = Instance.new("Sky")
-    sky.SkyboxBk = ""
-    sky.SkyboxDn = ""
-    sky.SkyboxFt = ""
-    sky.SkyboxLf = ""
-    sky.SkyboxRt = ""
-    sky.SkyboxUp = ""
-    sky.SunTextureId = ""
-    sky.MoonTextureId = ""
-    sky.StarCount = 0
-    sky.CelestialBodiesShown = false
-    sky.Parent = Lighting
     Lighting.GlobalShadows = false
     Lighting.Brightness = 1.6
     Lighting.ClockTime = 14
     Lighting.GeographicLatitude = 0
-    Lighting.Ambient = Color3.fromRGB(128, 128, 128)
-    Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
+    Lighting.Ambient = SKY_GRAY
+    Lighting.OutdoorAmbient = SKY_GRAY
     Lighting.EnvironmentDiffuseScale = 0
     Lighting.EnvironmentSpecularScale = 0
     Lighting.ExposureCompensation = 0
     Lighting.ShadowSoftness = 0
     Lighting.FogColor = SKY_GRAY
     Lighting.FogStart = 0
-    Lighting.FogEnd = 5000
+    Lighting.FogEnd = 3000
     Lighting.ColorShift_Top = SKY_GRAY
     Lighting.ColorShift_Bottom = SKY_GRAY
 end)
@@ -369,27 +362,23 @@ local function handleObject(v)
     end
 end
 
-local function scanTerrain()
-    pcall(function()
-        if not Terrain then return end
-        flattenWater(Terrain)
-        for _, v in ipairs(Terrain:GetChildren()) do
-            if v:IsA("Water") then
-                flattenWater(v)
-            end
-        end
-    end)
-end
-
 task.spawn(function()
     while true do
         task.wait(0.5)
-        scanTerrain()
+        pcall(function()
+            if not Terrain then return end
+            flattenWater(Terrain)
+            for _, v in ipairs(Terrain:GetChildren()) do
+                if v:IsA("Water") then
+                    flattenWater(v)
+                end
+            end
+        end)
     end
 end)
 
-local BATCH_SIZE = 800
-local MAX_CONCURRENT = 16
+local BATCH_SIZE = 1000
+local MAX_CONCURRENT = 24
 
 local function processBatch(list)
     for _, v in ipairs(list) do
@@ -440,12 +429,12 @@ Workspace.DescendantAdded:Connect(function(v)
     end)
 end)
 
-local CULL_DIST_SQ = 35 * 35
+local CULL_DIST_SQ = 28 * 28
 local culled = {}
 
 task.spawn(function()
     while true do
-        task.wait(0.6)
+        task.wait(0.4)
         pcall(function()
             if not Camera then return end
             local camPos = Camera.CFrame.Position
@@ -471,89 +460,94 @@ task.spawn(function()
     end
 end)
 
-local function reapplyFog()
-    pcall(function()
-        Lighting.FogColor = SKY_GRAY
-        Lighting.FogStart = 0
-        Lighting.FogEnd = 5000
-        Lighting.Ambient = Color3.fromRGB(128, 128, 128)
-        Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
-        Lighting.Brightness = 1.6
-        Lighting.GlobalShadows = false
-        Lighting.EnvironmentDiffuseScale = 0
-        Lighting.EnvironmentSpecularScale = 0
-    end)
-end
+pcall(function()
+    while true do
+        task.wait(2)
+        pcall(function()
+            Lighting.FogColor = SKY_GRAY
+            Lighting.FogStart = 0
+            Lighting.FogEnd = 3000
+            Lighting.Ambient = SKY_GRAY
+            Lighting.OutdoorAmbient = SKY_GRAY
+            Lighting.Brightness = 1.6
+            Lighting.GlobalShadows = false
+            Lighting.EnvironmentDiffuseScale = 0
+            Lighting.EnvironmentSpecularScale = 0
+            Lighting.ExposureCompensation = 0
+            Lighting.ColorShift_Top = SKY_GRAY
+            Lighting.ColorShift_Bottom = SKY_GRAY
+            for _, v in ipairs(Lighting:GetChildren()) do
+                if v:IsA("PostEffect") or v:IsA("Sky") or v:IsA("Atmosphere") or v:IsA("Clouds") then
+                    pcall(function() v:Destroy() end)
+                end
+            end
+        end)
+    end
+end)
+
+task.spawn(function()
+    while true do
+        task.wait(1)
+        pcall(function()
+            for _, v in ipairs(Lighting:GetDescendants()) do
+                if v:IsA("PointLight") or v:IsA("SpotLight") or v:IsA("SurfaceLight") then
+                    if v.Enabled then v.Enabled = false end
+                end
+            end
+        end)
+    end
+end)
+
+task.spawn(function()
+    while true do
+        task.wait(15)
+        pcall(function()
+            collectgarbage("collect")
+            collectgarbage("collect")
+            collectgarbage("collect")
+            collectgarbage("collect")
+            collectgarbage("collect")
+        end)
+    end
+end)
+
+task.spawn(function()
+    while true do
+        task.wait(1)
+        pcall(function()
+            for _, v in ipairs(Workspace:GetDescendants()) do
+                if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam") then
+                    if v.Enabled then v.Enabled = false end
+                end
+            end
+        end)
+    end
+end)
 
 task.spawn(function()
     while true do
         task.wait(3)
-        reapplyFog()
-    end
-end)
-
-pcall(function()
-    local count = 0
-    for _, v in ipairs(Lighting:GetDescendants()) do
-        if v:IsA("PointLight") or v:IsA("SpotLight") or v:IsA("SurfaceLight") then
-            count = count + 1
-            if count > 0 then
-                v.Enabled = false
-            end
-        end
-    end
-end)
-
-task.spawn(function()
-    while true do
-        task.wait(20)
-        pcall(function()
-            collectgarbage("collect")
-            collectgarbage("collect")
-            collectgarbage("collect")
-            collectgarbage("collect")
-        end)
-    end
-end)
-
-task.spawn(function()
-    while true do
-        task.wait(1.5)
-        pcall(function()
-            for _, v in ipairs(Workspace:GetDescendants()) do
-                if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam") then
-                    if v.Enabled then
-                        v.Enabled = false
-                    end
-                end
-            end
-        end)
-    end
-end)
-
-pcall(function()
-    RunService.Stepped:Connect(function()
-        pcall(function()
-            for _, v in ipairs(Workspace:GetChildren()) do
-                if v:IsA("BasePart") and not isChar(v) then
-                    if v.Transparency > 0 and v.Transparency < 1 then
-                        v.Transparency = 1
-                    end
-                end
-            end
-        end)
-    end)
-end)
-
-task.spawn(function()
-    while true do
-        task.wait(5)
         pcall(function()
             for _, v in ipairs(Workspace:GetDescendants()) do
                 if v:IsA("Decal") or v:IsA("Texture") then
                     pcall(function() v:Destroy() end)
                 elseif v:IsA("MeshPart") then
                     pcall(function() v.TextureID = "" end)
+                end
+            end
+        end)
+    end
+end)
+
+task.spawn(function()
+    while true do
+        task.wait(0.3)
+        pcall(function()
+            for _, v in ipairs(Workspace:GetChildren()) do
+                if v:IsA("BasePart") and not isChar(v) then
+                    if v.Transparency > 0 and v.Transparency < 1 then
+                        v.Transparency = 1
+                    end
                 end
             end
         end)
@@ -578,14 +572,14 @@ backdrop.ZIndex = 999
 backdrop.Parent = sg
 
 local popup = Instance.new("Frame")
-popup.Size = UDim2.new(0, 400, 0, 120)
-popup.Position = UDim2.new(0.5, -200, 0.5, -60)
-popup.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+popup.Size = UDim2.new(0, 360, 0, 100)
+popup.Position = UDim2.new(0.5, -180, 0.5, -50)
+popup.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
 popup.BorderSizePixel = 0
 popup.Active = false
 popup.ZIndex = 1000
 popup.Parent = sg
-Instance.new("UICorner", popup).CornerRadius = UDim.new(0, 10)
+Instance.new("UICorner", popup).CornerRadius = UDim.new(0, 8)
 
 local borderHolder = Instance.new("Frame")
 borderHolder.Name = "BorderHolder"
@@ -594,21 +588,21 @@ borderHolder.Position = UDim2.new(0, 1, 0, 1)
 borderHolder.BackgroundTransparency = 1
 borderHolder.ZIndex = 1001
 borderHolder.Parent = popup
-Instance.new("UICorner", borderHolder).CornerRadius = UDim.new(0, 9)
+Instance.new("UICorner", borderHolder).CornerRadius = UDim.new(0, 7)
 
 local borderStroke = Instance.new("UIStroke")
-borderStroke.Color = Color3.fromRGB(255, 60, 60)
-borderStroke.Thickness = 1.5
+borderStroke.Color = Color3.fromRGB(60, 60, 60)
+borderStroke.Thickness = 1
 borderStroke.Parent = borderHolder
 
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, -40, 0, 24)
+title.Size = UDim2.new(1, -40, 0, 22)
 title.Position = UDim2.new(0, 20, 0, 16)
 title.BackgroundTransparency = 1
 title.Text = "fix lag + anti-afk"
-title.Font = Enum.Font.GothamBold
-title.TextSize = 18
-title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.Font = Enum.Font.GothamMedium
+title.TextSize = 16
+title.TextColor3 = Color3.fromRGB(240, 240, 240)
 title.TextXAlignment = Enum.TextXAlignment.Left
 title.ZIndex = 1010
 title.Parent = popup
@@ -619,16 +613,16 @@ sub.Position = UDim2.new(0, 20, 0, 38)
 sub.BackgroundTransparency = 1
 sub.Text = "made by @kudo29001.      v1.1"
 sub.Font = Enum.Font.Gotham
-sub.TextSize = 12
-sub.TextColor3 = Color3.fromRGB(180, 180, 180)
+sub.TextSize = 11
+sub.TextColor3 = Color3.fromRGB(140, 140, 140)
 sub.TextXAlignment = Enum.TextXAlignment.Left
 sub.ZIndex = 1010
 sub.Parent = popup
 
 local barBg = Instance.new("Frame")
-barBg.Size = UDim2.new(1, -40, 0, 6)
-barBg.Position = UDim2.new(0, 20, 0, 72)
-barBg.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+barBg.Size = UDim2.new(1, -40, 0, 4)
+barBg.Position = UDim2.new(0, 20, 0, 68)
+barBg.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 barBg.BorderSizePixel = 0
 barBg.ZIndex = 1010
 barBg.Parent = popup
@@ -636,7 +630,7 @@ Instance.new("UICorner", barBg).CornerRadius = UDim.new(1, 0)
 
 local barFill = Instance.new("Frame")
 barFill.Size = UDim2.new(0, 0, 1, 0)
-barFill.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+barFill.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 barFill.BorderSizePixel = 0
 barFill.ZIndex = 1011
 barFill.Parent = barBg
@@ -644,17 +638,29 @@ Instance.new("UICorner", barFill).CornerRadius = UDim.new(1, 0)
 
 local percentL = Instance.new("TextLabel")
 percentL.Size = UDim2.new(0, 60, 0, 16)
-percentL.Position = UDim2.new(1, -80, 0, 38)
+percentL.Position = UDim2.new(1, -80, 0, 16)
 percentL.BackgroundTransparency = 1
 percentL.Text = "0%"
-percentL.Font = Enum.Font.GothamBold
-percentL.TextSize = 14
-percentL.TextColor3 = Color3.fromRGB(255, 255, 255)
+percentL.Font = Enum.Font.GothamMedium
+percentL.TextSize = 13
+percentL.TextColor3 = Color3.fromRGB(200, 200, 200)
 percentL.TextXAlignment = Enum.TextXAlignment.Right
 percentL.ZIndex = 1010
 percentL.Parent = popup
 
-local totalTime = 3.5
+local statusLabel = Instance.new("TextLabel")
+statusLabel.Size = UDim2.new(1, -40, 0, 14)
+statusLabel.Position = UDim2.new(0, 20, 0, 82)
+statusLabel.BackgroundTransparency = 1
+statusLabel.Text = "loading..."
+statusLabel.Font = Enum.Font.Gotham
+statusLabel.TextSize = 11
+statusLabel.TextColor3 = Color3.fromRGB(140, 140, 140)
+statusLabel.TextXAlignment = Enum.TextXAlignment.Left
+statusLabel.ZIndex = 1010
+statusLabel.Parent = popup
+
+local totalTime = 2.5
 task.spawn(function()
     local startT = tick()
     while tick() - startT < totalTime do
@@ -667,14 +673,17 @@ task.spawn(function()
     end
     barFill.Size = UDim2.new(1, 0, 1, 0)
     percentL.Text = "100%"
+    statusLabel.Text = "done"
+    statusLabel.TextColor3 = Color3.fromRGB(120, 220, 140)
 end)
 
-task.delay(4.2, function()
+task.delay(3.2, function()
     TweenService:Create(backdrop, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
     TweenService:Create(popup, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
     TweenService:Create(title, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
     TweenService:Create(sub, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
     TweenService:Create(percentL, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
+    TweenService:Create(statusLabel, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
     TweenService:Create(barBg, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
     TweenService:Create(barFill, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
     TweenService:Create(borderStroke, TweenInfo.new(0.5), {Transparency = 1}):Play()

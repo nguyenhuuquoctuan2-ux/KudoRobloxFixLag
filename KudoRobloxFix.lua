@@ -1,3 +1,5 @@
+task.wait(5)
+
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
@@ -159,45 +161,43 @@ for k, v in pairs(fflagTable) do
     pcall(setfflag, k, v)
 end
 
+task.wait(1)
+
 local SKY_GRAY = Color3.fromRGB(128, 128, 128)
 
-local function applySkyOnce()
-    pcall(function()
-        for _, v in ipairs(Lighting:GetChildren()) do
-            if v:IsA("PostEffect") or v:IsA("Sky") or v:IsA("Atmosphere") or v:IsA("Clouds") then
-                pcall(function() v:Destroy() end)
-            end
+pcall(function()
+    for _, v in ipairs(Lighting:GetChildren()) do
+        if v:IsA("PostEffect") or v:IsA("Sky") or v:IsA("Atmosphere") or v:IsA("Clouds") then
+            pcall(function() v:Destroy() end)
         end
-        local sky = Instance.new("Sky")
-        sky.SkyboxBk = ""
-        sky.SkyboxDn = ""
-        sky.SkyboxFt = ""
-        sky.SkyboxLf = ""
-        sky.SkyboxRt = ""
-        sky.SkyboxUp = ""
-        sky.SunTextureId = ""
-        sky.MoonTextureId = ""
-        sky.StarCount = 0
-        sky.CelestialBodiesShown = false
-        sky.Parent = Lighting
-        Lighting.GlobalShadows = false
-        Lighting.Brightness = 1.6
-        Lighting.ClockTime = 14
-        Lighting.Ambient = SKY_GRAY
-        Lighting.OutdoorAmbient = SKY_GRAY
-        Lighting.EnvironmentDiffuseScale = 0
-        Lighting.EnvironmentSpecularScale = 0
-        Lighting.ExposureCompensation = 0
-        Lighting.ShadowSoftness = 0
-        Lighting.FogColor = SKY_GRAY
-        Lighting.FogStart = 0
-        Lighting.FogEnd = 5000
-        Lighting.ColorShift_Top = SKY_GRAY
-        Lighting.ColorShift_Bottom = SKY_GRAY
-    end)
-end
-
-applySkyOnce()
+    end
+    local sky = Instance.new("Sky")
+    sky.SkyboxBk = ""
+    sky.SkyboxDn = ""
+    sky.SkyboxFt = ""
+    sky.SkyboxLf = ""
+    sky.SkyboxRt = ""
+    sky.SkyboxUp = ""
+    sky.SunTextureId = ""
+    sky.MoonTextureId = ""
+    sky.StarCount = 0
+    sky.CelestialBodiesShown = false
+    sky.Parent = Lighting
+    Lighting.GlobalShadows = false
+    Lighting.Brightness = 1.6
+    Lighting.ClockTime = 14
+    Lighting.Ambient = SKY_GRAY
+    Lighting.OutdoorAmbient = SKY_GRAY
+    Lighting.EnvironmentDiffuseScale = 0
+    Lighting.EnvironmentSpecularScale = 0
+    Lighting.ExposureCompensation = 0
+    Lighting.ShadowSoftness = 0
+    Lighting.FogColor = SKY_GRAY
+    Lighting.FogStart = 0
+    Lighting.FogEnd = 5000
+    Lighting.ColorShift_Top = SKY_GRAY
+    Lighting.ColorShift_Bottom = SKY_GRAY
+end)
 
 task.spawn(function()
     while true do
@@ -225,116 +225,6 @@ notifGui.DisplayOrder = 1
 notifGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 pcall(function() notifGui.Parent = uiParent end)
 
-local activeNotifs = {}
-local NOTIF_CONST = {
-    WIDTH = 260,
-    HEIGHT = 80,
-    PADDING = 12,
-    THEME = Color3.fromRGB(255, 60, 60),
-    BG = Color3.fromRGB(18, 18, 18),
-    TEXT = Color3.fromRGB(240, 240, 240),
-    SUBTEXT = Color3.fromRGB(160, 160, 160),
-    SPEED = 0.4
-}
-
-local function updateNotifs()
-    for index, data in ipairs(activeNotifs) do
-        local targetY = -NOTIF_CONST.PADDING - ((index - 1) * (NOTIF_CONST.HEIGHT + NOTIF_CONST.PADDING))
-        TweenService:Create(data.Container, TweenInfo.new(NOTIF_CONST.SPEED, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-            Position = UDim2.new(1, -NOTIF_CONST.PADDING, 1, targetY)
-        }):Play()
-    end
-end
-
-local function showNotif(titleText, messageText, duration)
-    duration = duration or 6
-    local container = Instance.new("Frame")
-    container.Size = UDim2.new(0, NOTIF_CONST.WIDTH, 0, NOTIF_CONST.HEIGHT)
-    container.Position = UDim2.new(1, 320, 1, -NOTIF_CONST.PADDING)
-    container.AnchorPoint = Vector2.new(1, 1)
-    container.BackgroundTransparency = 1
-    container.Parent = notifGui
-
-    local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(1, 0, 1, 0)
-    frame.BackgroundColor3 = NOTIF_CONST.BG
-    frame.BorderSizePixel = 0
-    frame.Parent = container
-    Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 8)
-
-    local stroke = Instance.new("UIStroke")
-    stroke.Color = Color3.fromRGB(60, 30, 30)
-    stroke.Thickness = 1
-    stroke.Parent = frame
-
-    local accent = Instance.new("Frame")
-    accent.Size = UDim2.new(1, 0, 0, 2)
-    accent.BackgroundColor3 = NOTIF_CONST.THEME
-    accent.BorderSizePixel = 0
-    accent.Parent = frame
-
-    local titleLabel = Instance.new("TextLabel")
-    titleLabel.Size = UDim2.new(1, -50, 0, 22)
-    titleLabel.Position = UDim2.new(0, 14, 0, 10)
-    titleLabel.BackgroundTransparency = 1
-    titleLabel.Text = titleText
-    titleLabel.TextColor3 = NOTIF_CONST.TEXT
-    titleLabel.Font = Enum.Font.GothamBold
-    titleLabel.TextSize = 15
-    titleLabel.TextXAlignment = Enum.TextXAlignment.Left
-    titleLabel.Parent = frame
-
-    local msgLabel = Instance.new("TextLabel")
-    msgLabel.Size = UDim2.new(1, -28, 0, 36)
-    msgLabel.Position = UDim2.new(0, 14, 0, 34)
-    msgLabel.BackgroundTransparency = 1
-    msgLabel.Text = messageText
-    msgLabel.TextColor3 = NOTIF_CONST.SUBTEXT
-    msgLabel.Font = Enum.Font.GothamMedium
-    msgLabel.TextSize = 12
-    msgLabel.TextWrapped = true
-    msgLabel.TextXAlignment = Enum.TextXAlignment.Left
-    msgLabel.TextYAlignment = Enum.TextYAlignment.Top
-    msgLabel.Parent = frame
-
-    local closeBtn = Instance.new("TextButton")
-    closeBtn.Size = UDim2.new(0, 22, 0, 22)
-    closeBtn.Position = UDim2.new(1, -8, 0, 8)
-    closeBtn.AnchorPoint = Vector2.new(1, 0)
-    closeBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
-    closeBtn.Text = "X"
-    closeBtn.TextColor3 = Color3.fromRGB(150, 150, 150)
-    closeBtn.Font = Enum.Font.GothamBold
-    closeBtn.TextSize = 11
-    closeBtn.AutoButtonColor = false
-    closeBtn.Parent = frame
-    Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 6)
-
-    local notifData = {Container = container}
-    table.insert(activeNotifs, 1, notifData)
-    updateNotifs()
-
-    local closed = false
-    local function closeNotif()
-        if closed then return end
-        closed = true
-        local idx = table.find(activeNotifs, notifData)
-        if idx then
-            table.remove(activeNotifs, idx)
-            updateNotifs()
-        end
-        local tweenOut = TweenService:Create(container, TweenInfo.new(NOTIF_CONST.SPEED, Enum.EasingStyle.Sine, Enum.EasingDirection.In), {
-            Position = UDim2.new(1, 320, container.Position.Y.Scale, container.Position.Y.Offset)
-        })
-        tweenOut:Play()
-        tweenOut.Completed:Wait()
-        container:Destroy()
-    end
-
-    closeBtn.MouseButton1Click:Connect(closeNotif)
-    task.delay(duration, closeNotif)
-end
-
 local sg = Instance.new("ScreenGui")
 sg.Name = "LegacyLoader"
 sg.ResetOnSpawn = false
@@ -344,170 +234,26 @@ sg.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 sg.Parent = uiParent
 
 local backdrop = Instance.new("Frame")
-backdrop.Name = "LegacyBackdrop"
 backdrop.Size = UDim2.new(1, 0, 1, 0)
 backdrop.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-backdrop.BackgroundTransparency = 1
+backdrop.BackgroundTransparency = 0.5
 backdrop.BorderSizePixel = 0
 backdrop.ZIndex = 999
 backdrop.Parent = sg
-
-TweenService:Create(backdrop, TweenInfo.new(0.5), {BackgroundTransparency = 0.5}):Play()
 
 local popup = Instance.new("Frame")
 popup.Size = UDim2.new(0, 320, 0, 100)
 popup.Position = UDim2.new(0.5, -160, 0.5, -50)
 popup.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
-popup.BackgroundTransparency = 1
 popup.BorderSizePixel = 0
 popup.ZIndex = 1000
 popup.Parent = sg
 Instance.new("UICorner", popup).CornerRadius = UDim.new(0, 8)
 
-local popupScale = Instance.new("UIScale")
-popupScale.Scale = 0.6
-popupScale.Parent = popup
-
-TweenService:Create(popup, TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {BackgroundTransparency = 0}):Play()
-TweenService:Create(popupScale, TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Scale = 1}):Play()
-
-local borderStroke = Instance.new("UIStroke")
-borderStroke.Color = Color3.fromRGB(80, 30, 30)
-borderStroke.Thickness = 1
-borderStroke.Transparency = 1
-borderStroke.Parent = popup
-TweenService:Create(borderStroke, TweenInfo.new(0.6), {Transparency = 0}):Play()
-
-local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, -30, 0, 22)
-title.Position = UDim2.new(0, 15, 0, 14)
-title.BackgroundTransparency = 1
-title.Text = "Legacy optimizer"
-title.Font = Enum.Font.GothamBold
-title.TextSize = 17
-title.TextColor3 = Color3.fromRGB(240, 240, 240)
-title.TextXAlignment = Enum.TextXAlignment.Left
-title.TextTransparency = 1
-title.ZIndex = 1010
-title.Parent = popup
-TweenService:Create(title, TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 0}):Play()
-
-local sub = Instance.new("TextLabel")
-sub.Size = UDim2.new(1, -30, 0, 14)
-sub.Position = UDim2.new(0, 15, 0, 38)
-sub.BackgroundTransparency = 1
-sub.Text = "by @realz29001 on tiktok     v1.2.0"
-sub.Font = Enum.Font.Gotham
-sub.TextSize = 11
-sub.TextColor3 = Color3.fromRGB(150, 150, 150)
-sub.TextXAlignment = Enum.TextXAlignment.Left
-sub.TextTransparency = 1
-sub.ZIndex = 1010
-sub.Parent = popup
-TweenService:Create(sub, TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 0}):Play()
-
-local barBg = Instance.new("Frame")
-barBg.Size = UDim2.new(1, -30, 0, 5)
-barBg.Position = UDim2.new(0, 15, 0, 68)
-barBg.BackgroundColor3 = Color3.fromRGB(40, 25, 25)
-barBg.BackgroundTransparency = 1
-barBg.BorderSizePixel = 0
-barBg.ZIndex = 1010
-barBg.Parent = popup
-Instance.new("UICorner", barBg).CornerRadius = UDim.new(1, 0)
-TweenService:Create(barBg, TweenInfo.new(0.6), {BackgroundTransparency = 0}):Play()
-
-local barBgStroke = Instance.new("UIStroke")
-barBgStroke.Color = Color3.fromRGB(180, 50, 50)
-barBgStroke.Thickness = 1
-barBgStroke.Transparency = 1
-barBgStroke.Parent = barBg
-TweenService:Create(barBgStroke, TweenInfo.new(0.6), {Transparency = 0.5}):Play()
-
-local barFill = Instance.new("Frame")
-barFill.Size = UDim2.new(0, 0, 1, 0)
-barFill.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
-barFill.BorderSizePixel = 0
-barFill.ZIndex = 1011
-barFill.Parent = barBg
-Instance.new("UICorner", barFill).CornerRadius = UDim.new(1, 0)
-
-local statusLabel = Instance.new("TextLabel")
-statusLabel.Size = UDim2.new(1, -100, 0, 14)
-statusLabel.Position = UDim2.new(0, 15, 0, 80)
-statusLabel.BackgroundTransparency = 1
-statusLabel.Text = "optimizing..."
-statusLabel.Font = Enum.Font.Gotham
-statusLabel.TextSize = 10
-statusLabel.TextColor3 = Color3.fromRGB(160, 120, 120)
-statusLabel.TextXAlignment = Enum.TextXAlignment.Left
-statusLabel.TextTransparency = 1
-statusLabel.ZIndex = 1010
-statusLabel.Parent = popup
-TweenService:Create(statusLabel, TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 0}):Play()
-
-local percentL = Instance.new("TextLabel")
-percentL.Size = UDim2.new(0, 60, 0, 14)
-percentL.Position = UDim2.new(1, -75, 0, 80)
-percentL.BackgroundTransparency = 1
-percentL.Text = "0%"
-percentL.Font = Enum.Font.GothamMedium
-percentL.TextSize = 10
-percentL.TextColor3 = Color3.fromRGB(255, 130, 130)
-percentL.TextXAlignment = Enum.TextXAlignment.Right
-percentL.TextTransparency = 1
-percentL.ZIndex = 1010
-percentL.Parent = popup
-TweenService:Create(percentL, TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 0}):Play()
-
-local barDone = false
-task.spawn(function()
-    local currentP = 0
-    local minDuration = 4.5
-    local startT = tick()
-
-    while not barDone do
-        local elapsed = tick() - startT
-        local progress = math.min(elapsed / minDuration, 1)
-        currentP = progress * 100
-
-        barFill.Size = UDim2.new(currentP / 100, 0, 1, 0)
-        percentL.Text = math.floor(currentP) .. "%"
-
-        if currentP >= 100 then
-            barDone = true
-        end
-        task.wait(0.05)
-    end
-
-    percentL.Text = "100%"
-    statusLabel.Text = "done"
-    statusLabel.TextColor3 = Color3.fromRGB(120, 220, 140)
-    barFill.BackgroundColor3 = Color3.fromRGB(120, 220, 140)
-    barBgStroke.Color = Color3.fromRGB(120, 220, 140)
-end)
-
-task.spawn(function()
-    while not barDone do
-        task.wait(0.1)
-    end
-    task.wait(1.5)
-
+task.delay(4.5, function()
     TweenService:Create(backdrop, TweenInfo.new(0.8), {BackgroundTransparency = 1}):Play()
     TweenService:Create(popup, TweenInfo.new(0.8), {BackgroundTransparency = 1}):Play()
-    TweenService:Create(title, TweenInfo.new(0.8), {TextTransparency = 1}):Play()
-    TweenService:Create(sub, TweenInfo.new(0.8), {TextTransparency = 1}):Play()
-    TweenService:Create(percentL, TweenInfo.new(0.8), {TextTransparency = 1}):Play()
-    TweenService:Create(statusLabel, TweenInfo.new(0.8), {TextTransparency = 1}):Play()
-    TweenService:Create(barBg, TweenInfo.new(0.8), {BackgroundTransparency = 1}):Play()
-    TweenService:Create(barFill, TweenInfo.new(0.8), {BackgroundTransparency = 1}):Play()
-    TweenService:Create(barBgStroke, TweenInfo.new(0.8), {Transparency = 1}):Play()
-    TweenService:Create(borderStroke, TweenInfo.new(0.8), {Transparency = 1}):Play()
-
-    local scaleTween = TweenService:Create(popupScale, TweenInfo.new(0.8), {Scale = 0.85})
-    scaleTween:Play()
-    scaleTween.Completed:Wait()
-    task.wait(0.3)
+    task.wait(1)
     sg:Destroy()
 end)
 
@@ -530,94 +276,6 @@ box.Active = false
 box.Parent = statsGui
 Instance.new("UICorner", box).CornerRadius = UDim.new(0, 8)
 
-local bxStroke = Instance.new("UIStroke")
-bxStroke.Color = Color3.fromRGB(255, 60, 60)
-bxStroke.Thickness = 1
-bxStroke.Transparency = 0.5
-bxStroke.Parent = box
-
-local header = Instance.new("Frame")
-header.Size = UDim2.new(1, 0, 0, 16)
-header.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
-header.BackgroundTransparency = 0.7
-header.BorderSizePixel = 0
-header.Parent = box
-Instance.new("UICorner", header).CornerRadius = UDim.new(0, 8)
-
-local function mkLabel(t, y)
-    local l = Instance.new("TextLabel")
-    l.Size = UDim2.new(0, 45, 0, 18)
-    l.Position = UDim2.new(0, 12, 0, y)
-    l.BackgroundTransparency = 1
-    l.Text = t
-    l.Font = Enum.Font.GothamBold
-    l.TextSize = 11
-    l.TextColor3 = Color3.fromRGB(180, 180, 180)
-    l.TextXAlignment = Enum.TextXAlignment.Left
-    l.Parent = box
-end
-
-local function mkValue(y)
-    local v = Instance.new("TextLabel")
-    v.Size = UDim2.new(0, 80, 0, 18)
-    v.Position = UDim2.new(1, -92, 0, y)
-    v.BackgroundTransparency = 1
-    v.Text = "--"
-    v.Font = Enum.Font.GothamBold
-    v.TextSize = 13
-    v.TextColor3 = Color3.fromRGB(0, 255, 120)
-    v.TextXAlignment = Enum.TextXAlignment.Right
-    v.Parent = box
-    return v
-end
-
-mkLabel("FPS", 24)
-local fpsV = mkValue(24)
-mkLabel("PING", 44)
-local pingV = mkValue(44)
-mkLabel("TIME", 64)
-local timeV = mkValue(64)
-timeV.TextColor3 = Color3.fromRGB(255, 100, 100)
-timeV.Text = "00:00"
-
-local credit = Instance.new("TextLabel")
-credit.Size = UDim2.new(1, -10, 0, 12)
-credit.Position = UDim2.new(0, 5, 1, -14)
-credit.BackgroundTransparency = 1
-credit.Text = "@realz29001 on tiktok"
-credit.Font = Enum.Font.GothamBold
-credit.TextSize = 10
-credit.TextColor3 = Color3.fromRGB(255, 100, 100)
-credit.TextTransparency = 0.3
-credit.TextXAlignment = Enum.TextXAlignment.Center
-credit.Parent = box
-
-local closeB = Instance.new("TextButton")
-closeB.Size = UDim2.new(0, 24, 0, 24)
-closeB.Position = UDim2.new(1, -28, 0, -4)
-closeB.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
-closeB.Text = "x"
-closeB.Font = Enum.Font.GothamBold
-closeB.TextSize = 14
-closeB.TextColor3 = Color3.new(1, 1, 1)
-closeB.BorderSizePixel = 0
-closeB.ZIndex = 10
-closeB.Parent = box
-Instance.new("UICorner", closeB).CornerRadius = UDim.new(1, 0)
-
-local hideB = Instance.new("TextButton")
-hideB.Size = UDim2.new(0, 24, 0, 24)
-hideB.Position = UDim2.new(1, -56, 0, -4)
-hideB.BackgroundColor3 = Color3.fromRGB(255, 150, 50)
-hideB.Text = "-"
-hideB.Font = Enum.Font.GothamBold
-hideB.TextSize = 16
-hideB.TextColor3 = Color3.new(1, 1, 1)
-hideB.BorderSizePixel = 0
-hideB.ZIndex = 10
-hideB.Parent = box
-Instance.new("UICorner", hideB).CornerRadius = UDim.new(1, 0)
-
 local showSg = Instance.new("ScreenGui")
 showSg.Name = "LegacyToggle"
 showSg.ResetOnSpawn = false
@@ -634,51 +292,7 @@ showB.Font = Enum.Font.GothamBold
 showB.TextSize = 22
 showB.TextColor3 = Color3.new(1, 1, 1)
 showB.BorderSizePixel = 0
-showB.Visible = false
 showB.Parent = showSg
 Instance.new("UICorner", showB).CornerRadius = UDim.new(1, 0)
-
-hideB.MouseButton1Click:Connect(function()
-    box.Visible = false
-    showB.Visible = true
-end)
-
-showB.MouseButton1Click:Connect(function()
-    box.Visible = true
-    showB.Visible = false
-end)
-
-closeB.MouseButton1Click:Connect(function()
-    statsGui:Destroy()
-    showSg:Destroy()
-end)
-
-local st = tick()
-task.spawn(function()
-    while statsGui.Parent do
-        task.wait(1)
-        local e = math.floor(tick() - st)
-        timeV.Text = string.format("%02d:%02d", math.floor(e / 60), e % 60)
-        fpsV.Text = tostring(math.floor(1 / (RunService.Heartbeat:Wait())))
-    end
-end)
-
-task.spawn(function()
-    while statsGui.Parent do
-        task.wait(1)
-        local p = 0
-        pcall(function()
-            p = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
-        end)
-        pingV.Text = p .. "ms"
-        if p <= 100 then
-            pingV.TextColor3 = Color3.fromRGB(0, 255, 120)
-        else
-            pingV.TextColor3 = Color3.fromRGB(255, 60, 60)
-        end
-    end
-end)
-
-showNotif("Script successfully loaded!", "FFlags applied. Optimization active.", 6)
 
 print("Legacy optimizer v1.2.0 by @realz29001 loaded")

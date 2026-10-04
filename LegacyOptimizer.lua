@@ -6,6 +6,7 @@ local Stats = game:GetService("Stats")
 local Lighting = game:GetService("Lighting")
 local Workspace = game:GetService("Workspace")
 local Terrain = Workspace:FindFirstChildOfClass("Terrain")
+local Camera = Workspace.CurrentCamera
 local VirtualUser = game:GetService("VirtualUser")
 local CoreGui = game:GetService("CoreGui")
 local HttpService = game:GetService("HttpService")
@@ -169,6 +170,12 @@ for k, v in pairs(fflagTable) do
     pcall(setfflag, k, v)
 end
 
+pcall(function()
+    if Camera then
+        Camera.FieldOfView = 85
+    end
+end)
+
 local SKY_GRAY = Color3.fromRGB(128, 128, 128)
 
 local function applySky()
@@ -245,6 +252,259 @@ pcall(function()
             VirtualUser:ClickButton2(Vector2.new())
         end)
     end)
+end)
+
+local charModels = {}
+local function watchChar(plr)
+    if plr.Character then charModels[plr.Character] = true end
+    plr.CharacterAdded:Connect(function(c) charModels[c] = true end)
+end
+for _, plr in ipairs(Players:GetPlayers()) do watchChar(plr) end
+Players.PlayerAdded:Connect(watchChar)
+Players.PlayerRemoving:Connect(function(plr)
+    if plr.Character then charModels[plr.Character] = nil end
+end)
+
+local function isChar(v)
+    local cur = v
+    while cur do
+        if charModels[cur] then return true end
+        if cur:IsA("Accessory") or cur:IsA("Tool") then return true end
+        cur = cur.Parent
+    end
+    return false
+end
+
+local function isProtected(v)
+    return v:IsA("BillboardGui")
+        or v:IsA("TextLabel")
+        or v:IsA("TextButton")
+        or v:IsA("TextBox")
+        or v:IsA("ImageLabel")
+        or v:IsA("ImageButton")
+        or v:IsA("Humanoid")
+        or v:IsA("ProximityPrompt")
+        or v:IsA("ProximityPromptService")
+        or v:IsA("ClickDetector")
+        or v:IsA("SurfaceGui")
+        or v:IsA("SurfaceAppearance")
+        or v:IsA("ScreenGui")
+        or v:IsA("GuiObject")
+        or v:IsA("GuiMain")
+        or v:IsA("Folder")
+        or v:IsA("Configuration")
+        or v:IsA("Script")
+        or v:IsA("LocalScript")
+        or v:IsA("ModuleScript")
+        or v:IsA("RemoteEvent")
+        or v:IsA("RemoteFunction")
+        or v:IsA("BindableEvent")
+        or v:IsA("BindableFunction")
+        or v:IsA("Animation")
+        or v:IsA("AnimationController")
+        or v:IsA("Animator")
+end
+
+local function hasInteractiveAncestor(v)
+    local cur = v
+    local depth = 0
+    while cur and depth < 10 do
+        if cur:IsA("ProximityPrompt") 
+            or cur:IsA("ClickDetector") 
+            or cur:IsA("SurfaceGui") 
+            or cur:IsA("BillboardGui")
+            or cur:IsA("Humanoid")
+            or cur:IsA("AnimationController")
+            or cur:IsA("Animator")
+        then
+            return true
+        end
+        if cur:IsA("Model") then
+            if cur:FindFirstChildOfClass("Humanoid") then return true end
+            if cur:FindFirstChildOfClass("AnimationController") then return true end
+            if cur:FindFirstChildOfClass("ProximityPrompt") then return true end
+            if cur:FindFirstChildOfClass("ClickDetector") then return true end
+        end
+        cur = cur.Parent
+        depth = depth + 1
+    end
+    return false
+end
+
+local killTypes = {
+    ParticleEmitter = true, Trail = true, Smoke = true, Fire = true,
+    Sparkles = true, Beam = true,
+    PointLight = true, SpotLight = true,
+    SurfaceLight = true, ForceField = true, Explosion = true,
+    Atmosphere = true, Clouds = true,
+    DepthOfFieldEffect = true, BloomEffect = true, BlurEffect = true,
+    ColorCorrectionEffect = true, SunRaysEffect = true,
+}
+
+local function flattenWater(v)
+    pcall(function()
+        v.WaterColor = Color3.fromRGB(0, 100, 200)
+        v.WaterTransparency = 0
+        v.WaterReflectance = 0
+        v.WaterWaveSize = 0
+        v.WaterWaveSpeed = 0
+    end)
+end
+
+local function handleObject(v)
+    if isProtected(v) or isChar(v) or hasInteractiveAncestor(v) then return end
+    local cn = v.ClassName
+    if killTypes[cn] then
+        pcall(function() v:Destroy() end)
+    elseif cn == "Part" or cn == "MeshPart" or cn == "UnionOperation" or cn == "WedgePart" or cn == "CornerWedgePart" then
+        pcall(function()
+            v.Material = Enum.Material.SmoothPlastic
+            v.Reflectance = 0
+            v.CastShadow = false
+            if v:IsA("MeshPart") and v.TextureID ~= "" and not hasInteractiveAncestor(v) then
+                v.RenderFidelity = Enum.RenderFidelity.Performance
+            end
+        end)
+    elseif cn == "Model" then
+        pcall(function()
+            v.LevelOfDetail = Enum.ModelLevelOfDetail.StreamingMesh
+        end)
+    end
+end
+
+task.spawn(function()
+    while true do
+        task.wait(0.5)
+        pcall(function()
+            if not Terrain then return end
+            flattenWater(Terrain)
+            for _, v in ipairs(Terrain:GetChildren()) do
+                if v:IsA("Water") then
+                    flattenWater(v)
+                end
+            end
+        end)
+    end
+end)
+
+local scanFinished = false
+
+task.spawn(function()
+    local descendants = Workspace:GetDescendants()
+    local total = #descendants
+    if total == 0 then scanFinished = true return end
+    local BATCH_SIZE = 600
+    local MAX_CONCURRENT = 40
+    local batches = {}
+    local current = {}
+    for i = 1, total do
+        current[#current + 1] = descendants[i]
+        if #current >= BATCH_SIZE then
+            batches[#batches + 1] = current
+            current = {}
+        end
+    end
+    if #current > 0 then batches[#batches + 1] = current end
+    local running = 0
+    local index = 1
+    while true do
+        if running < MAX_CONCURRENT and index <= #batches then
+            local batch = batches[index]
+            index = index + 1
+            running = running + 1
+            task.spawn(function()
+                for _, v in ipairs(batch) do
+                    pcall(handleObject, v)
+                end
+                running = running - 1
+            end)
+        elseif index > #batches and running == 0 then
+            break
+        else
+            RunService.Heartbeat:Wait()
+        end
+    end
+    scanFinished = true
+end)
+
+Workspace.DescendantAdded:Connect(function(v)
+    task.defer(function()
+        pcall(handleObject, v)
+    end)
+end)
+
+local CULL_DIST_SQ = 55 * 55
+local culled = {}
+
+task.spawn(function()
+    while true do
+        task.wait(0.3)
+        pcall(function()
+            if not Camera then return end
+            local camPos = Camera.CFrame.Position
+            for _, v in ipairs(Workspace:GetChildren()) do
+                if v:IsA("BasePart") and not isChar(v) then
+                    if not hasInteractiveAncestor(v) 
+                        and not v:FindFirstChildOfClass("Humanoid") 
+                        and not v:FindFirstChildOfClass("BillboardGui") 
+                        and not v:FindFirstChildOfClass("ProximityPrompt")
+                        and not v:FindFirstChildOfClass("ClickDetector")
+                        and not v:FindFirstChildOfClass("SurfaceGui")
+                    then
+                        local pos = v.Position
+                        if pos.Y >= camPos.Y - 3 then
+                            local dx, dy, dz = pos.X - camPos.X, pos.Y - camPos.Y, pos.Z - camPos.Z
+                            local shouldHide = (dx*dx + dy*dy + dz*dz) > CULL_DIST_SQ
+                            if shouldHide and not culled[v] then
+                                culled[v] = true
+                                pcall(function() v.LocalTransparencyModifier = 1 end)
+                            elseif not shouldHide and culled[v] then
+                                culled[v] = false
+                                pcall(function() v.LocalTransparencyModifier = 0 end)
+                            end
+                        end
+                    end
+                end
+            end
+        end)
+    end
+end)
+
+task.spawn(function()
+    while true do
+        task.wait(3)
+        pcall(function()
+            for _, v in ipairs(Lighting:GetDescendants()) do
+                if v:IsA("PointLight") or v:IsA("SpotLight") or v:IsA("SurfaceLight") then
+                    if v.Enabled then v.Enabled = false end
+                end
+            end
+        end)
+    end
+end)
+
+task.spawn(function()
+    while true do
+        task.wait(40)
+        pcall(function()
+            collectgarbage("collect")
+        end)
+    end
+end)
+
+task.spawn(function()
+    while true do
+        task.wait(3)
+        pcall(function()
+            for _, v in ipairs(Workspace:GetDescendants()) do
+                if (v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam")) 
+                    and not hasInteractiveAncestor(v) 
+                then
+                    if v.Enabled then v.Enabled = false end
+                end
+            end
+        end)
+    end
 end)
 
 local notifGui = Instance.new("ScreenGui")

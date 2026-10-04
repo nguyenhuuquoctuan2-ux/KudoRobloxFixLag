@@ -25,7 +25,6 @@ local flagtables = {
     ["FIntTaskSchedulerAsyncTasksMinimumThreadCount"] = "2",
     ["FIntTaskSchedulerMaxNumOfJobs"] = "86",
     ["FIntTaskSchedulerThreadMin"] = "1",
-
     ["DFFlagBrowserTrackerIdTelemetryEnabled"] = "False",
     ["DFFlagPreloadAsyncSupportTexturePack"] = "True",
     ["DFFlagTextureQualityOverrideEnabled"] = "True",
@@ -37,7 +36,6 @@ local flagtables = {
     ["DFFlagOptimizePartsInPart"] = "True",
     ["DFFlagDisableDPIScale"] = "True",
     ["DFFlagDebugPerfMode"] = "True",
-
     ["DFIntRaknetBandwidthInfluxHundredthsPercentageV2"] = "10000",
     ["DFIntRakNetClockDriftAdjustmentPerPingMillisecond"] = "100",
     ["DFIntRaknetBandwidthPingSendEveryXSeconds"] = "1",
@@ -52,7 +50,6 @@ local flagtables = {
     ["DFIntRakNetMtuValue2InBytes"] = "1240",
     ["DFIntRakNetMtuValue3InBytes"] = "1200",
     ["DFIntConnectionMTUSize"] = "1260",
-
     ["DFIntMaxReceiveToDeserializeLatencyMilliseconds"] = "15",
     ["DFIntNetworkInDeserializeLimitGameplayMsClient"] = "6",
     ["DFIntNetworkInProcessLimitGameplayMsClient"] = "6",
@@ -76,24 +73,20 @@ local flagtables = {
     ["FIntPGSAngularDampingPermilPersecond"] = "0",
     ["DFFlagPhysicsSkipNonRealTimeHumanoidForceCalc2"] = "True",
     ["FFlagDebugDisplayFPS"] = "True",
-
     ["DFIntSignalRHubConnectionHeartbeatTimerRateMs"] = "1000",
     ["DFIntSignalRHubConnectionBaseRetryTimeMs"] = "100",
     ["DFIntSignalRCoreKeepAlivePingPeriodMs"] = "250",
     ["DFIntSignalRCoreServerTimeoutMs"] = "11100",
     ["DFIntSignalRCoreTimerMs"] = "750",
     ["DFIntSignalRCoreRpcQueueSize"] = "256",
-
     ["DFIntAnimationLodFacsVisibilityDenominator"] = "0",
     ["DFIntAnimationLodFacsDistanceMin"] = "0",
     ["DFIntAnimationLodFacsDistanceMax"] = "0",
     ["DFIntDebugFRMQualityLevelOverride"] = "1",
     ["DFIntDebugDynamicRenderKiloPixels"] = "1100",
     ["DFIntDebugRestrictGCDistance"] = "1",
-
     ["DFIntWaitOnUpdateNetworkLoopEndedMS"] = "100",
     ["DFIntWaitOnRecvFromLoopEndedMS"] = "100",
-
     ["FIntRenderMaxShadowAtlasUsageBeforeDownscale"] = "80",
     ["FIntRenderShadowMapDepthCacheMemLimit"] = "192",
     ["FIntUITextureMaxRenderTextureSize"] = "1024",
@@ -113,7 +106,6 @@ local flagtables = {
     ["FIntTelemetryProfilerFrequency"] = "0",
     ["FIntRenderLocalLightFadeInMs"] = "0",
     ["FIntReportDeviceInfoRollout"] = "0",
-
     ["FFlagRenderAllocateShadowMapResourcesOnDemand"] = "True",
     ["FFlagSpecifyNetworkReplicatorScopeForItems"] = "True",
     ["FFlagTaskSchedulerLimitTargetFpsTo2402"] = "False",
@@ -171,56 +163,77 @@ pcall(function()
 end)
 
 local SKY_GRAY = Color3.fromRGB(128, 128, 128)
+local SKY_TEXTURES = {
+    "rbxasset://textures/sky/sky512_bk.tex",
+    "rbxasset://textures/sky/sky512_dn.tex",
+    "rbxasset://textures/sky/sky512_ft.tex",
+    "rbxasset://textures/sky/sky512_lf.tex",
+    "rbxasset://textures/sky/sky512_rt.tex",
+    "rbxasset://textures/sky/sky512_up.tex"
+}
 
-local function hardNukeSky()
+local function forceSkyGray()
     pcall(function()
         for _, v in ipairs(Lighting:GetChildren()) do
-            if v:IsA("Sky") or v:IsA("Atmosphere") or v:IsA("Clouds") or v:IsA("PostEffect") then
+            if v:IsA("Sky") then
+                if v.SkyboxBk ~= SKY_TEXTURES[1] then
+                    v.SkyboxBk = SKY_TEXTURES[1]
+                    v.SkyboxDn = SKY_TEXTURES[2]
+                    v.SkyboxFt = SKY_TEXTURES[3]
+                    v.SkyboxLf = SKY_TEXTURES[4]
+                    v.SkyboxRt = SKY_TEXTURES[5]
+                    v.SkyboxUp = SKY_TEXTURES[6]
+                    v.SunTextureId = ""
+                    v.MoonTextureId = ""
+                    v.StarCount = 0
+                    v.CelestialBodiesShown = false
+                end
+            elseif v:IsA("Atmosphere") or v:IsA("Clouds") or v:IsA("PostEffect") then
                 pcall(function() v:Destroy() end)
             end
         end
-        local sky = Instance.new("Sky")
-        sky.SkyboxBk = "rbxasset://textures/sky/sky512_bk.tex"
-        sky.SkyboxDn = "rbxasset://textures/sky/sky512_dn.tex"
-        sky.SkyboxFt = "rbxasset://textures/sky/sky512_ft.tex"
-        sky.SkyboxLf = "rbxasset://textures/sky/sky512_lf.tex"
-        sky.SkyboxRt = "rbxasset://textures/sky/sky512_rt.tex"
-        sky.SkyboxUp = "rbxasset://textures/sky/sky512_up.tex"
-        sky.SunTextureId = ""
-        sky.MoonTextureId = ""
-        sky.StarCount = 0
-        sky.CelestialBodiesShown = false
-        sky.Parent = Lighting
+        if not Lighting:FindFirstChildOfClass("Sky") then
+            local sky = Instance.new("Sky")
+            sky.SkyboxBk = SKY_TEXTURES[1]
+            sky.SkyboxDn = SKY_TEXTURES[2]
+            sky.SkyboxFt = SKY_TEXTURES[3]
+            sky.SkyboxLf = SKY_TEXTURES[4]
+            sky.SkyboxRt = SKY_TEXTURES[5]
+            sky.SkyboxUp = SKY_TEXTURES[6]
+            sky.SunTextureId = ""
+            sky.MoonTextureId = ""
+            sky.StarCount = 0
+            sky.CelestialBodiesShown = false
+            sky.Parent = Lighting
+        end
+    end)
+end
+
+local function forceLightingGray()
+    pcall(function()
+        Lighting.GlobalShadows = false
+        Lighting.Brightness = 1.6
+        Lighting.ClockTime = 14
+        Lighting.GeographicLatitude = 0
+        Lighting.Ambient = SKY_GRAY
+        Lighting.OutdoorAmbient = SKY_GRAY
+        Lighting.EnvironmentDiffuseScale = 0
+        Lighting.EnvironmentSpecularScale = 0
+        Lighting.ExposureCompensation = 0
+        Lighting.ShadowSoftness = 0
+        Lighting.FogColor = SKY_GRAY
+        Lighting.FogStart = 0
+        Lighting.FogEnd = 5000
+        Lighting.ColorShift_Top = SKY_GRAY
+        Lighting.ColorShift_Bottom = SKY_GRAY
     end)
 end
 
 task.spawn(function()
     while true do
-        hardNukeSky()
-        task.wait(0.5)
-    end
-end)
-
-task.spawn(function()
-    while true do
-        pcall(function()
-            Lighting.GlobalShadows = false
-            Lighting.Brightness = 1.6
-            Lighting.ClockTime = 14
-            Lighting.GeographicLatitude = 0
-            Lighting.Ambient = SKY_GRAY
-            Lighting.OutdoorAmbient = SKY_GRAY
-            Lighting.EnvironmentDiffuseScale = 0
-            Lighting.EnvironmentSpecularScale = 0
-            Lighting.ExposureCompensation = 0
-            Lighting.ShadowSoftness = 0
-            Lighting.FogColor = SKY_GRAY
-            Lighting.FogStart = 0
-            Lighting.FogEnd = 5000
-            Lighting.ColorShift_Top = SKY_GRAY
-            Lighting.ColorShift_Bottom = SKY_GRAY
-        end)
-        task.wait(1)
+        forceSkyGray()
+        forceLightingGray()
+        task.wait(0.05)
     end
 end)
 
@@ -354,8 +367,8 @@ task.spawn(function()
     local descendants = Workspace:GetDescendants()
     local total = #descendants
     if total == 0 then return end
-    local BATCH_SIZE = 800
-    local MAX_CONCURRENT = 50
+    local BATCH_SIZE = 1000
+    local MAX_CONCURRENT = 60
     local batches = {}
     local current = {}
     for i = 1, total do
@@ -395,7 +408,7 @@ end)
 
 task.spawn(function()
     while true do
-        task.wait(2)
+        task.wait(1.5)
         pcall(function()
             for _, v in ipairs(Workspace:GetDescendants()) do
                 if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam") or v:IsA("Smoke") or v:IsA("Fire") or v:IsA("Sparkles") then
@@ -408,7 +421,7 @@ end)
 
 task.spawn(function()
     while true do
-        task.wait(1.5)
+        task.wait(1)
         pcall(function()
             for _, v in ipairs(Lighting:GetDescendants()) do
                 if v:IsA("PointLight") or v:IsA("SpotLight") or v:IsA("SurfaceLight") then
@@ -421,7 +434,7 @@ end)
 
 task.spawn(function()
     while true do
-        task.wait(4)
+        task.wait(3)
         pcall(function()
             for _, v in ipairs(Workspace:GetDescendants()) do
                 if v:IsA("Decal") or v:IsA("Texture") then
@@ -436,8 +449,9 @@ end)
 
 task.spawn(function()
     while true do
-        task.wait(15)
+        task.wait(10)
         pcall(function()
+            collectgarbage("collect")
             collectgarbage("collect")
             collectgarbage("collect")
             collectgarbage("collect")
@@ -445,12 +459,12 @@ task.spawn(function()
     end
 end)
 
-local CULL_DIST_SQ = 50 * 50
+local CULL_DIST_SQ = 45 * 45
 local culled = {}
 
 task.spawn(function()
     while true do
-        task.wait(0.25)
+        task.wait(0.2)
         pcall(function()
             if not Camera then return end
             local camPos = Camera.CFrame.Position
@@ -474,6 +488,326 @@ task.spawn(function()
             end
         end)
     end
+end)
+
+local notifGui = Instance.new("ScreenGui")
+notifGui.Name = "LegacyNotif_" .. HttpService:GenerateGUID(false):sub(1, 8)
+notifGui.ResetOnSpawn = false
+notifGui.DisplayOrder = 2147483647
+notifGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+pcall(function() notifGui.Parent = uiParent end)
+
+local activeNotifs = {}
+local NOTIF_CONST = {
+    WIDTH = 260,
+    HEIGHT = 80,
+    PADDING = 12,
+    THEME = Color3.fromRGB(255, 60, 60),
+    BG = Color3.fromRGB(18, 18, 18),
+    TEXT = Color3.fromRGB(240, 240, 240),
+    SUBTEXT = Color3.fromRGB(160, 160, 160),
+    SPEED = 0.4
+}
+
+local function updateNotifs()
+    for index, data in ipairs(activeNotifs) do
+        local targetY = -NOTIF_CONST.PADDING - ((index - 1) * (NOTIF_CONST.HEIGHT + NOTIF_CONST.PADDING))
+        TweenService:Create(data.Container, TweenInfo.new(NOTIF_CONST.SPEED, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+            Position = UDim2.new(1, -NOTIF_CONST.PADDING, 1, targetY)
+        }):Play()
+    end
+end
+
+local function showNotif(titleText, messageText, duration)
+    duration = duration or 6
+    local container = Instance.new("Frame")
+    container.Size = UDim2.new(0, NOTIF_CONST.WIDTH, 0, NOTIF_CONST.HEIGHT)
+    container.Position = UDim2.new(1, 320, 1, -NOTIF_CONST.PADDING)
+    container.AnchorPoint = Vector2.new(1, 1)
+    container.BackgroundTransparency = 1
+    container.Parent = notifGui
+
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(1, 0, 1, 0)
+    frame.BackgroundColor3 = NOTIF_CONST.BG
+    frame.BorderSizePixel = 0
+    frame.Parent = container
+    Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 8)
+
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = Color3.fromRGB(60, 30, 30)
+    stroke.Thickness = 1
+    stroke.Parent = frame
+
+    local accent = Instance.new("Frame")
+    accent.Size = UDim2.new(1, 0, 0, 2)
+    accent.BackgroundColor3 = NOTIF_CONST.THEME
+    accent.BorderSizePixel = 0
+    accent.Parent = frame
+
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Size = UDim2.new(1, -50, 0, 22)
+    titleLabel.Position = UDim2.new(0, 14, 0, 10)
+    titleLabel.BackgroundTransparency = 1
+    titleLabel.Text = titleText
+    titleLabel.TextColor3 = NOTIF_CONST.TEXT
+    titleLabel.Font = Enum.Font.GothamBold
+    titleLabel.TextSize = 15
+    titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    titleLabel.Parent = frame
+
+    local msgLabel = Instance.new("TextLabel")
+    msgLabel.Size = UDim2.new(1, -28, 0, 36)
+    msgLabel.Position = UDim2.new(0, 14, 0, 34)
+    msgLabel.BackgroundTransparency = 1
+    msgLabel.Text = messageText
+    msgLabel.TextColor3 = NOTIF_CONST.SUBTEXT
+    msgLabel.Font = Enum.Font.GothamMedium
+    msgLabel.TextSize = 12
+    msgLabel.TextWrapped = true
+    msgLabel.TextXAlignment = Enum.TextXAlignment.Left
+    msgLabel.TextYAlignment = Enum.TextYAlignment.Top
+    msgLabel.Parent = frame
+
+    local closeBtn = Instance.new("TextButton")
+    closeBtn.Size = UDim2.new(0, 22, 0, 22)
+    closeBtn.Position = UDim2.new(1, -8, 0, 8)
+    closeBtn.AnchorPoint = Vector2.new(1, 0)
+    closeBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+    closeBtn.Text = "X"
+    closeBtn.TextColor3 = Color3.fromRGB(150, 150, 150)
+    closeBtn.Font = Enum.Font.GothamBold
+    closeBtn.TextSize = 11
+    closeBtn.AutoButtonColor = false
+    closeBtn.Parent = frame
+    Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 6)
+
+    local notifData = {Container = container}
+    table.insert(activeNotifs, 1, notifData)
+    updateNotifs()
+
+    local closed = false
+    local function closeNotif()
+        if closed then return end
+        closed = true
+        local idx = table.find(activeNotifs, notifData)
+        if idx then
+            table.remove(activeNotifs, idx)
+            updateNotifs()
+        end
+        local tweenOut = TweenService:Create(container, TweenInfo.new(NOTIF_CONST.SPEED, Enum.EasingStyle.Sine, Enum.EasingDirection.In), {
+            Position = UDim2.new(1, 320, container.Position.Y.Scale, container.Position.Y.Offset)
+        })
+        tweenOut:Play()
+        tweenOut.Completed:Wait()
+        container:Destroy()
+    end
+
+    closeBtn.MouseButton1Click:Connect(closeNotif)
+    task.delay(duration, closeNotif)
+end
+
+local sg = Instance.new("ScreenGui")
+sg.Name = "LegacyLoader"
+sg.ResetOnSpawn = false
+sg.IgnoreGuiInset = true
+sg.DisplayOrder = 2147483647
+sg.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+sg.Parent = uiParent
+
+local backdrop = Instance.new("Frame")
+backdrop.Name = "LegacyBackdrop"
+backdrop.Size = UDim2.new(1, 0, 1, 0)
+backdrop.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+backdrop.BackgroundTransparency = 1
+backdrop.BorderSizePixel = 0
+backdrop.ZIndex = 999
+backdrop.Parent = sg
+
+TweenService:Create(backdrop, TweenInfo.new(0.5), {BackgroundTransparency = 0.5}):Play()
+
+local popup = Instance.new("Frame")
+popup.Size = UDim2.new(0, 320, 0, 100)
+popup.Position = UDim2.new(0.5, -160, 0.5, -50)
+popup.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
+popup.BackgroundTransparency = 1
+popup.BorderSizePixel = 0
+popup.ZIndex = 1000
+popup.Parent = sg
+Instance.new("UICorner", popup).CornerRadius = UDim.new(0, 8)
+
+local popupScale = Instance.new("UIScale")
+popupScale.Scale = 0.6
+popupScale.Parent = popup
+
+TweenService:Create(popup, TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {BackgroundTransparency = 0}):Play()
+TweenService:Create(popupScale, TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Scale = 1}):Play()
+
+local borderStroke = Instance.new("UIStroke")
+borderStroke.Color = Color3.fromRGB(80, 30, 30)
+borderStroke.Thickness = 1
+borderStroke.Transparency = 1
+borderStroke.Parent = popup
+TweenService:Create(borderStroke, TweenInfo.new(0.6), {Transparency = 0}):Play()
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, -30, 0, 22)
+title.Position = UDim2.new(0, 15, 0, 14)
+title.BackgroundTransparency = 1
+title.Text = "Legacy optimizer"
+title.Font = Enum.Font.GothamBold
+title.TextSize = 17
+title.TextColor3 = Color3.fromRGB(240, 240, 240)
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.TextTransparency = 1
+title.ZIndex = 1010
+title.Parent = popup
+TweenService:Create(title, TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 0}):Play()
+
+local sub = Instance.new("TextLabel")
+sub.Size = UDim2.new(1, -30, 0, 14)
+sub.Position = UDim2.new(0, 15, 0, 38)
+sub.BackgroundTransparency = 1
+sub.Text = "by @realz29001 on tiktok     v1.2.0"
+sub.Font = Enum.Font.Gotham
+sub.TextSize = 11
+sub.TextColor3 = Color3.fromRGB(150, 150, 150)
+sub.TextXAlignment = Enum.TextXAlignment.Left
+sub.TextTransparency = 1
+sub.ZIndex = 1010
+sub.Parent = popup
+TweenService:Create(sub, TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 0}):Play()
+
+local barBg = Instance.new("Frame")
+barBg.Size = UDim2.new(1, -30, 0, 5)
+barBg.Position = UDim2.new(0, 15, 0, 68)
+barBg.BackgroundColor3 = Color3.fromRGB(40, 25, 25)
+barBg.BackgroundTransparency = 1
+barBg.BorderSizePixel = 0
+barBg.ZIndex = 1010
+barBg.Parent = popup
+Instance.new("UICorner", barBg).CornerRadius = UDim.new(1, 0)
+TweenService:Create(barBg, TweenInfo.new(0.6), {BackgroundTransparency = 0}):Play()
+
+local barBgStroke = Instance.new("UIStroke")
+barBgStroke.Color = Color3.fromRGB(180, 50, 50)
+barBgStroke.Thickness = 1
+barBgStroke.Transparency = 1
+barBgStroke.Parent = barBg
+TweenService:Create(barBgStroke, TweenInfo.new(0.6), {Transparency = 0.5}):Play()
+
+local barFill = Instance.new("Frame")
+barFill.Size = UDim2.new(0, 0, 1, 0)
+barFill.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+barFill.BorderSizePixel = 0
+barFill.ZIndex = 1011
+barFill.Parent = barBg
+Instance.new("UICorner", barFill).CornerRadius = UDim.new(1, 0)
+
+local barGlow = Instance.new("Frame")
+barGlow.Size = UDim2.new(1, 4, 1, 4)
+barGlow.Position = UDim2.new(0, -2, 0, -2)
+barGlow.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
+barGlow.BackgroundTransparency = 0.6
+barGlow.BorderSizePixel = 0
+barGlow.ZIndex = 1009
+barGlow.Parent = barFill
+Instance.new("UICorner", barGlow).CornerRadius = UDim.new(1, 0)
+
+local statusLabel = Instance.new("TextLabel")
+statusLabel.Size = UDim2.new(1, -100, 0, 14)
+statusLabel.Position = UDim2.new(0, 15, 0, 80)
+statusLabel.BackgroundTransparency = 1
+statusLabel.Text = "optimizing..."
+statusLabel.Font = Enum.Font.Gotham
+statusLabel.TextSize = 10
+statusLabel.TextColor3 = Color3.fromRGB(160, 120, 120)
+statusLabel.TextXAlignment = Enum.TextXAlignment.Left
+statusLabel.TextTransparency = 1
+statusLabel.ZIndex = 1010
+statusLabel.Parent = popup
+TweenService:Create(statusLabel, TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 0}):Play()
+
+local percentL = Instance.new("TextLabel")
+percentL.Size = UDim2.new(0, 60, 0, 14)
+percentL.Position = UDim2.new(1, -75, 0, 80)
+percentL.BackgroundTransparency = 1
+percentL.Text = "0%"
+percentL.Font = Enum.Font.GothamMedium
+percentL.TextSize = 10
+percentL.TextColor3 = Color3.fromRGB(255, 130, 130)
+percentL.TextXAlignment = Enum.TextXAlignment.Right
+percentL.TextTransparency = 1
+percentL.ZIndex = 1010
+percentL.Parent = popup
+TweenService:Create(percentL, TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 0}):Play()
+
+task.spawn(function()
+    while barBg.Parent do
+        local pulse = math.abs(math.sin(tick() * 3))
+        barBgStroke.Transparency = 0.3 + pulse * 0.4
+        barGlow.BackgroundTransparency = 0.5 + pulse * 0.3
+        task.wait(0.05)
+    end
+end)
+
+local barDone = false
+task.spawn(function()
+    local currentP = 0
+    local minDuration = 4.5
+    local startT = tick()
+
+    while not barDone do
+        local elapsed = tick() - startT
+        local progress = math.min(elapsed / minDuration, 1)
+        currentP = progress * 100
+
+        barFill.Size = UDim2.new(currentP / 100, 0, 1, 0)
+        percentL.Text = math.floor(currentP) .. "%"
+
+        if currentP >= 100 then
+            barDone = true
+        end
+        task.wait(0.03)
+    end
+
+    percentL.Text = "100%"
+    statusLabel.Text = "done"
+    statusLabel.TextColor3 = Color3.fromRGB(120, 220, 140)
+    barFill.BackgroundColor3 = Color3.fromRGB(120, 220, 140)
+    barGlow.BackgroundColor3 = Color3.fromRGB(120, 220, 140)
+    barBgStroke.Color = Color3.fromRGB(120, 220, 140)
+end)
+
+task.spawn(function()
+    while not barDone do
+        task.wait(0.1)
+    end
+    task.wait(1.5)
+
+    local fadeItems = {
+        {obj = backdrop, prop = "BackgroundTransparency", target = 1},
+        {obj = popup, prop = "BackgroundTransparency", target = 1},
+        {obj = title, prop = "TextTransparency", target = 1},
+        {obj = sub, prop = "TextTransparency", target = 1},
+        {obj = percentL, prop = "TextTransparency", target = 1},
+        {obj = statusLabel, prop = "TextTransparency", target = 1},
+        {obj = barBg, prop = "BackgroundTransparency", target = 1},
+        {obj = barFill, prop = "BackgroundTransparency", target = 1},
+        {obj = barGlow, prop = "BackgroundTransparency", target = 1},
+    }
+
+    for _, item in ipairs(fadeItems) do
+        TweenService:Create(item.obj, TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {[item.prop] = item.target}):Play()
+    end
+    TweenService:Create(barBgStroke, TweenInfo.new(0.8), {Transparency = 1}):Play()
+    TweenService:Create(borderStroke, TweenInfo.new(0.8), {Transparency = 1}):Play()
+
+    local scaleTween = TweenService:Create(popupScale, TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Scale = 0.85})
+    scaleTween:Play()
+    scaleTween.Completed:Wait()
+    task.wait(0.3)
+    sg:Destroy()
 end)
 
 local statsGui = Instance.new("ScreenGui")
@@ -816,5 +1150,7 @@ end)
 
 task.wait(0.1)
 applyOpacity(0.5)
+
+showNotif("Script successfully loaded!", "FFlags applied. Optimization active.", 6)
 
 print("Legacy optimizer v1.2.0 by @realz29001 loaded")

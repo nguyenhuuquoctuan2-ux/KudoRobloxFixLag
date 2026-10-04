@@ -174,17 +174,17 @@ local SKY_GRAY = Color3.fromRGB(128, 128, 128)
 local function applySky()
     pcall(function()
         for _, v in ipairs(Lighting:GetChildren()) do
-            if v:IsA("PostEffect") or v:IsA("Sky") or v:IsA("Atmosphere") or v:IsA("Clouds") then
+            if v:IsA("Sky") or v:IsA("Atmosphere") or v:IsA("Clouds") or v:IsA("PostEffect") then
                 pcall(function() v:Destroy() end)
             end
         end
         local sky = Instance.new("Sky")
-        sky.SkyboxBk = ""
-        sky.SkyboxDn = ""
-        sky.SkyboxFt = ""
-        sky.SkyboxLf = ""
-        sky.SkyboxRt = ""
-        sky.SkyboxUp = ""
+        sky.SkyboxBk = "rbxasset://textures/sky/sky512_bk.tex"
+        sky.SkyboxDn = "rbxasset://textures/sky/sky512_dn.tex"
+        sky.SkyboxFt = "rbxasset://textures/sky/sky512_ft.tex"
+        sky.SkyboxLf = "rbxasset://textures/sky/sky512_lf.tex"
+        sky.SkyboxRt = "rbxasset://textures/sky/sky512_rt.tex"
+        sky.SkyboxUp = "rbxasset://textures/sky/sky512_up.tex"
         sky.SunTextureId = ""
         sky.MoonTextureId = ""
         sky.StarCount = 0

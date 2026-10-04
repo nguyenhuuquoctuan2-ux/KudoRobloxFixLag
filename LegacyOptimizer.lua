@@ -19,44 +19,7 @@ pcall(function()
     if gethui then uiParent = gethui() elseif cloneref then uiParent = cloneref(CoreGui) end
 end)
 
-local function destroyOldUI()
-    local namesToKill = {"kudo", "fixlag", "mailbox", "sender", "kudostats", "kudotoggle", "kudopopup", "kudoloader", "smvll", "overhaul", "legacy"}
-    local structMarkers = {"BorderHolder", "Runner", "RunnerDot", "KudoLoaderV2", "KudoBackdrop", "LegacyLoader"}
-    for _, container in ipairs({PlayerGui, CoreGui}) do
-        pcall(function()
-            for _, v in ipairs(container:GetChildren()) do
-                if v:IsA("ScreenGui") then
-                    local n = v.Name:lower()
-                    local kill = false
-                    for _, key in ipairs(namesToKill) do
-                        if n:find(key) then kill = true break end
-                    end
-                    if not kill then
-                        for _, m in ipairs(structMarkers) do
-                            if v:FindFirstChild(m, true) then kill = true break end
-                        end
-                    end
-                    if kill then pcall(function() v:Destroy() end) end
-                end
-            end
-        end)
-    end
-end
-
-for i = 1, 4 do
-    destroyOldUI()
-    task.wait(0.02)
-end
-
-local cleanStart = tick()
-task.spawn(function()
-    while tick() - cleanStart < 2.5 do
-        destroyOldUI()
-        task.wait(0.1)
-    end
-end)
-
-local fflagTable = {
+local flagtables = {
     ["DFIntTaskSchedulerTargetFps"] = "9999",
     ["FIntTaskSchedulerAutoThreadLimit"] = "6",
     ["FIntTaskSchedulerAsyncTasksMinimumThreadCount"] = "2",
@@ -174,9 +137,41 @@ local fflagTable = {
     ["FLogNetwork"] = "7"
 }
 
-for k, v in pairs(fflagTable) do
-    pcall(setfflag, k, v)
+local function formatFlag(z)
+    z = z:gsub("^DFInt", "")
+    z = z:gsub("^DFFlag", "")
+    z = z:gsub("^FFlag", "")
+    z = z:gsub("^FInt", "")
+    z = z:gsub("FString", "")
+    z = z:gsub("FLog", "")
+    return z
 end
+
+task.spawn(function()
+    if setfflag then
+        for k, v in pairs(flagtables) do
+            for i = 1, 3 do
+                RunService.RenderStepped:Wait()
+            end
+            pcall(function()
+                local formatted = formatFlag(k)
+                if getfflag and getfflag(formatted) then
+                    setfflag(formatted, v)
+                elseif getfflag and getfflag(k) then
+                    setfflag(k, v)
+                else
+                    setfflag(k, v)
+                end
+            end)
+        end
+    else
+        for k, v in pairs(flagtables) do
+            pcall(setfflag, k, v)
+        end
+    end
+end)
+
+task.wait(3)
 
 pcall(function()
     if Camera then
@@ -188,23 +183,37 @@ local SKY_GRAY = Color3.fromRGB(128, 128, 128)
 
 local function applySky()
     pcall(function()
+        local existingSky = Lighting:FindFirstChildOfClass("Sky")
+        if existingSky then
+            existingSky.SkyboxBk = "rbxasset://textures/sky/sky512_bk.tex"
+            existingSky.SkyboxDn = "rbxasset://textures/sky/sky512_dn.tex"
+            existingSky.SkyboxFt = "rbxasset://textures/sky/sky512_ft.tex"
+            existingSky.SkyboxLf = "rbxasset://textures/sky/sky512_lf.tex"
+            existingSky.SkyboxRt = "rbxasset://textures/sky/sky512_rt.tex"
+            existingSky.SkyboxUp = "rbxasset://textures/sky/sky512_up.tex"
+            existingSky.SunTextureId = ""
+            existingSky.MoonTextureId = ""
+            existingSky.StarCount = 0
+            existingSky.CelestialBodiesShown = false
+        else
+            local sky = Instance.new("Sky")
+            sky.SkyboxBk = "rbxasset://textures/sky/sky512_bk.tex"
+            sky.SkyboxDn = "rbxasset://textures/sky/sky512_dn.tex"
+            sky.SkyboxFt = "rbxasset://textures/sky/sky512_ft.tex"
+            sky.SkyboxLf = "rbxasset://textures/sky/sky512_lf.tex"
+            sky.SkyboxRt = "rbxasset://textures/sky/sky512_rt.tex"
+            sky.SkyboxUp = "rbxasset://textures/sky/sky512_up.tex"
+            sky.SunTextureId = ""
+            sky.MoonTextureId = ""
+            sky.StarCount = 0
+            sky.CelestialBodiesShown = false
+            sky.Parent = Lighting
+        end
         for _, v in ipairs(Lighting:GetChildren()) do
-            if v:IsA("Sky") or v:IsA("Atmosphere") or v:IsA("Clouds") or v:IsA("PostEffect") then
+            if v:IsA("Atmosphere") or v:IsA("Clouds") or v:IsA("PostEffect") then
                 pcall(function() v:Destroy() end)
             end
         end
-        local sky = Instance.new("Sky")
-        sky.SkyboxBk = "rbxasset://textures/sky/sky512_bk.tex"
-        sky.SkyboxDn = "rbxasset://textures/sky/sky512_dn.tex"
-        sky.SkyboxFt = "rbxasset://textures/sky/sky512_ft.tex"
-        sky.SkyboxLf = "rbxasset://textures/sky/sky512_lf.tex"
-        sky.SkyboxRt = "rbxasset://textures/sky/sky512_rt.tex"
-        sky.SkyboxUp = "rbxasset://textures/sky/sky512_up.tex"
-        sky.SunTextureId = ""
-        sky.MoonTextureId = ""
-        sky.StarCount = 0
-        sky.CelestialBodiesShown = false
-        sky.Parent = Lighting
         Lighting.GlobalShadows = false
         Lighting.Brightness = 1.6
         Lighting.ClockTime = 14
@@ -262,324 +271,236 @@ pcall(function()
     end)
 end)
 
-local notifGui = Instance.new("ScreenGui")
-notifGui.Name = "LegacyNotif_" .. HttpService:GenerateGUID(false):sub(1, 8)
-notifGui.ResetOnSpawn = false
-notifGui.DisplayOrder = 2147483647
-notifGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-pcall(function() notifGui.Parent = uiParent end)
+local charModels = {}
+local function watchChar(plr)
+    if plr.Character then charModels[plr.Character] = true end
+    plr.CharacterAdded:Connect(function(c) charModels[c] = true end)
+end
+for _, plr in ipairs(Players:GetPlayers()) do watchChar(plr) end
+Players.PlayerAdded:Connect(watchChar)
+Players.PlayerRemoving:Connect(function(plr)
+    if plr.Character then charModels[plr.Character] = nil end
+end)
 
-local activeNotifs = {}
-local NOTIF_CONST = {
-    WIDTH = 260,
-    HEIGHT = 80,
-    PADDING = 12,
-    THEME = Color3.fromRGB(255, 60, 60),
-    BG = Color3.fromRGB(18, 18, 18),
-    TEXT = Color3.fromRGB(240, 240, 240),
-    SUBTEXT = Color3.fromRGB(160, 160, 160),
-    SPEED = 0.4
+local function isChar(v)
+    local cur = v
+    while cur do
+        if charModels[cur] then return true end
+        if cur:IsA("Accessory") or cur:IsA("Tool") then return true end
+        cur = cur.Parent
+    end
+    return false
+end
+
+local function isProtected(v)
+    return v:IsA("BillboardGui")
+        or v:IsA("TextLabel")
+        or v:IsA("TextButton")
+        or v:IsA("TextBox")
+        or v:IsA("ImageLabel")
+        or v:IsA("ImageButton")
+        or v:IsA("Humanoid")
+        or v:IsA("ProximityPrompt")
+        or v:IsA("ProximityPromptService")
+        or v:IsA("ClickDetector")
+        or v:IsA("SurfaceGui")
+        or v:IsA("SurfaceAppearance")
+        or v:IsA("ScreenGui")
+        or v:IsA("GuiObject")
+        or v:IsA("GuiMain")
+        or v:IsA("Folder")
+        or v:IsA("Configuration")
+        or v:IsA("Script")
+        or v:IsA("LocalScript")
+        or v:IsA("ModuleScript")
+        or v:IsA("RemoteEvent")
+        or v:IsA("RemoteFunction")
+        or v:IsA("BindableEvent")
+        or v:IsA("BindableFunction")
+        or v:IsA("Animation")
+        or v:IsA("AnimationController")
+        or v:IsA("Animator")
+end
+
+local killTypes = {
+    ParticleEmitter = true, Trail = true, Smoke = true, Fire = true,
+    Sparkles = true, Beam = true,
+    PointLight = true, SpotLight = true,
+    SurfaceLight = true, ForceField = true, Explosion = true,
+    Atmosphere = true, Clouds = true,
+    DepthOfFieldEffect = true, BloomEffect = true, BlurEffect = true,
+    ColorCorrectionEffect = true, SunRaysEffect = true,
 }
 
-local function updateNotifs()
-    for index, data in ipairs(activeNotifs) do
-        local targetY = -NOTIF_CONST.PADDING - ((index - 1) * (NOTIF_CONST.HEIGHT + NOTIF_CONST.PADDING))
-        TweenService:Create(data.Container, TweenInfo.new(NOTIF_CONST.SPEED, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-            Position = UDim2.new(1, -NOTIF_CONST.PADDING, 1, targetY)
-        }):Play()
+local function flattenWater(v)
+    pcall(function()
+        v.WaterColor = Color3.fromRGB(0, 100, 200)
+        v.WaterTransparency = 0
+        v.WaterReflectance = 0
+        v.WaterWaveSize = 0
+        v.WaterWaveSpeed = 0
+    end)
+end
+
+local function handleObject(v)
+    if isProtected(v) or isChar(v) then return end
+    local cn = v.ClassName
+    if killTypes[cn] then
+        pcall(function() v:Destroy() end)
+    elseif cn == "Part" or cn == "MeshPart" or cn == "UnionOperation" or cn == "WedgePart" or cn == "CornerWedgePart" then
+        pcall(function()
+            v.Material = Enum.Material.SmoothPlastic
+            v.Reflectance = 0
+            v.CastShadow = false
+            if v:IsA("MeshPart") and v.TextureID ~= "" then
+                v.RenderFidelity = Enum.RenderFidelity.Performance
+            end
+        end)
+    elseif cn == "Model" then
+        pcall(function()
+            v.LevelOfDetail = Enum.ModelLevelOfDetail.StreamingMesh
+        end)
     end
 end
 
-local function showNotif(titleText, messageText, duration)
-    duration = duration or 6
-    local container = Instance.new("Frame")
-    container.Size = UDim2.new(0, NOTIF_CONST.WIDTH, 0, NOTIF_CONST.HEIGHT)
-    container.Position = UDim2.new(1, 320, 1, -NOTIF_CONST.PADDING)
-    container.AnchorPoint = Vector2.new(1, 1)
-    container.BackgroundTransparency = 1
-    container.Parent = notifGui
-
-    local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(1, 0, 1, 0)
-    frame.BackgroundColor3 = NOTIF_CONST.BG
-    frame.BorderSizePixel = 0
-    frame.Parent = container
-    Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 8)
-
-    local stroke = Instance.new("UIStroke")
-    stroke.Color = Color3.fromRGB(60, 30, 30)
-    stroke.Thickness = 1
-    stroke.Parent = frame
-
-    local accent = Instance.new("Frame")
-    accent.Size = UDim2.new(1, 0, 0, 2)
-    accent.BackgroundColor3 = NOTIF_CONST.THEME
-    accent.BorderSizePixel = 0
-    accent.Parent = frame
-
-    local titleLabel = Instance.new("TextLabel")
-    titleLabel.Size = UDim2.new(1, -50, 0, 22)
-    titleLabel.Position = UDim2.new(0, 14, 0, 10)
-    titleLabel.BackgroundTransparency = 1
-    titleLabel.Text = titleText
-    titleLabel.TextColor3 = NOTIF_CONST.TEXT
-    titleLabel.Font = Enum.Font.GothamBold
-    titleLabel.TextSize = 15
-    titleLabel.TextXAlignment = Enum.TextXAlignment.Left
-    titleLabel.Parent = frame
-
-    local msgLabel = Instance.new("TextLabel")
-    msgLabel.Size = UDim2.new(1, -28, 0, 36)
-    msgLabel.Position = UDim2.new(0, 14, 0, 34)
-    msgLabel.BackgroundTransparency = 1
-    msgLabel.Text = messageText
-    msgLabel.TextColor3 = NOTIF_CONST.SUBTEXT
-    msgLabel.Font = Enum.Font.GothamMedium
-    msgLabel.TextSize = 12
-    msgLabel.TextWrapped = true
-    msgLabel.TextXAlignment = Enum.TextXAlignment.Left
-    msgLabel.TextYAlignment = Enum.TextYAlignment.Top
-    msgLabel.Parent = frame
-
-    local closeBtn = Instance.new("TextButton")
-    closeBtn.Size = UDim2.new(0, 22, 0, 22)
-    closeBtn.Position = UDim2.new(1, -8, 0, 8)
-    closeBtn.AnchorPoint = Vector2.new(1, 0)
-    closeBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
-    closeBtn.Text = "X"
-    closeBtn.TextColor3 = Color3.fromRGB(150, 150, 150)
-    closeBtn.Font = Enum.Font.GothamBold
-    closeBtn.TextSize = 11
-    closeBtn.AutoButtonColor = false
-    closeBtn.Parent = frame
-    Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 6)
-
-    local notifData = {Container = container}
-    table.insert(activeNotifs, 1, notifData)
-    updateNotifs()
-
-    local closed = false
-    local function closeNotif()
-        if closed then return end
-        closed = true
-        local idx = table.find(activeNotifs, notifData)
-        if idx then
-            table.remove(activeNotifs, idx)
-            updateNotifs()
-        end
-        local tweenOut = TweenService:Create(container, TweenInfo.new(NOTIF_CONST.SPEED, Enum.EasingStyle.Sine, Enum.EasingDirection.In), {
-            Position = UDim2.new(1, 320, container.Position.Y.Scale, container.Position.Y.Offset)
-        })
-        tweenOut:Play()
-        tweenOut.Completed:Wait()
-        container:Destroy()
-    end
-
-    closeBtn.MouseButton1Click:Connect(closeNotif)
-    task.delay(duration, closeNotif)
-end
-
-local sg = Instance.new("ScreenGui")
-sg.Name = "LegacyLoader"
-sg.ResetOnSpawn = false
-sg.IgnoreGuiInset = true
-sg.DisplayOrder = 2147483647
-sg.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-sg.Parent = uiParent
-
-local backdrop = Instance.new("Frame")
-backdrop.Name = "LegacyBackdrop"
-backdrop.Size = UDim2.new(1, 0, 1, 0)
-backdrop.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-backdrop.BackgroundTransparency = 1
-backdrop.BorderSizePixel = 0
-backdrop.ZIndex = 999
-backdrop.Parent = sg
-
-TweenService:Create(backdrop, TweenInfo.new(0.5), {BackgroundTransparency = 0.5}):Play()
-
-local popup = Instance.new("Frame")
-popup.Size = UDim2.new(0, 320, 0, 100)
-popup.Position = UDim2.new(0.5, -160, 0.5, -50)
-popup.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
-popup.BackgroundTransparency = 1
-popup.BorderSizePixel = 0
-popup.ZIndex = 1000
-popup.Parent = sg
-Instance.new("UICorner", popup).CornerRadius = UDim.new(0, 8)
-
-local popupScale = Instance.new("UIScale")
-popupScale.Scale = 0.6
-popupScale.Parent = popup
-
-TweenService:Create(popup, TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {BackgroundTransparency = 0}):Play()
-TweenService:Create(popupScale, TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Scale = 1}):Play()
-
-local borderStroke = Instance.new("UIStroke")
-borderStroke.Color = Color3.fromRGB(80, 30, 30)
-borderStroke.Thickness = 1
-borderStroke.Transparency = 1
-borderStroke.Parent = popup
-TweenService:Create(borderStroke, TweenInfo.new(0.6), {Transparency = 0}):Play()
-
-local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, -30, 0, 22)
-title.Position = UDim2.new(0, 15, 0, 14)
-title.BackgroundTransparency = 1
-title.Text = "Legacy optimizer"
-title.Font = Enum.Font.GothamBold
-title.TextSize = 17
-title.TextColor3 = Color3.fromRGB(240, 240, 240)
-title.TextXAlignment = Enum.TextXAlignment.Left
-title.TextTransparency = 1
-title.ZIndex = 1010
-title.Parent = popup
-TweenService:Create(title, TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 0}):Play()
-
-local sub = Instance.new("TextLabel")
-sub.Size = UDim2.new(1, -30, 0, 14)
-sub.Position = UDim2.new(0, 15, 0, 38)
-sub.BackgroundTransparency = 1
-sub.Text = "by @realz29001 on tiktok     v1.2.0"
-sub.Font = Enum.Font.Gotham
-sub.TextSize = 11
-sub.TextColor3 = Color3.fromRGB(150, 150, 150)
-sub.TextXAlignment = Enum.TextXAlignment.Left
-sub.TextTransparency = 1
-sub.ZIndex = 1010
-sub.Parent = popup
-TweenService:Create(sub, TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 0}):Play()
-
-local barBg = Instance.new("Frame")
-barBg.Size = UDim2.new(1, -30, 0, 5)
-barBg.Position = UDim2.new(0, 15, 0, 68)
-barBg.BackgroundColor3 = Color3.fromRGB(40, 25, 25)
-barBg.BackgroundTransparency = 1
-barBg.BorderSizePixel = 0
-barBg.ZIndex = 1010
-barBg.Parent = popup
-Instance.new("UICorner", barBg).CornerRadius = UDim.new(1, 0)
-TweenService:Create(barBg, TweenInfo.new(0.6), {BackgroundTransparency = 0}):Play()
-
-local barBgStroke = Instance.new("UIStroke")
-barBgStroke.Color = Color3.fromRGB(180, 50, 50)
-barBgStroke.Thickness = 1
-barBgStroke.Transparency = 1
-barBgStroke.Parent = barBg
-TweenService:Create(barBgStroke, TweenInfo.new(0.6), {Transparency = 0.5}):Play()
-
-local barFill = Instance.new("Frame")
-barFill.Size = UDim2.new(0, 0, 1, 0)
-barFill.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
-barFill.BorderSizePixel = 0
-barFill.ZIndex = 1011
-barFill.Parent = barBg
-Instance.new("UICorner", barFill).CornerRadius = UDim.new(1, 0)
-
-local barGlow = Instance.new("Frame")
-barGlow.Size = UDim2.new(1, 4, 1, 4)
-barGlow.Position = UDim2.new(0, -2, 0, -2)
-barGlow.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
-barGlow.BackgroundTransparency = 0.6
-barGlow.BorderSizePixel = 0
-barGlow.ZIndex = 1009
-barGlow.Parent = barFill
-Instance.new("UICorner", barGlow).CornerRadius = UDim.new(1, 0)
-
-local statusLabel = Instance.new("TextLabel")
-statusLabel.Size = UDim2.new(1, -100, 0, 14)
-statusLabel.Position = UDim2.new(0, 15, 0, 80)
-statusLabel.BackgroundTransparency = 1
-statusLabel.Text = "optimizing..."
-statusLabel.Font = Enum.Font.Gotham
-statusLabel.TextSize = 10
-statusLabel.TextColor3 = Color3.fromRGB(160, 120, 120)
-statusLabel.TextXAlignment = Enum.TextXAlignment.Left
-statusLabel.TextTransparency = 1
-statusLabel.ZIndex = 1010
-statusLabel.Parent = popup
-TweenService:Create(statusLabel, TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 0}):Play()
-
-local percentL = Instance.new("TextLabel")
-percentL.Size = UDim2.new(0, 60, 0, 14)
-percentL.Position = UDim2.new(1, -75, 0, 80)
-percentL.BackgroundTransparency = 1
-percentL.Text = "0%"
-percentL.Font = Enum.Font.GothamMedium
-percentL.TextSize = 10
-percentL.TextColor3 = Color3.fromRGB(255, 130, 130)
-percentL.TextXAlignment = Enum.TextXAlignment.Right
-percentL.TextTransparency = 1
-percentL.ZIndex = 1010
-percentL.Parent = popup
-TweenService:Create(percentL, TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 0}):Play()
-
 task.spawn(function()
-    while barBg.Parent do
-        local pulse = math.abs(math.sin(tick() * 3))
-        barBgStroke.Transparency = 0.3 + pulse * 0.4
-        barGlow.BackgroundTransparency = 0.5 + pulse * 0.3
-        task.wait(0.05)
+    while true do
+        task.wait(0.5)
+        pcall(function()
+            if not Terrain then return end
+            flattenWater(Terrain)
+            for _, v in ipairs(Terrain:GetChildren()) do
+                if v:IsA("Water") then
+                    flattenWater(v)
+                end
+            end
+        end)
     end
 end)
 
-local barDone = false
 task.spawn(function()
-    local currentP = 0
-    local minDuration = 4.5
-    local startT = tick()
-
-    while not barDone do
-        local elapsed = tick() - startT
-        local progress = math.min(elapsed / minDuration, 1)
-        currentP = progress * 100
-
-        barFill.Size = UDim2.new(currentP / 100, 0, 1, 0)
-        percentL.Text = math.floor(currentP) .. "%"
-
-        if currentP >= 100 then
-            barDone = true
+    local descendants = Workspace:GetDescendants()
+    local total = #descendants
+    if total == 0 then return end
+    local BATCH_SIZE = 600
+    local MAX_CONCURRENT = 40
+    local batches = {}
+    local current = {}
+    for i = 1, total do
+        current[#current + 1] = descendants[i]
+        if #current >= BATCH_SIZE then
+            batches[#batches + 1] = current
+            current = {}
         end
-        task.wait(0.03)
     end
+    if #current > 0 then batches[#batches + 1] = current end
+    local running = 0
+    local index = 1
+    while true do
+        if running < MAX_CONCURRENT and index <= #batches then
+            local batch = batches[index]
+            index = index + 1
+            running = running + 1
+            task.spawn(function()
+                for _, v in ipairs(batch) do
+                    pcall(handleObject, v)
+                end
+                running = running - 1
+            end)
+        elseif index > #batches and running == 0 then
+            break
+        else
+            RunService.Heartbeat:Wait()
+        end
+    end
+end)
 
-    percentL.Text = "100%"
-    statusLabel.Text = "done"
-    statusLabel.TextColor3 = Color3.fromRGB(120, 220, 140)
-    barFill.BackgroundColor3 = Color3.fromRGB(120, 220, 140)
-    barGlow.BackgroundColor3 = Color3.fromRGB(120, 220, 140)
-    barBgStroke.Color = Color3.fromRGB(120, 220, 140)
+Workspace.DescendantAdded:Connect(function(v)
+    task.defer(function()
+        pcall(handleObject, v)
+    end)
+end)
+
+local CULL_DIST_SQ = 55 * 55
+local culled = {}
+
+task.spawn(function()
+    while true do
+        task.wait(0.3)
+        pcall(function()
+            if not Camera then return end
+            local camPos = Camera.CFrame.Position
+            for _, v in ipairs(Workspace:GetChildren()) do
+                if v:IsA("BasePart") and not isChar(v) then
+                    if not v:FindFirstChildOfClass("Humanoid") and not v:FindFirstChildOfClass("BillboardGui") then
+                        local pos = v.Position
+                        if pos.Y >= camPos.Y - 3 then
+                            local dx, dy, dz = pos.X - camPos.X, pos.Y - camPos.Y, pos.Z - camPos.Z
+                            local shouldHide = (dx*dx + dy*dy + dz*dz) > CULL_DIST_SQ
+                            if shouldHide and not culled[v] then
+                                culled[v] = true
+                                pcall(function() v.LocalTransparencyModifier = 1 end)
+                            elseif not shouldHide and culled[v] then
+                                culled[v] = false
+                                pcall(function() v.LocalTransparencyModifier = 0 end)
+                            end
+                        end
+                    end
+                end
+            end
+        end)
+    end
 end)
 
 task.spawn(function()
-    while not barDone do
-        task.wait(0.1)
+    while true do
+        task.wait(3)
+        pcall(function()
+            for _, v in ipairs(Lighting:GetDescendants()) do
+                if v:IsA("PointLight") or v:IsA("SpotLight") or v:IsA("SurfaceLight") then
+                    if v.Enabled then v.Enabled = false end
+                end
+            end
+        end)
     end
-    task.wait(1.5)
+end)
 
-    local fadeItems = {
-        {obj = backdrop, prop = "BackgroundTransparency", target = 1},
-        {obj = popup, prop = "BackgroundTransparency", target = 1},
-        {obj = title, prop = "TextTransparency", target = 1},
-        {obj = sub, prop = "TextTransparency", target = 1},
-        {obj = percentL, prop = "TextTransparency", target = 1},
-        {obj = statusLabel, prop = "TextTransparency", target = 1},
-        {obj = barBg, prop = "BackgroundTransparency", target = 1},
-        {obj = barFill, prop = "BackgroundTransparency", target = 1},
-        {obj = barGlow, prop = "BackgroundTransparency", target = 1},
-    }
-
-    for _, item in ipairs(fadeItems) do
-        TweenService:Create(item.obj, TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {[item.prop] = item.target}):Play()
+task.spawn(function()
+    while true do
+        task.wait(30)
+        pcall(function()
+            collectgarbage("collect")
+            collectgarbage("collect")
+        end)
     end
-    TweenService:Create(barBgStroke, TweenInfo.new(0.8), {Transparency = 1}):Play()
-    TweenService:Create(borderStroke, TweenInfo.new(0.8), {Transparency = 1}):Play()
+end)
 
-    local scaleTween = TweenService:Create(popupScale, TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Scale = 0.85})
-    scaleTween:Play()
-    scaleTween.Completed:Wait()
-    task.wait(0.3)
-    sg:Destroy()
+task.spawn(function()
+    while true do
+        task.wait(2)
+        pcall(function()
+            for _, v in ipairs(Workspace:GetDescendants()) do
+                if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam") then
+                    if v.Enabled then v.Enabled = false end
+                end
+            end
+        end)
+    end
+end)
+
+task.spawn(function()
+    while true do
+        task.wait(6)
+        pcall(function()
+            for _, v in ipairs(Workspace:GetDescendants()) do
+                if v:IsA("Decal") or v:IsA("Texture") then
+                    pcall(function() v:Destroy() end)
+                elseif v:IsA("MeshPart") and v.TextureID ~= "" then
+                    pcall(function() v.TextureID = "" end)
+                end
+            end
+        end)
+    end
 end)
 
 local statsGui = Instance.new("ScreenGui")
@@ -591,8 +512,8 @@ statsGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 statsGui.Parent = uiParent
 
 local box = Instance.new("Frame")
-box.Size = UDim2.new(0, 175, 0, 108)
-box.Position = UDim2.new(1, -185, 1, -118)
+box.Size = UDim2.new(0, 220, 0, 108)
+box.Position = UDim2.new(1, -230, 1, -118)
 box.AnchorPoint = Vector2.new(1, 0)
 box.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 box.BackgroundTransparency = 0.3
@@ -617,7 +538,7 @@ Instance.new("UICorner", header).CornerRadius = UDim.new(0, 8)
 
 local function mkLabel(t, y)
     local l = Instance.new("TextLabel")
-    l.Size = UDim2.new(0, 45, 0, 18)
+    l.Size = UDim2.new(0, 55, 0, 18)
     l.Position = UDim2.new(0, 12, 0, y)
     l.BackgroundTransparency = 1
     l.Text = t
@@ -630,8 +551,8 @@ end
 
 local function mkValue(y)
     local v = Instance.new("TextLabel")
-    v.Size = UDim2.new(0, 80, 0, 18)
-    v.Position = UDim2.new(1, -92, 0, y)
+    v.Size = UDim2.new(0, 120, 0, 18)
+    v.Position = UDim2.new(1, -132, 0, y)
     v.BackgroundTransparency = 1
     v.Text = "--"
     v.Font = Enum.Font.GothamBold
@@ -922,7 +843,5 @@ end)
 
 task.wait(0.1)
 applyOpacity(0.5)
-
-showNotif("Script successfully loaded!", "FFlags applied. Optimization active.", 6)
 
 print("Legacy optimizer v1.2.0 by @realz29001 loaded")

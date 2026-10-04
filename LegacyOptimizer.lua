@@ -1,6 +1,60 @@
--- ============================================================
--- PHASE 1: FFlag Overhaul (chạy trước để engine apply flag)
--- ============================================================
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local Stats = game:GetService("Stats")
+local Lighting = game:GetService("Lighting")
+local Workspace = game:GetService("Workspace")
+local Terrain = Workspace:FindFirstChildOfClass("Terrain")
+local Camera = Workspace.CurrentCamera
+local VirtualUser = game:GetService("VirtualUser")
+local CoreGui = game:GetService("CoreGui")
+local HttpService = game:GetService("HttpService")
+
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+
+local uiParent = PlayerGui
+pcall(function()
+    if gethui then uiParent = gethui() elseif cloneref then uiParent = cloneref(CoreGui) end
+end)
+
+local function destroyOldUI()
+    local namesToKill = {"kudo", "fixlag", "mailbox", "sender", "kudostats", "kudotoggle", "kudopopup", "kudoloader", "smvll", "overhaul", "legacy"}
+    local structMarkers = {"BorderHolder", "Runner", "RunnerDot", "KudoLoaderV2", "KudoBackdrop", "LegacyLoader"}
+    for _, container in ipairs({PlayerGui, CoreGui}) do
+        pcall(function()
+            for _, v in ipairs(container:GetChildren()) do
+                if v:IsA("ScreenGui") then
+                    local n = v.Name:lower()
+                    local kill = false
+                    for _, key in ipairs(namesToKill) do
+                        if n:find(key) then kill = true break end
+                    end
+                    if not kill then
+                        for _, m in ipairs(structMarkers) do
+                            if v:FindFirstChild(m, true) then kill = true break end
+                        end
+                    end
+                    if kill then pcall(function() v:Destroy() end) end
+                end
+            end
+        end)
+    end
+end
+
+for i = 1, 4 do
+    destroyOldUI()
+    task.wait(0.02)
+end
+
+local cleanStart = tick()
+task.spawn(function()
+    while tick() - cleanStart < 2.5 do
+        destroyOldUI()
+        task.wait(0.1)
+    end
+end)
 
 local fflagTable = {
     ["DFIntTaskSchedulerTargetFps"] = "9999",
@@ -124,70 +178,6 @@ for k, v in pairs(fflagTable) do
     pcall(setfflag, k, v)
 end
 
--- Chờ engine apply FFlag xong trước khi sang Phase 2
-task.wait(2)
-
--- ============================================================
--- PHASE 2: Fix lag + Sky + UI
--- ============================================================
-
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
-local Stats = game:GetService("Stats")
-local Lighting = game:GetService("Lighting")
-local Workspace = game:GetService("Workspace")
-local Terrain = Workspace:FindFirstChildOfClass("Terrain")
-local Camera = Workspace.CurrentCamera
-local VirtualUser = game:GetService("VirtualUser")
-local CoreGui = game:GetService("CoreGui")
-
-local LocalPlayer = Players.LocalPlayer
-local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
-
-local uiParent = PlayerGui
-pcall(function()
-    if gethui then uiParent = gethui() elseif cloneref then uiParent = cloneref(CoreGui) end
-end)
-
-local function destroyOldUI()
-    local namesToKill = {"kudo", "fixlag", "mailbox", "sender", "kudostats", "kudotoggle", "kudopopup", "kudoloader", "smvll", "overhaul", "legacy"}
-    local structMarkers = {"BorderHolder", "Runner", "RunnerDot", "KudoLoaderV2", "KudoBackdrop", "LegacyLoader"}
-    for _, container in ipairs({PlayerGui, CoreGui}) do
-        pcall(function()
-            for _, v in ipairs(container:GetChildren()) do
-                if v:IsA("ScreenGui") then
-                    local n = v.Name:lower()
-                    local kill = false
-                    for _, key in ipairs(namesToKill) do
-                        if n:find(key) then kill = true break end
-                    end
-                    if not kill then
-                        for _, m in ipairs(structMarkers) do
-                            if v:FindFirstChild(m, true) then kill = true break end
-                        end
-                    end
-                    if kill then pcall(function() v:Destroy() end) end
-                end
-            end
-        end)
-    end
-end
-
-for i = 1, 4 do
-    destroyOldUI()
-    task.wait(0.02)
-end
-
-local cleanStart = tick()
-task.spawn(function()
-    while tick() - cleanStart < 2.5 do
-        destroyOldUI()
-        task.wait(0.1)
-    end
-end)
-
 pcall(function()
     if Camera then
         Camera.FieldOfView = 85
@@ -198,37 +188,23 @@ local SKY_GRAY = Color3.fromRGB(128, 128, 128)
 
 local function applySky()
     pcall(function()
-        local existingSky = Lighting:FindFirstChildOfClass("Sky")
-        if existingSky then
-            existingSky.SkyboxBk = "rbxasset://textures/sky/sky512_bk.tex"
-            existingSky.SkyboxDn = "rbxasset://textures/sky/sky512_dn.tex"
-            existingSky.SkyboxFt = "rbxasset://textures/sky/sky512_ft.tex"
-            existingSky.SkyboxLf = "rbxasset://textures/sky/sky512_lf.tex"
-            existingSky.SkyboxRt = "rbxasset://textures/sky/sky512_rt.tex"
-            existingSky.SkyboxUp = "rbxasset://textures/sky/sky512_up.tex"
-            existingSky.SunTextureId = ""
-            existingSky.MoonTextureId = ""
-            existingSky.StarCount = 0
-            existingSky.CelestialBodiesShown = false
-        else
-            local sky = Instance.new("Sky")
-            sky.SkyboxBk = "rbxasset://textures/sky/sky512_bk.tex"
-            sky.SkyboxDn = "rbxasset://textures/sky/sky512_dn.tex"
-            sky.SkyboxFt = "rbxasset://textures/sky/sky512_ft.tex"
-            sky.SkyboxLf = "rbxasset://textures/sky/sky512_lf.tex"
-            sky.SkyboxRt = "rbxasset://textures/sky/sky512_rt.tex"
-            sky.SkyboxUp = "rbxasset://textures/sky/sky512_up.tex"
-            sky.SunTextureId = ""
-            sky.MoonTextureId = ""
-            sky.StarCount = 0
-            sky.CelestialBodiesShown = false
-            sky.Parent = Lighting
-        end
         for _, v in ipairs(Lighting:GetChildren()) do
-            if v:IsA("Atmosphere") or v:IsA("Clouds") or v:IsA("PostEffect") then
+            if v:IsA("Sky") or v:IsA("Atmosphere") or v:IsA("Clouds") or v:IsA("PostEffect") then
                 pcall(function() v:Destroy() end)
             end
         end
+        local sky = Instance.new("Sky")
+        sky.SkyboxBk = "rbxasset://textures/sky/sky512_bk.tex"
+        sky.SkyboxDn = "rbxasset://textures/sky/sky512_dn.tex"
+        sky.SkyboxFt = "rbxasset://textures/sky/sky512_ft.tex"
+        sky.SkyboxLf = "rbxasset://textures/sky/sky512_lf.tex"
+        sky.SkyboxRt = "rbxasset://textures/sky/sky512_rt.tex"
+        sky.SkyboxUp = "rbxasset://textures/sky/sky512_up.tex"
+        sky.SunTextureId = ""
+        sky.MoonTextureId = ""
+        sky.StarCount = 0
+        sky.CelestialBodiesShown = false
+        sky.Parent = Lighting
         Lighting.GlobalShadows = false
         Lighting.Brightness = 1.6
         Lighting.ClockTime = 14
@@ -286,237 +262,122 @@ pcall(function()
     end)
 end)
 
-local charModels = {}
-local function watchChar(plr)
-    if plr.Character then charModels[plr.Character] = true end
-    plr.CharacterAdded:Connect(function(c) charModels[c] = true end)
-end
-for _, plr in ipairs(Players:GetPlayers()) do watchChar(plr) end
-Players.PlayerAdded:Connect(watchChar)
-Players.PlayerRemoving:Connect(function(plr)
-    if plr.Character then charModels[plr.Character] = nil end
-end)
+local notifGui = Instance.new("ScreenGui")
+notifGui.Name = "LegacyNotif_" .. HttpService:GenerateGUID(false):sub(1, 8)
+notifGui.ResetOnSpawn = false
+notifGui.DisplayOrder = 2147483647
+notifGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+pcall(function() notifGui.Parent = uiParent end)
 
-local function isChar(v)
-    local cur = v
-    while cur do
-        if charModels[cur] then return true end
-        if cur:IsA("Accessory") or cur:IsA("Tool") then return true end
-        cur = cur.Parent
-    end
-    return false
-end
-
-local function isProtected(v)
-    return v:IsA("BillboardGui")
-        or v:IsA("TextLabel")
-        or v:IsA("TextButton")
-        or v:IsA("TextBox")
-        or v:IsA("ImageLabel")
-        or v:IsA("ImageButton")
-        or v:IsA("Humanoid")
-        or v:IsA("ProximityPrompt")
-        or v:IsA("ProximityPromptService")
-        or v:IsA("ClickDetector")
-        or v:IsA("SurfaceGui")
-        or v:IsA("SurfaceAppearance")
-        or v:IsA("ScreenGui")
-        or v:IsA("GuiObject")
-        or v:IsA("GuiMain")
-        or v:IsA("Folder")
-        or v:IsA("Configuration")
-        or v:IsA("Script")
-        or v:IsA("LocalScript")
-        or v:IsA("ModuleScript")
-        or v:IsA("RemoteEvent")
-        or v:IsA("RemoteFunction")
-        or v:IsA("BindableEvent")
-        or v:IsA("BindableFunction")
-        or v:IsA("Animation")
-        or v:IsA("AnimationController")
-        or v:IsA("Animator")
-end
-
-local killTypes = {
-    ParticleEmitter = true, Trail = true, Smoke = true, Fire = true,
-    Sparkles = true, Beam = true,
-    PointLight = true, SpotLight = true,
-    SurfaceLight = true, ForceField = true, Explosion = true,
-    Atmosphere = true, Clouds = true,
-    DepthOfFieldEffect = true, BloomEffect = true, BlurEffect = true,
-    ColorCorrectionEffect = true, SunRaysEffect = true,
+local activeNotifs = {}
+local NOTIF_CONST = {
+    WIDTH = 260,
+    HEIGHT = 80,
+    PADDING = 12,
+    THEME = Color3.fromRGB(255, 60, 60),
+    BG = Color3.fromRGB(18, 18, 18),
+    TEXT = Color3.fromRGB(240, 240, 240),
+    SUBTEXT = Color3.fromRGB(160, 160, 160),
+    SPEED = 0.4
 }
 
-local function flattenWater(v)
-    pcall(function()
-        v.WaterColor = Color3.fromRGB(0, 100, 200)
-        v.WaterTransparency = 0
-        v.WaterReflectance = 0
-        v.WaterWaveSize = 0
-        v.WaterWaveSpeed = 0
-    end)
-end
-
-local function handleObject(v)
-    if isProtected(v) or isChar(v) then return end
-    local cn = v.ClassName
-    if killTypes[cn] then
-        pcall(function() v:Destroy() end)
-    elseif cn == "Part" or cn == "MeshPart" or cn == "UnionOperation" or cn == "WedgePart" or cn == "CornerWedgePart" then
-        pcall(function()
-            v.Material = Enum.Material.SmoothPlastic
-            v.Reflectance = 0
-            v.CastShadow = false
-            if v:IsA("MeshPart") and v.TextureID ~= "" then
-                v.RenderFidelity = Enum.RenderFidelity.Performance
-            end
-        end)
-    elseif cn == "Model" then
-        pcall(function()
-            v.LevelOfDetail = Enum.ModelLevelOfDetail.StreamingMesh
-        end)
+local function updateNotifs()
+    for index, data in ipairs(activeNotifs) do
+        local targetY = -NOTIF_CONST.PADDING - ((index - 1) * (NOTIF_CONST.HEIGHT + NOTIF_CONST.PADDING))
+        TweenService:Create(data.Container, TweenInfo.new(NOTIF_CONST.SPEED, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+            Position = UDim2.new(1, -NOTIF_CONST.PADDING, 1, targetY)
+        }):Play()
     end
 end
 
-task.spawn(function()
-    while true do
-        task.wait(0.5)
-        pcall(function()
-            if not Terrain then return end
-            flattenWater(Terrain)
-            for _, v in ipairs(Terrain:GetChildren()) do
-                if v:IsA("Water") then
-                    flattenWater(v)
-                end
-            end
-        end)
-    end
-end)
+local function showNotif(titleText, messageText, duration)
+    duration = duration or 6
+    local container = Instance.new("Frame")
+    container.Size = UDim2.new(0, NOTIF_CONST.WIDTH, 0, NOTIF_CONST.HEIGHT)
+    container.Position = UDim2.new(1, 320, 1, -NOTIF_CONST.PADDING)
+    container.AnchorPoint = Vector2.new(1, 1)
+    container.BackgroundTransparency = 1
+    container.Parent = notifGui
 
-task.spawn(function()
-    local descendants = Workspace:GetDescendants()
-    local total = #descendants
-    if total == 0 then return end
-    local BATCH_SIZE = 600
-    local MAX_CONCURRENT = 40
-    local batches = {}
-    local current = {}
-    for i = 1, total do
-        current[#current + 1] = descendants[i]
-        if #current >= BATCH_SIZE then
-            batches[#batches + 1] = current
-            current = {}
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(1, 0, 1, 0)
+    frame.BackgroundColor3 = NOTIF_CONST.BG
+    frame.BorderSizePixel = 0
+    frame.Parent = container
+    Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 8)
+
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = Color3.fromRGB(60, 30, 30)
+    stroke.Thickness = 1
+    stroke.Parent = frame
+
+    local accent = Instance.new("Frame")
+    accent.Size = UDim2.new(1, 0, 0, 2)
+    accent.BackgroundColor3 = NOTIF_CONST.THEME
+    accent.BorderSizePixel = 0
+    accent.Parent = frame
+
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Size = UDim2.new(1, -50, 0, 22)
+    titleLabel.Position = UDim2.new(0, 14, 0, 10)
+    titleLabel.BackgroundTransparency = 1
+    titleLabel.Text = titleText
+    titleLabel.TextColor3 = NOTIF_CONST.TEXT
+    titleLabel.Font = Enum.Font.GothamBold
+    titleLabel.TextSize = 15
+    titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    titleLabel.Parent = frame
+
+    local msgLabel = Instance.new("TextLabel")
+    msgLabel.Size = UDim2.new(1, -28, 0, 36)
+    msgLabel.Position = UDim2.new(0, 14, 0, 34)
+    msgLabel.BackgroundTransparency = 1
+    msgLabel.Text = messageText
+    msgLabel.TextColor3 = NOTIF_CONST.SUBTEXT
+    msgLabel.Font = Enum.Font.GothamMedium
+    msgLabel.TextSize = 12
+    msgLabel.TextWrapped = true
+    msgLabel.TextXAlignment = Enum.TextXAlignment.Left
+    msgLabel.TextYAlignment = Enum.TextYAlignment.Top
+    msgLabel.Parent = frame
+
+    local closeBtn = Instance.new("TextButton")
+    closeBtn.Size = UDim2.new(0, 22, 0, 22)
+    closeBtn.Position = UDim2.new(1, -8, 0, 8)
+    closeBtn.AnchorPoint = Vector2.new(1, 0)
+    closeBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+    closeBtn.Text = "X"
+    closeBtn.TextColor3 = Color3.fromRGB(150, 150, 150)
+    closeBtn.Font = Enum.Font.GothamBold
+    closeBtn.TextSize = 11
+    closeBtn.AutoButtonColor = false
+    closeBtn.Parent = frame
+    Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 6)
+
+    local notifData = {Container = container}
+    table.insert(activeNotifs, 1, notifData)
+    updateNotifs()
+
+    local closed = false
+    local function closeNotif()
+        if closed then return end
+        closed = true
+        local idx = table.find(activeNotifs, notifData)
+        if idx then
+            table.remove(activeNotifs, idx)
+            updateNotifs()
         end
+        local tweenOut = TweenService:Create(container, TweenInfo.new(NOTIF_CONST.SPEED, Enum.EasingStyle.Sine, Enum.EasingDirection.In), {
+            Position = UDim2.new(1, 320, container.Position.Y.Scale, container.Position.Y.Offset)
+        })
+        tweenOut:Play()
+        tweenOut.Completed:Wait()
+        container:Destroy()
     end
-    if #current > 0 then batches[#batches + 1] = current end
-    local running = 0
-    local index = 1
-    while true do
-        if running < MAX_CONCURRENT and index <= #batches then
-            local batch = batches[index]
-            index = index + 1
-            running = running + 1
-            task.spawn(function()
-                for _, v in ipairs(batch) do
-                    pcall(handleObject, v)
-                end
-                running = running - 1
-            end)
-        elseif index > #batches and running == 0 then
-            break
-        else
-            RunService.Heartbeat:Wait()
-        end
-    end
-end)
 
-Workspace.DescendantAdded:Connect(function(v)
-    task.defer(function()
-        pcall(handleObject, v)
-    end)
-end)
-
-local CULL_DIST_SQ = 55 * 55
-local culled = {}
-
-task.spawn(function()
-    while true do
-        task.wait(0.3)
-        pcall(function()
-            if not Camera then return end
-            local camPos = Camera.CFrame.Position
-            for _, v in ipairs(Workspace:GetChildren()) do
-                if v:IsA("BasePart") and not isChar(v) then
-                    if not v:FindFirstChildOfClass("Humanoid") and not v:FindFirstChildOfClass("BillboardGui") then
-                        local pos = v.Position
-                        if pos.Y >= camPos.Y - 3 then
-                            local dx, dy, dz = pos.X - camPos.X, pos.Y - camPos.Y, pos.Z - camPos.Z
-                            local shouldHide = (dx*dx + dy*dy + dz*dz) > CULL_DIST_SQ
-                            if shouldHide and not culled[v] then
-                                culled[v] = true
-                                pcall(function() v.LocalTransparencyModifier = 1 end)
-                            elseif not shouldHide and culled[v] then
-                                culled[v] = false
-                                pcall(function() v.LocalTransparencyModifier = 0 end)
-                            end
-                        end
-                    end
-                end
-            end
-        end)
-    end
-end)
-
-task.spawn(function()
-    while true do
-        task.wait(3)
-        pcall(function()
-            for _, v in ipairs(Lighting:GetDescendants()) do
-                if v:IsA("PointLight") or v:IsA("SpotLight") or v:IsA("SurfaceLight") then
-                    if v.Enabled then v.Enabled = false end
-                end
-            end
-        end)
-    end
-end)
-
-task.spawn(function()
-    while true do
-        task.wait(30)
-        pcall(function()
-            collectgarbage("collect")
-            collectgarbage("collect")
-        end)
-    end
-end)
-
-task.spawn(function()
-    while true do
-        task.wait(2)
-        pcall(function()
-            for _, v in ipairs(Workspace:GetDescendants()) do
-                if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam") then
-                    if v.Enabled then v.Enabled = false end
-                end
-            end
-        end)
-    end
-end)
-
-task.spawn(function()
-    while true do
-        task.wait(6)
-        pcall(function()
-            for _, v in ipairs(Workspace:GetDescendants()) do
-                if v:IsA("Decal") or v:IsA("Texture") then
-                    pcall(function() v:Destroy() end)
-                elseif v:IsA("MeshPart") and v.TextureID ~= "" then
-                    pcall(function() v.TextureID = "" end)
-                end
-            end
-        end)
-    end
-end)
+    closeBtn.MouseButton1Click:Connect(closeNotif)
+    task.delay(duration, closeNotif)
+end
 
 local sg = Instance.new("ScreenGui")
 sg.Name = "LegacyLoader"
@@ -1061,5 +922,7 @@ end)
 
 task.wait(0.1)
 applyOpacity(0.5)
+
+showNotif("Script successfully loaded!", "FFlags applied. Optimization active.", 6)
 
 print("Legacy optimizer v1.2.0 by @realz29001 loaded")

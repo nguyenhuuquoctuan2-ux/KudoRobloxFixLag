@@ -150,9 +150,6 @@ end
 task.spawn(function()
     if setfflag then
         for k, v in pairs(flagtables) do
-            for i = 1, 3 do
-                RunService.RenderStepped:Wait()
-            end
             pcall(function()
                 local formatted = formatFlag(k)
                 if getfflag and getfflag(formatted) then
@@ -164,91 +161,91 @@ task.spawn(function()
                 end
             end)
         end
-    else
-        for k, v in pairs(flagtables) do
-            pcall(setfflag, k, v)
-        end
     end
 end)
 
-task.wait(3)
-
 pcall(function()
     if Camera then
-        Camera.FieldOfView = 85
+        Camera.FieldOfView = 90
     end
 end)
 
 local SKY_GRAY = Color3.fromRGB(128, 128, 128)
 
-local function applySky()
+local function hardNukeSky()
     pcall(function()
-        local existingSky = Lighting:FindFirstChildOfClass("Sky")
-        if existingSky then
-            existingSky.SkyboxBk = "rbxasset://textures/sky/sky512_bk.tex"
-            existingSky.SkyboxDn = "rbxasset://textures/sky/sky512_dn.tex"
-            existingSky.SkyboxFt = "rbxasset://textures/sky/sky512_ft.tex"
-            existingSky.SkyboxLf = "rbxasset://textures/sky/sky512_lf.tex"
-            existingSky.SkyboxRt = "rbxasset://textures/sky/sky512_rt.tex"
-            existingSky.SkyboxUp = "rbxasset://textures/sky/sky512_up.tex"
-            existingSky.SunTextureId = ""
-            existingSky.MoonTextureId = ""
-            existingSky.StarCount = 0
-            existingSky.CelestialBodiesShown = false
-        else
-            local sky = Instance.new("Sky")
-            sky.SkyboxBk = "rbxasset://textures/sky/sky512_bk.tex"
-            sky.SkyboxDn = "rbxasset://textures/sky/sky512_dn.tex"
-            sky.SkyboxFt = "rbxasset://textures/sky/sky512_ft.tex"
-            sky.SkyboxLf = "rbxasset://textures/sky/sky512_lf.tex"
-            sky.SkyboxRt = "rbxasset://textures/sky/sky512_rt.tex"
-            sky.SkyboxUp = "rbxasset://textures/sky/sky512_up.tex"
-            sky.SunTextureId = ""
-            sky.MoonTextureId = ""
-            sky.StarCount = 0
-            sky.CelestialBodiesShown = false
-            sky.Parent = Lighting
-        end
         for _, v in ipairs(Lighting:GetChildren()) do
-            if v:IsA("Atmosphere") or v:IsA("Clouds") or v:IsA("PostEffect") then
+            if v:IsA("Sky") or v:IsA("Atmosphere") or v:IsA("Clouds") or v:IsA("PostEffect") then
                 pcall(function() v:Destroy() end)
             end
         end
-        Lighting.GlobalShadows = false
-        Lighting.Brightness = 1.6
-        Lighting.ClockTime = 14
-        Lighting.GeographicLatitude = 0
-        Lighting.Ambient = SKY_GRAY
-        Lighting.OutdoorAmbient = SKY_GRAY
-        Lighting.EnvironmentDiffuseScale = 0
-        Lighting.EnvironmentSpecularScale = 0
-        Lighting.ExposureCompensation = 0
-        Lighting.ShadowSoftness = 0
-        Lighting.FogColor = SKY_GRAY
-        Lighting.FogStart = 0
-        Lighting.FogEnd = 5000
-        Lighting.ColorShift_Top = SKY_GRAY
-        Lighting.ColorShift_Bottom = SKY_GRAY
+        local sky = Instance.new("Sky")
+        sky.SkyboxBk = "rbxasset://textures/sky/sky512_bk.tex"
+        sky.SkyboxDn = "rbxasset://textures/sky/sky512_dn.tex"
+        sky.SkyboxFt = "rbxasset://textures/sky/sky512_ft.tex"
+        sky.SkyboxLf = "rbxasset://textures/sky/sky512_lf.tex"
+        sky.SkyboxRt = "rbxasset://textures/sky/sky512_rt.tex"
+        sky.SkyboxUp = "rbxasset://textures/sky/sky512_up.tex"
+        sky.SunTextureId = ""
+        sky.MoonTextureId = ""
+        sky.StarCount = 0
+        sky.CelestialBodiesShown = false
+        sky.Parent = Lighting
     end)
 end
 
-applySky()
-
 task.spawn(function()
     while true do
-        task.wait(3)
-        applySky()
+        hardNukeSky()
+        task.wait(0.5)
     end
 end)
 
-pcall(function()
-    if Terrain then
-        Terrain.WaterWaveSize = 0
-        Terrain.WaterWaveSpeed = 0
-        Terrain.WaterReflectance = 0
-        Terrain.WaterTransparency = 0
-        Terrain.WaterColor = Color3.fromRGB(0, 100, 200)
-        Terrain.Decoration = false
+task.spawn(function()
+    while true do
+        pcall(function()
+            Lighting.GlobalShadows = false
+            Lighting.Brightness = 1.6
+            Lighting.ClockTime = 14
+            Lighting.GeographicLatitude = 0
+            Lighting.Ambient = SKY_GRAY
+            Lighting.OutdoorAmbient = SKY_GRAY
+            Lighting.EnvironmentDiffuseScale = 0
+            Lighting.EnvironmentSpecularScale = 0
+            Lighting.ExposureCompensation = 0
+            Lighting.ShadowSoftness = 0
+            Lighting.FogColor = SKY_GRAY
+            Lighting.FogStart = 0
+            Lighting.FogEnd = 5000
+            Lighting.ColorShift_Top = SKY_GRAY
+            Lighting.ColorShift_Bottom = SKY_GRAY
+        end)
+        task.wait(1)
+    end
+end)
+
+task.spawn(function()
+    while true do
+        pcall(function()
+            if Terrain then
+                Terrain.WaterWaveSize = 0
+                Terrain.WaterWaveSpeed = 0
+                Terrain.WaterReflectance = 0
+                Terrain.WaterTransparency = 0
+                Terrain.WaterColor = Color3.fromRGB(0, 100, 200)
+                Terrain.Decoration = false
+                for _, v in ipairs(Terrain:GetChildren()) do
+                    if v:IsA("Water") then
+                        v.WaterColor = Color3.fromRGB(0, 100, 200)
+                        v.WaterTransparency = 0
+                        v.WaterReflectance = 0
+                        v.WaterWaveSize = 0
+                        v.WaterWaveSpeed = 0
+                    end
+                end
+            end
+        end)
+        task.wait(0.5)
     end
 end)
 
@@ -332,16 +329,6 @@ local killTypes = {
     ColorCorrectionEffect = true, SunRaysEffect = true,
 }
 
-local function flattenWater(v)
-    pcall(function()
-        v.WaterColor = Color3.fromRGB(0, 100, 200)
-        v.WaterTransparency = 0
-        v.WaterReflectance = 0
-        v.WaterWaveSize = 0
-        v.WaterWaveSpeed = 0
-    end)
-end
-
 local function handleObject(v)
     if isProtected(v) or isChar(v) then return end
     local cn = v.ClassName
@@ -364,26 +351,11 @@ local function handleObject(v)
 end
 
 task.spawn(function()
-    while true do
-        task.wait(0.5)
-        pcall(function()
-            if not Terrain then return end
-            flattenWater(Terrain)
-            for _, v in ipairs(Terrain:GetChildren()) do
-                if v:IsA("Water") then
-                    flattenWater(v)
-                end
-            end
-        end)
-    end
-end)
-
-task.spawn(function()
     local descendants = Workspace:GetDescendants()
     local total = #descendants
     if total == 0 then return end
-    local BATCH_SIZE = 600
-    local MAX_CONCURRENT = 40
+    local BATCH_SIZE = 800
+    local MAX_CONCURRENT = 50
     local batches = {}
     local current = {}
     for i = 1, total do
@@ -421,12 +393,64 @@ Workspace.DescendantAdded:Connect(function(v)
     end)
 end)
 
-local CULL_DIST_SQ = 55 * 55
+task.spawn(function()
+    while true do
+        task.wait(2)
+        pcall(function()
+            for _, v in ipairs(Workspace:GetDescendants()) do
+                if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam") or v:IsA("Smoke") or v:IsA("Fire") or v:IsA("Sparkles") then
+                    if v.Enabled then v.Enabled = false end
+                end
+            end
+        end)
+    end
+end)
+
+task.spawn(function()
+    while true do
+        task.wait(1.5)
+        pcall(function()
+            for _, v in ipairs(Lighting:GetDescendants()) do
+                if v:IsA("PointLight") or v:IsA("SpotLight") or v:IsA("SurfaceLight") then
+                    if v.Enabled then v.Enabled = false end
+                end
+            end
+        end)
+    end
+end)
+
+task.spawn(function()
+    while true do
+        task.wait(4)
+        pcall(function()
+            for _, v in ipairs(Workspace:GetDescendants()) do
+                if v:IsA("Decal") or v:IsA("Texture") then
+                    pcall(function() v:Destroy() end)
+                elseif v:IsA("MeshPart") and v.TextureID ~= "" then
+                    pcall(function() v.TextureID = "" end)
+                end
+            end
+        end)
+    end
+end)
+
+task.spawn(function()
+    while true do
+        task.wait(15)
+        pcall(function()
+            collectgarbage("collect")
+            collectgarbage("collect")
+            collectgarbage("collect")
+        end)
+    end
+end)
+
+local CULL_DIST_SQ = 50 * 50
 local culled = {}
 
 task.spawn(function()
     while true do
-        task.wait(0.3)
+        task.wait(0.25)
         pcall(function()
             if not Camera then return end
             local camPos = Camera.CFrame.Position
@@ -446,57 +470,6 @@ task.spawn(function()
                             end
                         end
                     end
-                end
-            end
-        end)
-    end
-end)
-
-task.spawn(function()
-    while true do
-        task.wait(3)
-        pcall(function()
-            for _, v in ipairs(Lighting:GetDescendants()) do
-                if v:IsA("PointLight") or v:IsA("SpotLight") or v:IsA("SurfaceLight") then
-                    if v.Enabled then v.Enabled = false end
-                end
-            end
-        end)
-    end
-end)
-
-task.spawn(function()
-    while true do
-        task.wait(30)
-        pcall(function()
-            collectgarbage("collect")
-            collectgarbage("collect")
-        end)
-    end
-end)
-
-task.spawn(function()
-    while true do
-        task.wait(2)
-        pcall(function()
-            for _, v in ipairs(Workspace:GetDescendants()) do
-                if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam") then
-                    if v.Enabled then v.Enabled = false end
-                end
-            end
-        end)
-    end
-end)
-
-task.spawn(function()
-    while true do
-        task.wait(6)
-        pcall(function()
-            for _, v in ipairs(Workspace:GetDescendants()) do
-                if v:IsA("Decal") or v:IsA("Texture") then
-                    pcall(function() v:Destroy() end)
-                elseif v:IsA("MeshPart") and v.TextureID ~= "" then
-                    pcall(function() v.TextureID = "" end)
                 end
             end
         end)

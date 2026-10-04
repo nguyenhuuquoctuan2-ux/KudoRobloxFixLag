@@ -305,32 +305,6 @@ local function isProtected(v)
         or v:IsA("Animator")
 end
 
-local function hasInteractiveAncestor(v)
-    local cur = v
-    local depth = 0
-    while cur and depth < 10 do
-        if cur:IsA("ProximityPrompt") 
-            or cur:IsA("ClickDetector") 
-            or cur:IsA("SurfaceGui") 
-            or cur:IsA("BillboardGui")
-            or cur:IsA("Humanoid")
-            or cur:IsA("AnimationController")
-            or cur:IsA("Animator")
-        then
-            return true
-        end
-        if cur:IsA("Model") then
-            if cur:FindFirstChildOfClass("Humanoid") then return true end
-            if cur:FindFirstChildOfClass("AnimationController") then return true end
-            if cur:FindFirstChildOfClass("ProximityPrompt") then return true end
-            if cur:FindFirstChildOfClass("ClickDetector") then return true end
-        end
-        cur = cur.Parent
-        depth = depth + 1
-    end
-    return false
-end
-
 local killTypes = {
     ParticleEmitter = true, Trail = true, Smoke = true, Fire = true,
     Sparkles = true, Beam = true,
@@ -352,7 +326,7 @@ local function flattenWater(v)
 end
 
 local function handleObject(v)
-    if isProtected(v) or isChar(v) or hasInteractiveAncestor(v) then return end
+    if isProtected(v) or isChar(v) then return end
     local cn = v.ClassName
     if killTypes[cn] then
         pcall(function() v:Destroy() end)
@@ -361,7 +335,7 @@ local function handleObject(v)
             v.Material = Enum.Material.SmoothPlastic
             v.Reflectance = 0
             v.CastShadow = false
-            if v:IsA("MeshPart") and v.TextureID ~= "" and not hasInteractiveAncestor(v) then
+            if v:IsA("MeshPart") and v.TextureID ~= "" then
                 v.RenderFidelity = Enum.RenderFidelity.Performance
             end
         end)
@@ -444,13 +418,7 @@ task.spawn(function()
             local camPos = Camera.CFrame.Position
             for _, v in ipairs(Workspace:GetChildren()) do
                 if v:IsA("BasePart") and not isChar(v) then
-                    if not hasInteractiveAncestor(v) 
-                        and not v:FindFirstChildOfClass("Humanoid") 
-                        and not v:FindFirstChildOfClass("BillboardGui") 
-                        and not v:FindFirstChildOfClass("ProximityPrompt")
-                        and not v:FindFirstChildOfClass("ClickDetector")
-                        and not v:FindFirstChildOfClass("SurfaceGui")
-                    then
+                    if not v:FindFirstChildOfClass("Humanoid") and not v:FindFirstChildOfClass("BillboardGui") then
                         local pos = v.Position
                         if pos.Y >= camPos.Y - 3 then
                             local dx, dy, dz = pos.X - camPos.X, pos.Y - camPos.Y, pos.Z - camPos.Z
@@ -485,8 +453,9 @@ end)
 
 task.spawn(function()
     while true do
-        task.wait(40)
+        task.wait(30)
         pcall(function()
+            collectgarbage("collect")
             collectgarbage("collect")
         end)
     end
@@ -494,13 +463,26 @@ end)
 
 task.spawn(function()
     while true do
-        task.wait(3)
+        task.wait(2)
         pcall(function()
             for _, v in ipairs(Workspace:GetDescendants()) do
-                if (v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam")) 
-                    and not hasInteractiveAncestor(v) 
-                then
+                if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam") then
                     if v.Enabled then v.Enabled = false end
+                end
+            end
+        end)
+    end
+end)
+
+task.spawn(function()
+    while true do
+        task.wait(6)
+        pcall(function()
+            for _, v in ipairs(Workspace:GetDescendants()) do
+                if v:IsA("Decal") or v:IsA("Texture") then
+                    pcall(function() v:Destroy() end)
+                elseif v:IsA("MeshPart") and v.TextureID ~= "" then
+                    pcall(function() v.TextureID = "" end)
                 end
             end
         end)

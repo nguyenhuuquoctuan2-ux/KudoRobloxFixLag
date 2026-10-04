@@ -1,3 +1,136 @@
+-- ============================================================
+-- PHASE 1: FFlag Overhaul (chạy trước để engine apply flag)
+-- ============================================================
+
+local fflagTable = {
+    ["DFIntTaskSchedulerTargetFps"] = "9999",
+    ["FIntTaskSchedulerAutoThreadLimit"] = "6",
+    ["FIntTaskSchedulerAsyncTasksMinimumThreadCount"] = "2",
+    ["FIntTaskSchedulerMaxNumOfJobs"] = "86",
+    ["FIntTaskSchedulerThreadMin"] = "1",
+
+    ["DFFlagBrowserTrackerIdTelemetryEnabled"] = "False",
+    ["DFFlagPreloadAsyncSupportTexturePack"] = "True",
+    ["DFFlagTextureQualityOverrideEnabled"] = "True",
+    ["DFFlagVideoCaptureServiceEnabled"] = "False",
+    ["DFFlagSampleAndRefreshRakPing"] = "True",
+    ["DFFlagRakNetUseSlidingWindow4"] = "True",
+    ["DFFlagCoreScriptTelemetry2"] = "False",
+    ["DFFlagEnableSoundPreloading"] = "True",
+    ["DFFlagOptimizePartsInPart"] = "True",
+    ["DFFlagDisableDPIScale"] = "True",
+    ["DFFlagDebugPerfMode"] = "True",
+
+    ["DFIntRaknetBandwidthInfluxHundredthsPercentageV2"] = "10000",
+    ["DFIntRakNetClockDriftAdjustmentPerPingMillisecond"] = "100",
+    ["DFIntRaknetBandwidthPingSendEveryXSeconds"] = "1",
+    ["DFIntRakNetNakResendDelayRttPercent"] = "50",
+    ["DFIntRakNetNakResendDelayMsMax"] = "100",
+    ["DFIntRakNetNakResendDelayMs"] = "10",
+    ["DFIntRakNetResendRttMultiple"] = "1",
+    ["DFIntRakNetSelectTimeoutMs"] = "1",
+    ["DFIntRakNetLoopMs"] = "1",
+    ["DFIntRakNetMinAckGrowthPercent"] = "0",
+    ["DFIntRakNetMtuValue1InBytes"] = "1280",
+    ["DFIntRakNetMtuValue2InBytes"] = "1240",
+    ["DFIntRakNetMtuValue3InBytes"] = "1200",
+    ["DFIntConnectionMTUSize"] = "1260",
+
+    ["DFIntMaxReceiveToDeserializeLatencyMilliseconds"] = "15",
+    ["DFIntNetworkInDeserializeLimitGameplayMsClient"] = "6",
+    ["DFIntNetworkInProcessLimitGameplayMsClient"] = "6",
+    ["DFIntClientPacketHealthyAllocationPercent"] = "20",
+    ["DFIntClientPacketMaxFrameMicroseconds"] = "200",
+    ["DFIntClientPacketExcessMicroseconds"] = "1000",
+    ["DFIntClientPacketMinMicroseconds"] = "1",
+    ["DFIntClientPacketMaxDelayMs"] = "11",
+    ["DFIntMaxWaitTimeBeforeForcePacketProcessMS"] = "1",
+    ["DFIntMaxProcessPacketsStepsPerCyclic"] = "5000",
+    ["DFIntMaxProcessPacketsStepsAccumulated"] = "0",
+    ["DFIntMaxProcessPacketsJobScaling"] = "10000",
+    ["DFIntLargePacketQueueSizeCutoffMB"] = "1000",
+    ["DFIntDataSenderRate"] = "1000",
+    ["DFIntDataSenderMaxBandwidthBps"] = "2147483647",
+    ["DFIntDataSenderMaxJoinBandwidthBps"] = "2147483647",
+    ["DFIntS2PhysicsSenderRate"] = "1000",
+    ["DFIntS2NumPhysicsPacketsPerStep"] = "100",
+    ["DFIntPhysicsSenderMaxBandwidthBps"] = "2147483647",
+    ["DFIntPhysicsSenderMaxBandwidthBpsScaling"] = "1000",
+    ["FIntPGSAngularDampingPermilPersecond"] = "0",
+    ["DFFlagPhysicsSkipNonRealTimeHumanoidForceCalc2"] = "True",
+    ["FFlagDebugDisplayFPS"] = "True",
+
+    ["DFIntSignalRHubConnectionHeartbeatTimerRateMs"] = "1000",
+    ["DFIntSignalRHubConnectionBaseRetryTimeMs"] = "100",
+    ["DFIntSignalRCoreKeepAlivePingPeriodMs"] = "250",
+    ["DFIntSignalRCoreServerTimeoutMs"] = "11100",
+    ["DFIntSignalRCoreTimerMs"] = "750",
+    ["DFIntSignalRCoreRpcQueueSize"] = "256",
+
+    ["DFIntAnimationLodFacsVisibilityDenominator"] = "0",
+    ["DFIntAnimationLodFacsDistanceMin"] = "0",
+    ["DFIntAnimationLodFacsDistanceMax"] = "0",
+    ["DFIntDebugFRMQualityLevelOverride"] = "1",
+    ["DFIntDebugDynamicRenderKiloPixels"] = "1100",
+    ["DFIntDebugRestrictGCDistance"] = "1",
+
+    ["DFIntWaitOnUpdateNetworkLoopEndedMS"] = "100",
+    ["DFIntWaitOnRecvFromLoopEndedMS"] = "100",
+
+    ["FIntRenderMaxShadowAtlasUsageBeforeDownscale"] = "80",
+    ["FIntRenderShadowMapDepthCacheMemLimit"] = "192",
+    ["FIntUITextureMaxRenderTextureSize"] = "1024",
+    ["FIntRakNetResendBufferArrayLength"] = "128",
+    ["FIntTerrainOTAMaxTextureSize"] = "1024",
+    ["FIntOcclusionWorkerThreadCount"] = "5",
+    ["FIntDefaultMeshCacheSizeMB"] = "256",
+    ["FIntRobloxGuiBlurIntensity"] = "0",
+    ["FIntTerrainArraySliceSize"] = "0",
+    ["FIntDebugForceMSAASamples"] = "1",
+    ["FIntRenderShadowmapBias"] = "0",
+    ["FIntFRMMaxGrassDistance"] = "0",
+    ["FIntFRMMinGrassDistance"] = "0",
+    ["FIntGrassMovementReducedMotionFactor"] = "0",
+    ["FIntDebugTextureManagerSkipMips"] = "7",
+    ["FIntPerformanceTelemetryQueueProcessLimit"] = "0",
+    ["FIntTelemetryProfilerFrequency"] = "0",
+    ["FIntRenderLocalLightFadeInMs"] = "0",
+    ["FIntReportDeviceInfoRollout"] = "0",
+
+    ["FFlagRenderAllocateShadowMapResourcesOnDemand"] = "True",
+    ["FFlagSpecifyNetworkReplicatorScopeForItems"] = "True",
+    ["FFlagTaskSchedulerLimitTargetFpsTo2402"] = "False",
+    ["FFlagHandleAltEnterFullscreenManually"] = "False",
+    ["FFlagGameBasicSettingsFramerateCap5"] = "False",
+    ["FFlagSpecifyNetworkReplicatorScope"] = "True",
+    ["FFlagSendRenderFidelityTelemetry2"] = "False",
+    ["FFlagRenderGpuTextureCompressor"] = "True",
+    ["FFlagBaseThreadPoolUseRuntime2"] = "True",
+    ["FFlagCacheTextBoundsInGuiText"] = "True",
+    ["FFlagEnableTelemetryService1"] = "False",
+    ["FFlagDebugGraphicsPreferD3D11"] = "True",
+    ["FFlagPerfDataOnTelemetryV2"] = "False",
+    ["FFlagOpenTelemetryEnabled2"] = "False",
+    ["FFlagRbxStorageUseMemCache"] = "True",
+    ["FFlagDebugForceGenerateHSR"] = "True",
+    ["FFlagRenderInitShadowmaps"] = "True",
+    ["FFlagFastGPULightCulling3"] = "True",
+    ["FFlagDebugSkyGray"] = "True",
+    ["FFlagDebugRenderingSetDeterministic"] = "True",
+    ["FLogNetwork"] = "7"
+}
+
+for k, v in pairs(fflagTable) do
+    pcall(setfflag, k, v)
+end
+
+-- Chờ engine apply FFlag xong trước khi sang Phase 2
+task.wait(2)
+
+-- ============================================================
+-- PHASE 2: Fix lag + Sky + UI
+-- ============================================================
+
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
@@ -9,7 +142,6 @@ local Terrain = Workspace:FindFirstChildOfClass("Terrain")
 local Camera = Workspace.CurrentCamera
 local VirtualUser = game:GetService("VirtualUser")
 local CoreGui = game:GetService("CoreGui")
-local HttpService = game:GetService("HttpService")
 
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
@@ -56,120 +188,6 @@ task.spawn(function()
     end
 end)
 
-local fflagTable = {
-    ["DFIntTaskSchedulerTargetFps"] = "9999",
-    ["FIntTaskSchedulerAutoThreadLimit"] = "6",
-    ["FIntTaskSchedulerAsyncTasksMinimumThreadCount"] = "2",
-    ["FIntTaskSchedulerMaxNumOfJobs"] = "86",
-    ["FIntTaskSchedulerThreadMin"] = "1",
-    ["DFFlagBrowserTrackerIdTelemetryEnabled"] = "False",
-    ["DFFlagPreloadAsyncSupportTexturePack"] = "True",
-    ["DFFlagTextureQualityOverrideEnabled"] = "True",
-    ["DFFlagVideoCaptureServiceEnabled"] = "False",
-    ["DFFlagSampleAndRefreshRakPing"] = "True",
-    ["DFFlagRakNetUseSlidingWindow4"] = "True",
-    ["DFFlagCoreScriptTelemetry2"] = "False",
-    ["DFFlagEnableSoundPreloading"] = "True",
-    ["DFFlagOptimizePartsInPart"] = "True",
-    ["DFFlagDisableDPIScale"] = "True",
-    ["DFFlagDebugPerfMode"] = "True",
-    ["DFIntRaknetBandwidthInfluxHundredthsPercentageV2"] = "10000",
-    ["DFIntRakNetClockDriftAdjustmentPerPingMillisecond"] = "100",
-    ["DFIntRaknetBandwidthPingSendEveryXSeconds"] = "1",
-    ["DFIntRakNetNakResendDelayRttPercent"] = "50",
-    ["DFIntRakNetNakResendDelayMsMax"] = "100",
-    ["DFIntRakNetNakResendDelayMs"] = "10",
-    ["DFIntRakNetResendRttMultiple"] = "1",
-    ["DFIntRakNetSelectTimeoutMs"] = "1",
-    ["DFIntRakNetLoopMs"] = "1",
-    ["DFIntRakNetMinAckGrowthPercent"] = "0",
-    ["DFIntRakNetMtuValue1InBytes"] = "1280",
-    ["DFIntRakNetMtuValue2InBytes"] = "1240",
-    ["DFIntRakNetMtuValue3InBytes"] = "1200",
-    ["DFIntConnectionMTUSize"] = "1260",
-    ["DFIntMaxReceiveToDeserializeLatencyMilliseconds"] = "15",
-    ["DFIntNetworkInDeserializeLimitGameplayMsClient"] = "6",
-    ["DFIntNetworkInProcessLimitGameplayMsClient"] = "6",
-    ["DFIntClientPacketHealthyAllocationPercent"] = "20",
-    ["DFIntClientPacketMaxFrameMicroseconds"] = "200",
-    ["DFIntClientPacketExcessMicroseconds"] = "1000",
-    ["DFIntClientPacketMinMicroseconds"] = "1",
-    ["DFIntClientPacketMaxDelayMs"] = "11",
-    ["DFIntMaxWaitTimeBeforeForcePacketProcessMS"] = "1",
-    ["DFIntMaxProcessPacketsStepsPerCyclic"] = "5000",
-    ["DFIntMaxProcessPacketsStepsAccumulated"] = "0",
-    ["DFIntMaxProcessPacketsJobScaling"] = "10000",
-    ["DFIntLargePacketQueueSizeCutoffMB"] = "1000",
-    ["DFIntDataSenderRate"] = "1000",
-    ["DFIntDataSenderMaxBandwidthBps"] = "2147483647",
-    ["DFIntDataSenderMaxJoinBandwidthBps"] = "2147483647",
-    ["DFIntS2PhysicsSenderRate"] = "1000",
-    ["DFIntS2NumPhysicsPacketsPerStep"] = "100",
-    ["DFIntPhysicsSenderMaxBandwidthBps"] = "2147483647",
-    ["DFIntPhysicsSenderMaxBandwidthBpsScaling"] = "1000",
-    ["FIntPGSAngularDampingPermilPersecond"] = "0",
-    ["DFFlagPhysicsSkipNonRealTimeHumanoidForceCalc2"] = "True",
-    ["FFlagDebugDisplayFPS"] = "True",
-    ["DFIntSignalRHubConnectionHeartbeatTimerRateMs"] = "1000",
-    ["DFIntSignalRHubConnectionBaseRetryTimeMs"] = "100",
-    ["DFIntSignalRCoreKeepAlivePingPeriodMs"] = "250",
-    ["DFIntSignalRCoreServerTimeoutMs"] = "11100",
-    ["DFIntSignalRCoreTimerMs"] = "750",
-    ["DFIntSignalRCoreRpcQueueSize"] = "256",
-    ["DFIntAnimationLodFacsVisibilityDenominator"] = "0",
-    ["DFIntAnimationLodFacsDistanceMin"] = "0",
-    ["DFIntAnimationLodFacsDistanceMax"] = "0",
-    ["DFIntDebugFRMQualityLevelOverride"] = "1",
-    ["DFIntDebugDynamicRenderKiloPixels"] = "1100",
-    ["DFIntDebugRestrictGCDistance"] = "1",
-    ["DFIntWaitOnUpdateNetworkLoopEndedMS"] = "100",
-    ["DFIntWaitOnRecvFromLoopEndedMS"] = "100",
-    ["FIntRenderMaxShadowAtlasUsageBeforeDownscale"] = "80",
-    ["FIntRenderShadowMapDepthCacheMemLimit"] = "192",
-    ["FIntUITextureMaxRenderTextureSize"] = "1024",
-    ["FIntRakNetResendBufferArrayLength"] = "128",
-    ["FIntTerrainOTAMaxTextureSize"] = "1024",
-    ["FIntOcclusionWorkerThreadCount"] = "5",
-    ["FIntDefaultMeshCacheSizeMB"] = "256",
-    ["FIntRobloxGuiBlurIntensity"] = "0",
-    ["FIntTerrainArraySliceSize"] = "0",
-    ["FIntDebugForceMSAASamples"] = "1",
-    ["FIntRenderShadowmapBias"] = "0",
-    ["FIntFRMMaxGrassDistance"] = "0",
-    ["FIntFRMMinGrassDistance"] = "0",
-    ["FIntGrassMovementReducedMotionFactor"] = "0",
-    ["FIntDebugTextureManagerSkipMips"] = "7",
-    ["FIntPerformanceTelemetryQueueProcessLimit"] = "0",
-    ["FIntTelemetryProfilerFrequency"] = "0",
-    ["FIntRenderLocalLightFadeInMs"] = "0",
-    ["FIntReportDeviceInfoRollout"] = "0",
-    ["FFlagRenderAllocateShadowMapResourcesOnDemand"] = "True",
-    ["FFlagSpecifyNetworkReplicatorScopeForItems"] = "True",
-    ["FFlagTaskSchedulerLimitTargetFpsTo2402"] = "False",
-    ["FFlagHandleAltEnterFullscreenManually"] = "False",
-    ["FFlagGameBasicSettingsFramerateCap5"] = "False",
-    ["FFlagSpecifyNetworkReplicatorScope"] = "True",
-    ["FFlagSendRenderFidelityTelemetry2"] = "False",
-    ["FFlagRenderGpuTextureCompressor"] = "True",
-    ["FFlagBaseThreadPoolUseRuntime2"] = "True",
-    ["FFlagCacheTextBoundsInGuiText"] = "True",
-    ["FFlagEnableTelemetryService1"] = "False",
-    ["FFlagDebugGraphicsPreferD3D11"] = "True",
-    ["FFlagPerfDataOnTelemetryV2"] = "False",
-    ["FFlagOpenTelemetryEnabled2"] = "False",
-    ["FFlagRbxStorageUseMemCache"] = "True",
-    ["FFlagDebugForceGenerateHSR"] = "True",
-    ["FFlagRenderInitShadowmaps"] = "True",
-    ["FFlagFastGPULightCulling3"] = "True",
-    ["FFlagDebugSkyGray"] = "True",
-    ["FFlagDebugRenderingSetDeterministic"] = "True",
-    ["FLogNetwork"] = "7",
-}
-
-for k, v in pairs(fflagTable) do
-    pcall(setfflag, k, v)
-end
-
 pcall(function()
     if Camera then
         Camera.FieldOfView = 85
@@ -180,23 +198,37 @@ local SKY_GRAY = Color3.fromRGB(128, 128, 128)
 
 local function applySky()
     pcall(function()
+        local existingSky = Lighting:FindFirstChildOfClass("Sky")
+        if existingSky then
+            existingSky.SkyboxBk = "rbxasset://textures/sky/sky512_bk.tex"
+            existingSky.SkyboxDn = "rbxasset://textures/sky/sky512_dn.tex"
+            existingSky.SkyboxFt = "rbxasset://textures/sky/sky512_ft.tex"
+            existingSky.SkyboxLf = "rbxasset://textures/sky/sky512_lf.tex"
+            existingSky.SkyboxRt = "rbxasset://textures/sky/sky512_rt.tex"
+            existingSky.SkyboxUp = "rbxasset://textures/sky/sky512_up.tex"
+            existingSky.SunTextureId = ""
+            existingSky.MoonTextureId = ""
+            existingSky.StarCount = 0
+            existingSky.CelestialBodiesShown = false
+        else
+            local sky = Instance.new("Sky")
+            sky.SkyboxBk = "rbxasset://textures/sky/sky512_bk.tex"
+            sky.SkyboxDn = "rbxasset://textures/sky/sky512_dn.tex"
+            sky.SkyboxFt = "rbxasset://textures/sky/sky512_ft.tex"
+            sky.SkyboxLf = "rbxasset://textures/sky/sky512_lf.tex"
+            sky.SkyboxRt = "rbxasset://textures/sky/sky512_rt.tex"
+            sky.SkyboxUp = "rbxasset://textures/sky/sky512_up.tex"
+            sky.SunTextureId = ""
+            sky.MoonTextureId = ""
+            sky.StarCount = 0
+            sky.CelestialBodiesShown = false
+            sky.Parent = Lighting
+        end
         for _, v in ipairs(Lighting:GetChildren()) do
-            if v:IsA("Sky") or v:IsA("Atmosphere") or v:IsA("Clouds") or v:IsA("PostEffect") then
+            if v:IsA("Atmosphere") or v:IsA("Clouds") or v:IsA("PostEffect") then
                 pcall(function() v:Destroy() end)
             end
         end
-        local sky = Instance.new("Sky")
-        sky.SkyboxBk = "rbxasset://textures/sky/sky512_bk.tex"
-        sky.SkyboxDn = "rbxasset://textures/sky/sky512_dn.tex"
-        sky.SkyboxFt = "rbxasset://textures/sky/sky512_ft.tex"
-        sky.SkyboxLf = "rbxasset://textures/sky/sky512_lf.tex"
-        sky.SkyboxRt = "rbxasset://textures/sky/sky512_rt.tex"
-        sky.SkyboxUp = "rbxasset://textures/sky/sky512_up.tex"
-        sky.SunTextureId = ""
-        sky.MoonTextureId = ""
-        sky.StarCount = 0
-        sky.CelestialBodiesShown = false
-        sky.Parent = Lighting
         Lighting.GlobalShadows = false
         Lighting.Brightness = 1.6
         Lighting.ClockTime = 14
@@ -361,12 +393,10 @@ task.spawn(function()
     end
 end)
 
-local scanFinished = false
-
 task.spawn(function()
     local descendants = Workspace:GetDescendants()
     local total = #descendants
-    if total == 0 then scanFinished = true return end
+    if total == 0 then return end
     local BATCH_SIZE = 600
     local MAX_CONCURRENT = 40
     local batches = {}
@@ -398,7 +428,6 @@ task.spawn(function()
             RunService.Heartbeat:Wait()
         end
     end
-    scanFinished = true
 end)
 
 Workspace.DescendantAdded:Connect(function(v)
@@ -488,123 +517,6 @@ task.spawn(function()
         end)
     end
 end)
-
-local notifGui = Instance.new("ScreenGui")
-notifGui.Name = "LegacyNotif_" .. HttpService:GenerateGUID(false):sub(1, 8)
-notifGui.ResetOnSpawn = false
-notifGui.DisplayOrder = 2147483647
-notifGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-pcall(function() notifGui.Parent = uiParent end)
-
-local activeNotifs = {}
-local NOTIF_CONST = {
-    WIDTH = 260,
-    HEIGHT = 80,
-    PADDING = 12,
-    THEME = Color3.fromRGB(255, 60, 60),
-    BG = Color3.fromRGB(18, 18, 18),
-    TEXT = Color3.fromRGB(240, 240, 240),
-    SUBTEXT = Color3.fromRGB(160, 160, 160),
-    SPEED = 0.4
-}
-
-local function updateNotifs()
-    for index, data in ipairs(activeNotifs) do
-        local targetY = -NOTIF_CONST.PADDING - ((index - 1) * (NOTIF_CONST.HEIGHT + NOTIF_CONST.PADDING))
-        TweenService:Create(data.Container, TweenInfo.new(NOTIF_CONST.SPEED, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-            Position = UDim2.new(1, -NOTIF_CONST.PADDING, 1, targetY)
-        }):Play()
-    end
-end
-
-local function showNotif(titleText, messageText, duration)
-    duration = duration or 6
-    local container = Instance.new("Frame")
-    container.Size = UDim2.new(0, NOTIF_CONST.WIDTH, 0, NOTIF_CONST.HEIGHT)
-    container.Position = UDim2.new(1, 320, 1, -NOTIF_CONST.PADDING)
-    container.AnchorPoint = Vector2.new(1, 1)
-    container.BackgroundTransparency = 1
-    container.Parent = notifGui
-
-    local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(1, 0, 1, 0)
-    frame.BackgroundColor3 = NOTIF_CONST.BG
-    frame.BorderSizePixel = 0
-    frame.Parent = container
-    Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 8)
-
-    local stroke = Instance.new("UIStroke")
-    stroke.Color = Color3.fromRGB(60, 30, 30)
-    stroke.Thickness = 1
-    stroke.Parent = frame
-
-    local accent = Instance.new("Frame")
-    accent.Size = UDim2.new(1, 0, 0, 2)
-    accent.BackgroundColor3 = NOTIF_CONST.THEME
-    accent.BorderSizePixel = 0
-    accent.Parent = frame
-
-    local titleLabel = Instance.new("TextLabel")
-    titleLabel.Size = UDim2.new(1, -50, 0, 22)
-    titleLabel.Position = UDim2.new(0, 14, 0, 10)
-    titleLabel.BackgroundTransparency = 1
-    titleLabel.Text = titleText
-    titleLabel.TextColor3 = NOTIF_CONST.TEXT
-    titleLabel.Font = Enum.Font.GothamBold
-    titleLabel.TextSize = 15
-    titleLabel.TextXAlignment = Enum.TextXAlignment.Left
-    titleLabel.Parent = frame
-
-    local msgLabel = Instance.new("TextLabel")
-    msgLabel.Size = UDim2.new(1, -28, 0, 36)
-    msgLabel.Position = UDim2.new(0, 14, 0, 34)
-    msgLabel.BackgroundTransparency = 1
-    msgLabel.Text = messageText
-    msgLabel.TextColor3 = NOTIF_CONST.SUBTEXT
-    msgLabel.Font = Enum.Font.GothamMedium
-    msgLabel.TextSize = 12
-    msgLabel.TextWrapped = true
-    msgLabel.TextXAlignment = Enum.TextXAlignment.Left
-    msgLabel.TextYAlignment = Enum.TextYAlignment.Top
-    msgLabel.Parent = frame
-
-    local closeBtn = Instance.new("TextButton")
-    closeBtn.Size = UDim2.new(0, 22, 0, 22)
-    closeBtn.Position = UDim2.new(1, -8, 0, 8)
-    closeBtn.AnchorPoint = Vector2.new(1, 0)
-    closeBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
-    closeBtn.Text = "X"
-    closeBtn.TextColor3 = Color3.fromRGB(150, 150, 150)
-    closeBtn.Font = Enum.Font.GothamBold
-    closeBtn.TextSize = 11
-    closeBtn.AutoButtonColor = false
-    closeBtn.Parent = frame
-    Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 6)
-
-    local notifData = {Container = container}
-    table.insert(activeNotifs, 1, notifData)
-    updateNotifs()
-
-    local closed = false
-    local function closeNotif()
-        if closed then return end
-        closed = true
-        local idx = table.find(activeNotifs, notifData)
-        if idx then
-            table.remove(activeNotifs, idx)
-            updateNotifs()
-        end
-        local tweenOut = TweenService:Create(container, TweenInfo.new(NOTIF_CONST.SPEED, Enum.EasingStyle.Sine, Enum.EasingDirection.In), {
-            Position = UDim2.new(1, 320, container.Position.Y.Scale, container.Position.Y.Offset)
-        })
-        tweenOut:Play()
-        tweenOut.Completed:Wait()
-        container:Destroy()
-    end
-
-    closeBtn.MouseButton1Click:Connect(closeNotif)
-    task.delay(duration, closeNotif)
-end
 
 local sg = Instance.new("ScreenGui")
 sg.Name = "LegacyLoader"
@@ -1149,7 +1061,5 @@ end)
 
 task.wait(0.1)
 applyOpacity(0.5)
-
-showNotif("Script successfully loaded!", "FFlags applied. Optimization active.", 6)
 
 print("Legacy optimizer v1.2.0 by @realz29001 loaded")

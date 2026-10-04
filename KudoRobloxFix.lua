@@ -4,11 +4,9 @@ local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local Stats = game:GetService("Stats")
 local Lighting = game:GetService("Lighting")
-local Workspace = game:GetService("Workspace")
-local Terrain = Workspace:FindFirstChildOfClass("Terrain")
-local VirtualUser = game:GetService("VirtualUser")
 local CoreGui = game:GetService("CoreGui")
 local HttpService = game:GetService("HttpService")
+local VirtualUser = game:GetService("VirtualUser")
 
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
@@ -161,11 +159,9 @@ for k, v in pairs(fflagTable) do
     pcall(setfflag, k, v)
 end
 
-task.wait(1)
-
 local SKY_GRAY = Color3.fromRGB(128, 128, 128)
 
-local function applySky()
+local function applySkyOnce()
     pcall(function()
         for _, v in ipairs(Lighting:GetChildren()) do
             if v:IsA("PostEffect") or v:IsA("Sky") or v:IsA("Atmosphere") or v:IsA("Clouds") then
@@ -201,25 +197,7 @@ local function applySky()
     end)
 end
 
-applySky()
-
-task.spawn(function()
-    while true do
-        task.wait(3)
-        applySky()
-    end
-end)
-
-pcall(function()
-    if Terrain then
-        Terrain.WaterWaveSize = 0
-        Terrain.WaterWaveSpeed = 0
-        Terrain.WaterReflectance = 0
-        Terrain.WaterTransparency = 0
-        Terrain.WaterColor = Color3.fromRGB(0, 100, 200)
-        Terrain.Decoration = false
-    end
-end)
+applySkyOnce()
 
 task.spawn(function()
     while true do
@@ -454,16 +432,6 @@ barFill.ZIndex = 1011
 barFill.Parent = barBg
 Instance.new("UICorner", barFill).CornerRadius = UDim.new(1, 0)
 
-local barGlow = Instance.new("Frame")
-barGlow.Size = UDim2.new(1, 4, 1, 4)
-barGlow.Position = UDim2.new(0, -2, 0, -2)
-barGlow.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
-barGlow.BackgroundTransparency = 0.6
-barGlow.BorderSizePixel = 0
-barGlow.ZIndex = 1009
-barGlow.Parent = barFill
-Instance.new("UICorner", barGlow).CornerRadius = UDim.new(1, 0)
-
 local statusLabel = Instance.new("TextLabel")
 statusLabel.Size = UDim2.new(1, -100, 0, 14)
 statusLabel.Position = UDim2.new(0, 15, 0, 80)
@@ -492,15 +460,6 @@ percentL.ZIndex = 1010
 percentL.Parent = popup
 TweenService:Create(percentL, TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 0}):Play()
 
-task.spawn(function()
-    while barBg.Parent do
-        local pulse = math.abs(math.sin(tick() * 3))
-        barBgStroke.Transparency = 0.3 + pulse * 0.4
-        barGlow.BackgroundTransparency = 0.5 + pulse * 0.3
-        task.wait(0.05)
-    end
-end)
-
 local barDone = false
 task.spawn(function()
     local currentP = 0
@@ -518,14 +477,13 @@ task.spawn(function()
         if currentP >= 100 then
             barDone = true
         end
-        task.wait(0.03)
+        task.wait(0.05)
     end
 
     percentL.Text = "100%"
     statusLabel.Text = "done"
     statusLabel.TextColor3 = Color3.fromRGB(120, 220, 140)
     barFill.BackgroundColor3 = Color3.fromRGB(120, 220, 140)
-    barGlow.BackgroundColor3 = Color3.fromRGB(120, 220, 140)
     barBgStroke.Color = Color3.fromRGB(120, 220, 140)
 end)
 
@@ -535,25 +493,18 @@ task.spawn(function()
     end
     task.wait(1.5)
 
-    local fadeItems = {
-        {obj = backdrop, prop = "BackgroundTransparency", target = 1},
-        {obj = popup, prop = "BackgroundTransparency", target = 1},
-        {obj = title, prop = "TextTransparency", target = 1},
-        {obj = sub, prop = "TextTransparency", target = 1},
-        {obj = percentL, prop = "TextTransparency", target = 1},
-        {obj = statusLabel, prop = "TextTransparency", target = 1},
-        {obj = barBg, prop = "BackgroundTransparency", target = 1},
-        {obj = barFill, prop = "BackgroundTransparency", target = 1},
-        {obj = barGlow, prop = "BackgroundTransparency", target = 1},
-    }
-
-    for _, item in ipairs(fadeItems) do
-        TweenService:Create(item.obj, TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {[item.prop] = item.target}):Play()
-    end
+    TweenService:Create(backdrop, TweenInfo.new(0.8), {BackgroundTransparency = 1}):Play()
+    TweenService:Create(popup, TweenInfo.new(0.8), {BackgroundTransparency = 1}):Play()
+    TweenService:Create(title, TweenInfo.new(0.8), {TextTransparency = 1}):Play()
+    TweenService:Create(sub, TweenInfo.new(0.8), {TextTransparency = 1}):Play()
+    TweenService:Create(percentL, TweenInfo.new(0.8), {TextTransparency = 1}):Play()
+    TweenService:Create(statusLabel, TweenInfo.new(0.8), {TextTransparency = 1}):Play()
+    TweenService:Create(barBg, TweenInfo.new(0.8), {BackgroundTransparency = 1}):Play()
+    TweenService:Create(barFill, TweenInfo.new(0.8), {BackgroundTransparency = 1}):Play()
     TweenService:Create(barBgStroke, TweenInfo.new(0.8), {Transparency = 1}):Play()
     TweenService:Create(borderStroke, TweenInfo.new(0.8), {Transparency = 1}):Play()
 
-    local scaleTween = TweenService:Create(popupScale, TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Scale = 0.85})
+    local scaleTween = TweenService:Create(popupScale, TweenInfo.new(0.8), {Scale = 0.85})
     scaleTween:Play()
     scaleTween.Completed:Wait()
     task.wait(0.3)
@@ -667,140 +618,6 @@ hideB.ZIndex = 10
 hideB.Parent = box
 Instance.new("UICorner", hideB).CornerRadius = UDim.new(1, 0)
 
-local lockB = Instance.new("TextButton")
-lockB.Size = UDim2.new(0, 24, 0, 24)
-lockB.Position = UDim2.new(1, -84, 0, -4)
-lockB.BackgroundColor3 = Color3.fromRGB(80, 80, 90)
-lockB.Text = "🔓"
-lockB.Font = Enum.Font.GothamBold
-lockB.TextSize = 12
-lockB.TextColor3 = Color3.new(1, 1, 1)
-lockB.BorderSizePixel = 0
-lockB.ZIndex = 10
-lockB.Parent = box
-Instance.new("UICorner", lockB).CornerRadius = UDim.new(1, 0)
-
-local opacityB = Instance.new("TextButton")
-opacityB.Size = UDim2.new(0, 24, 0, 24)
-opacityB.Position = UDim2.new(1, -112, 0, -4)
-opacityB.BackgroundColor3 = Color3.fromRGB(80, 100, 200)
-opacityB.Text = "◐"
-opacityB.Font = Enum.Font.GothamBold
-opacityB.TextSize = 14
-opacityB.TextColor3 = Color3.new(1, 1, 1)
-opacityB.BorderSizePixel = 0
-opacityB.ZIndex = 10
-opacityB.Parent = box
-Instance.new("UICorner", opacityB).CornerRadius = UDim.new(1, 0)
-
-local locked = false
-lockB.MouseButton1Click:Connect(function()
-    locked = not locked
-    if locked then
-        lockB.BackgroundColor3 = Color3.fromRGB(80, 200, 100)
-        lockB.Text = "🔒"
-    else
-        lockB.BackgroundColor3 = Color3.fromRGB(80, 80, 90)
-        lockB.Text = "🔓"
-    end
-end)
-
-local sliderPanel = Instance.new("Frame")
-sliderPanel.Name = "OpacitySlider"
-sliderPanel.Size = UDim2.new(1, -20, 0, 30)
-sliderPanel.Position = UDim2.new(0, 10, 1, -34)
-sliderPanel.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
-sliderPanel.BorderSizePixel = 0
-sliderPanel.Visible = false
-sliderPanel.ZIndex = 20
-sliderPanel.Parent = box
-Instance.new("UICorner", sliderPanel).CornerRadius = UDim.new(0, 6)
-
-local sliderBg = Instance.new("Frame")
-sliderBg.Size = UDim2.new(1, -20, 0, 6)
-sliderBg.Position = UDim2.new(0, 10, 0.5, -3)
-sliderBg.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
-sliderBg.BorderSizePixel = 0
-sliderBg.ZIndex = 21
-sliderBg.Parent = sliderPanel
-Instance.new("UICorner", sliderBg).CornerRadius = UDim.new(1, 0)
-
-local sliderFill = Instance.new("Frame")
-sliderFill.Size = UDim2.new(0.5, 0, 1, 0)
-sliderFill.BackgroundColor3 = Color3.fromRGB(80, 150, 255)
-sliderFill.BorderSizePixel = 0
-sliderFill.ZIndex = 22
-sliderFill.Parent = sliderBg
-Instance.new("UICorner", sliderFill).CornerRadius = UDim.new(1, 0)
-
-local sliderKnob = Instance.new("TextButton")
-sliderKnob.Size = UDim2.new(0, 16, 0, 16)
-sliderKnob.Position = UDim2.new(0.5, -8, 0.5, -8)
-sliderKnob.BackgroundColor3 = Color3.fromRGB(150, 200, 255)
-sliderKnob.Text = ""
-sliderKnob.BorderSizePixel = 0
-sliderKnob.ZIndex = 23
-sliderKnob.Parent = sliderBg
-Instance.new("UICorner", sliderKnob).CornerRadius = UDim.new(1, 0)
-
-local function applyOpacity(value)
-    local transparency = 1 - value
-    box.BackgroundTransparency = math.clamp(0.1 + transparency * 0.85, 0, 1)
-    header.BackgroundTransparency = math.clamp(0.4 + transparency * 0.5, 0, 1)
-    bxStroke.Transparency = math.clamp(0.4 + transparency * 0.55, 0, 1)
-    for _, child in ipairs(box:GetDescendants()) do
-        local skip = false
-        local parent = child.Parent
-        while parent do
-            if parent == sliderPanel then
-                skip = true
-                break
-            end
-            if parent == box then break end
-            parent = parent.Parent
-        end
-        if not skip then
-            if child:IsA("TextLabel") then
-                child.TextTransparency = math.clamp(transparency * 0.9, 0, 1)
-            elseif child:IsA("TextButton") then
-                child.BackgroundTransparency = math.clamp(transparency * 0.5, 0, 0.7)
-                child.TextTransparency = math.clamp(transparency * 0.7, 0, 0.8)
-            end
-        end
-    end
-end
-
-local draggingSlider = false
-sliderKnob.InputBegan:Connect(function(i)
-    if i.UserInputType == Enum.UserInputType.Touch or i.UserInputType == Enum.UserInputType.MouseButton1 then
-        draggingSlider = true
-    end
-end)
-
-UserInputService.InputChanged:Connect(function(i)
-    if draggingSlider then
-        local mouseX = i.Position.X
-        local bgAbsPos = sliderBg.AbsolutePosition.X
-        local bgAbsSize = sliderBg.AbsoluteSize.X
-        local percent = math.clamp((mouseX - bgAbsPos) / bgAbsSize, 0, 1)
-        sliderFill.Size = UDim2.new(percent, 0, 1, 0)
-        sliderKnob.Position = UDim2.new(percent, -8, 0.5, -8)
-        applyOpacity(percent)
-    end
-end)
-
-UserInputService.InputEnded:Connect(function(i)
-    if i.UserInputType == Enum.UserInputType.Touch or i.UserInputType == Enum.UserInputType.MouseButton1 then
-        draggingSlider = false
-    end
-end)
-
-local sliderVisible = false
-opacityB.MouseButton1Click:Connect(function()
-    sliderVisible = not sliderVisible
-    sliderPanel.Visible = sliderVisible
-end)
-
 local showSg = Instance.new("ScreenGui")
 showSg.Name = "LegacyToggle"
 showSg.ResetOnSpawn = false
@@ -836,55 +653,19 @@ closeB.MouseButton1Click:Connect(function()
     showSg:Destroy()
 end)
 
-local dragging = false
-local ds, sp
-
-box.InputBegan:Connect(function(i)
-    if locked then return end
-    if i.UserInputType == Enum.UserInputType.Touch or i.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = true
-        ds = i.Position
-        sp = box.Position
-    end
-end)
-
-UserInputService.InputChanged:Connect(function(i)
-    if dragging and not locked then
-        local d = i.Position - ds
-        box.Position = UDim2.new(sp.X.Scale, sp.X.Offset + d.X, sp.Y.Scale, sp.Y.Offset + d.Y)
-    end
-end)
-
-UserInputService.InputEnded:Connect(function(i)
-    if i.UserInputType == Enum.UserInputType.Touch or i.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = false
-    end
-end)
-
 local st = tick()
 task.spawn(function()
     while statsGui.Parent do
         task.wait(1)
         local e = math.floor(tick() - st)
         timeV.Text = string.format("%02d:%02d", math.floor(e / 60), e % 60)
+        fpsV.Text = tostring(math.floor(1 / (RunService.Heartbeat:Wait())))
     end
-end)
-
-local fr = 0
-RunService.RenderStepped:Connect(function()
-    fr = fr + 1
 end)
 
 task.spawn(function()
     while statsGui.Parent do
         task.wait(1)
-        fpsV.Text = tostring(fr)
-        if fr < 40 then
-            fpsV.TextColor3 = Color3.fromRGB(255, 60, 60)
-        else
-            fpsV.TextColor3 = Color3.fromRGB(0, 255, 120)
-        end
-        fr = 0
         local p = 0
         pcall(function()
             p = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
@@ -897,9 +678,6 @@ task.spawn(function()
         end
     end
 end)
-
-task.wait(0.1)
-applyOpacity(0.5)
 
 showNotif("Script successfully loaded!", "FFlags applied. Optimization active.", 6)
 

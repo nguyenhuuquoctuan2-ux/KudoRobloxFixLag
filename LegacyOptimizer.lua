@@ -1,3 +1,6 @@
+-- Legacy Optimizer v1.2.0 - Xeno Compatible
+-- by @realz29001
+
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
@@ -9,18 +12,26 @@ local Terrain = Workspace:FindFirstChildOfClass("Terrain")
 local Camera = Workspace.CurrentCamera
 local VirtualUser = game:GetService("VirtualUser")
 local CoreGui = game:GetService("CoreGui")
-local HttpService = game:GetService("HttpService")
 
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
 local uiParent = PlayerGui
 pcall(function()
-    if gethui then uiParent = gethui() elseif cloneref then uiParent = cloneref(CoreGui) end
+    if gethui then
+        uiParent = gethui()
+    end
 end)
 
+local function safeSetFFlag(k, v)
+    pcall(function()
+        if setfflag then
+            setfflag(k, v)
+        end
+    end)
+end
+
 local flagtables = {
-    -- Scheduler giảm xuống mức cân bằng
     ["DFIntTaskSchedulerTargetFps"] = "9999",
     ["FIntTaskSchedulerAutoThreadLimit"] = "4",
     ["FIntTaskSchedulerAsyncTasksMinimumThreadCount"] = "2",
@@ -85,12 +96,11 @@ local flagtables = {
     ["DFIntSignalRCoreTimerMs"] = "750",
     ["DFIntSignalRCoreRpcQueueSize"] = "256",
 
-    -- Animation LOD: bật lại để giảm tải
     ["DFIntAnimationLodFacsVisibilityDenominator"] = "1",
     ["DFIntAnimationLodFacsDistanceMin"] = "10",
     ["DFIntAnimationLodFacsDistanceMax"] = "100",
     ["DFIntDebugFRMQualityLevelOverride"] = "1",
-    ["DFIntDebugDynamicRenderKiloPixels"] = "800",
+    ["DFIntDebugDynamicRenderKiloPixels"] = "600",
     ["DFIntDebugRestrictGCDistance"] = "1",
 
     ["DFIntWaitOnUpdateNetworkLoopEndedMS"] = "100",
@@ -98,9 +108,8 @@ local flagtables = {
 
     ["FIntRenderMaxShadowAtlasUsageBeforeDownscale"] = "80",
     ["FIntRenderShadowMapDepthCacheMemLimit"] = "192",
-    ["FIntUITextureMaxRenderTextureSize"] = "512",
-    ["FIntRakNetResendBufferArrayLength"] = "128",
-    ["FIntTerrainOTAMaxTextureSize"] = "512",
+    ["FIntUITextureMaxRenderTextureSize"] = "256",
+    ["FIntTerrainOTAMaxTextureSize"] = "256",
     ["FIntOcclusionWorkerThreadCount"] = "5",
     ["FIntDefaultMeshCacheSizeMB"] = "128",
     ["FIntRobloxGuiBlurIntensity"] = "0",
@@ -175,17 +184,12 @@ local flagtables = {
     ["FFlagDebugPauseVoxelizer"] = "True",
     ["DFIntSolverSpringDamping"] = "0",
 
-    -- Physics đủ để nhân vật mượt
     ["DFIntMaxSimultaneousPhysicsJobs"] = "4",
     ["DFIntPhysicsStepPerFrame"] = "2",
     ["DFIntMaximumCollisionIterations"] = "3",
     ["DFIntSolverConvergenceIterations"] = "3",
     ["DFIntSolverIterations"] = "3",
-    ["DFFlagPhysicsSkipNonRealTimeHumanoidForceCalc2"] = "True",
     ["DFIntPhysicsQualityOverride"] = "2",
-
-    ["DFFlagDebugRenderForceTechnologyVoxel"] = "True",
-    ["FFlagDebugPauseVoxelizer"] = "True",
     ["FFlagDisableFluidForces"] = "True",
     ["FFlagDisableAeroForces"] = "True",
     ["FFlagSimplifyPhysics"] = "False",
@@ -219,7 +223,6 @@ local flagtables = {
     ["FFlagDisableGlobalShadows"] = "True",
     ["FFlagDisableLocalShadows"] = "True",
 
-    -- Animation: bật full để không giật
     ["DFIntAnimationQualityOverride"] = "4",
     ["FFlagDisableAnimationBlending"] = "False",
     ["DFIntMaxAnimationTracks"] = "8",
@@ -290,7 +293,6 @@ local flagtables = {
     ["FFlagDisableTerrainClutter"] = "True",
     ["DFIntTerrainQuality"] = "0",
 
-    -- Animation humanoid chạy mượt
     ["DFIntHumanoidAnimationQuality"] = "4",
     ["FFlagSimplifyHumanoidAnimations"] = "False",
     ["DFIntHumanoidAnimationRate"] = "60",
@@ -314,19 +316,16 @@ local flagtables = {
     ["DFIntLightingQuality"] = "0",
     ["DFIntShadowQuality"] = "0",
 
-    -- Physics step cao để nhân vật mượt
     ["FFlagOptimizePhysicsStepping"] = "True",
     ["DFIntPhysicsStepRate"] = "60",
     ["FFlagSkipPhysicsWhenIdle"] = "True",
     ["FFlagReducePhysicsPrecision"] = "False",
     ["DFIntPhysicsSolverIterations"] = "4",
 
-    -- Camera update theo frame render
     ["FFlagReduceCameraUpdateRate"] = "False",
     ["DFIntCameraUpdateRate"] = "60",
     ["FFlagOptimizeCameraPhysics"] = "True",
 
-    -- Character render full
     ["FFlagOptimizeCharacterRendering"] = "False",
     ["DFIntCharacterUpdateRate"] = "60",
     ["FFlagReduceCharacterDetail"] = "False",
@@ -341,30 +340,10 @@ local flagtables = {
     ["FFlagOptimizeDrawOrder"] = "True"
 }
 
-local function formatFlag(z)
-    z = z:gsub("^DFInt", "")
-    z = z:gsub("^DFFlag", "")
-    z = z:gsub("^FFlag", "")
-    z = z:gsub("^FInt", "")
-    z = z:gsub("FString", "")
-    z = z:gsub("FLog", "")
-    return z
-end
-
 task.spawn(function()
-    if setfflag then
-        for k, v in pairs(flagtables) do
-            pcall(function()
-                local formatted = formatFlag(k)
-                if getfflag and getfflag(formatted) then
-                    setfflag(formatted, v)
-                elseif getfflag and getfflag(k) then
-                    setfflag(k, v)
-                else
-                    setfflag(k, v)
-                end
-            end)
-        end
+    for k, v in pairs(flagtables) do
+        safeSetFFlag(k, v)
+        task.wait()
     end
 end)
 
@@ -665,10 +644,9 @@ task.spawn(function()
 end)
 
 local notifGui = Instance.new("ScreenGui")
-notifGui.Name = "LegacyNotif_" .. HttpService:GenerateGUID(false):sub(1, 8)
+notifGui.Name = "LegacyNotif"
 notifGui.ResetOnSpawn = false
 notifGui.DisplayOrder = 2147483647
-notifGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 pcall(function() notifGui.Parent = uiParent end)
 
 local activeNotifs = {}
@@ -686,9 +664,11 @@ local NOTIF_CONST = {
 local function updateNotifs()
     for index, data in ipairs(activeNotifs) do
         local targetY = -NOTIF_CONST.PADDING - ((index - 1) * (NOTIF_CONST.HEIGHT + NOTIF_CONST.PADDING))
-        TweenService:Create(data.Container, TweenInfo.new(NOTIF_CONST.SPEED, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-            Position = UDim2.new(1, -NOTIF_CONST.PADDING, 1, targetY)
-        }):Play()
+        pcall(function()
+            TweenService:Create(data.Container, TweenInfo.new(NOTIF_CONST.SPEED, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+                Position = UDim2.new(1, -NOTIF_CONST.PADDING, 1, targetY)
+            }):Play()
+        end)
     end
 end
 
@@ -769,11 +749,13 @@ local function showNotif(titleText, messageText, duration)
             table.remove(activeNotifs, idx)
             updateNotifs()
         end
-        local tweenOut = TweenService:Create(container, TweenInfo.new(NOTIF_CONST.SPEED, Enum.EasingStyle.Sine, Enum.EasingDirection.In), {
-            Position = UDim2.new(1, 320, container.Position.Y.Scale, container.Position.Y.Offset)
-        })
-        tweenOut:Play()
-        tweenOut.Completed:Wait()
+        pcall(function()
+            local tweenOut = TweenService:Create(container, TweenInfo.new(NOTIF_CONST.SPEED, Enum.EasingStyle.Sine, Enum.EasingDirection.In), {
+                Position = UDim2.new(1, 320, container.Position.Y.Scale, container.Position.Y.Offset)
+            })
+            tweenOut:Play()
+            tweenOut.Completed:Wait()
+        end)
         container:Destroy()
     end
 
@@ -786,43 +768,30 @@ sg.Name = "LegacyLoader"
 sg.ResetOnSpawn = false
 sg.IgnoreGuiInset = true
 sg.DisplayOrder = 2147483647
-sg.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 sg.Parent = uiParent
 
 local backdrop = Instance.new("Frame")
 backdrop.Name = "LegacyBackdrop"
 backdrop.Size = UDim2.new(1, 0, 1, 0)
 backdrop.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-backdrop.BackgroundTransparency = 1
+backdrop.BackgroundTransparency = 0.5
 backdrop.BorderSizePixel = 0
 backdrop.ZIndex = 999
 backdrop.Parent = sg
-
-TweenService:Create(backdrop, TweenInfo.new(0.5), {BackgroundTransparency = 0.5}):Play()
 
 local popup = Instance.new("Frame")
 popup.Size = UDim2.new(0, 320, 0, 100)
 popup.Position = UDim2.new(0.5, -160, 0.5, -50)
 popup.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
-popup.BackgroundTransparency = 1
 popup.BorderSizePixel = 0
 popup.ZIndex = 1000
 popup.Parent = sg
 Instance.new("UICorner", popup).CornerRadius = UDim.new(0, 8)
 
-local popupScale = Instance.new("UIScale")
-popupScale.Scale = 0.6
-popupScale.Parent = popup
-
-TweenService:Create(popup, TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {BackgroundTransparency = 0}):Play()
-TweenService:Create(popupScale, TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Scale = 1}):Play()
-
 local borderStroke = Instance.new("UIStroke")
 borderStroke.Color = Color3.fromRGB(80, 30, 30)
 borderStroke.Thickness = 1
-borderStroke.Transparency = 1
 borderStroke.Parent = popup
-TweenService:Create(borderStroke, TweenInfo.new(0.6), {Transparency = 0}):Play()
 
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, -30, 0, 22)
@@ -833,10 +802,8 @@ title.Font = Enum.Font.GothamBold
 title.TextSize = 17
 title.TextColor3 = Color3.fromRGB(240, 240, 240)
 title.TextXAlignment = Enum.TextXAlignment.Left
-title.TextTransparency = 1
 title.ZIndex = 1010
 title.Parent = popup
-TweenService:Create(title, TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 0}):Play()
 
 local sub = Instance.new("TextLabel")
 sub.Size = UDim2.new(1, -30, 0, 14)
@@ -847,28 +814,23 @@ sub.Font = Enum.Font.Gotham
 sub.TextSize = 11
 sub.TextColor3 = Color3.fromRGB(150, 150, 150)
 sub.TextXAlignment = Enum.TextXAlignment.Left
-sub.TextTransparency = 1
 sub.ZIndex = 1010
 sub.Parent = popup
-TweenService:Create(sub, TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 0}):Play()
 
 local barBg = Instance.new("Frame")
 barBg.Size = UDim2.new(1, -30, 0, 5)
 barBg.Position = UDim2.new(0, 15, 0, 68)
 barBg.BackgroundColor3 = Color3.fromRGB(40, 25, 25)
-barBg.BackgroundTransparency = 1
 barBg.BorderSizePixel = 0
 barBg.ZIndex = 1010
 barBg.Parent = popup
 Instance.new("UICorner", barBg).CornerRadius = UDim.new(1, 0)
-TweenService:Create(barBg, TweenInfo.new(0.6), {BackgroundTransparency = 0}):Play()
 
 local barBgStroke = Instance.new("UIStroke")
 barBgStroke.Color = Color3.fromRGB(180, 50, 50)
 barBgStroke.Thickness = 1
-barBgStroke.Transparency = 1
+barBgStroke.Transparency = 0.5
 barBgStroke.Parent = barBg
-TweenService:Create(barBgStroke, TweenInfo.new(0.6), {Transparency = 0.5}):Play()
 
 local barFill = Instance.new("Frame")
 barFill.Size = UDim2.new(0, 0, 1, 0)
@@ -877,16 +839,6 @@ barFill.BorderSizePixel = 0
 barFill.ZIndex = 1011
 barFill.Parent = barBg
 Instance.new("UICorner", barFill).CornerRadius = UDim.new(1, 0)
-
-local barGlow = Instance.new("Frame")
-barGlow.Size = UDim2.new(1, 4, 1, 4)
-barGlow.Position = UDim2.new(0, -2, 0, -2)
-barGlow.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
-barGlow.BackgroundTransparency = 0.6
-barGlow.BorderSizePixel = 0
-barGlow.ZIndex = 1009
-barGlow.Parent = barFill
-Instance.new("UICorner", barGlow).CornerRadius = UDim.new(1, 0)
 
 local statusLabel = Instance.new("TextLabel")
 statusLabel.Size = UDim2.new(1, -100, 0, 14)
@@ -897,10 +849,8 @@ statusLabel.Font = Enum.Font.Gotham
 statusLabel.TextSize = 10
 statusLabel.TextColor3 = Color3.fromRGB(160, 120, 120)
 statusLabel.TextXAlignment = Enum.TextXAlignment.Left
-statusLabel.TextTransparency = 1
 statusLabel.ZIndex = 1010
 statusLabel.Parent = popup
-TweenService:Create(statusLabel, TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 0}):Play()
 
 local percentL = Instance.new("TextLabel")
 percentL.Size = UDim2.new(0, 60, 0, 14)
@@ -911,76 +861,41 @@ percentL.Font = Enum.Font.GothamMedium
 percentL.TextSize = 10
 percentL.TextColor3 = Color3.fromRGB(255, 130, 130)
 percentL.TextXAlignment = Enum.TextXAlignment.Right
-percentL.TextTransparency = 1
 percentL.ZIndex = 1010
 percentL.Parent = popup
-TweenService:Create(percentL, TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 0}):Play()
 
 task.spawn(function()
-    while barBg.Parent do
-        local pulse = math.abs(math.sin(tick() * 3))
-        barBgStroke.Transparency = 0.3 + pulse * 0.4
-        barGlow.BackgroundTransparency = 0.5 + pulse * 0.3
-        task.wait(0.05)
-    end
-end)
-
-local barDone = false
-task.spawn(function()
-    local currentP = 0
-    local minDuration = 4.5
     local startT = tick()
-
-    while not barDone do
+    local minDuration = 4.5
+    while true do
         local elapsed = tick() - startT
         local progress = math.min(elapsed / minDuration, 1)
-        currentP = progress * 100
-
-        barFill.Size = UDim2.new(currentP / 100, 0, 1, 0)
-        percentL.Text = math.floor(currentP) .. "%"
-
-        if currentP >= 100 then
-            barDone = true
+        barFill.Size = UDim2.new(progress, 0, 1, 0)
+        percentL.Text = math.floor(progress * 100) .. "%"
+        if progress >= 1 then
+            percentL.Text = "100%"
+            statusLabel.Text = "done"
+            statusLabel.TextColor3 = Color3.fromRGB(120, 220, 140)
+            barFill.BackgroundColor3 = Color3.fromRGB(120, 220, 140)
+            barBgStroke.Color = Color3.fromRGB(120, 220, 140)
+            break
         end
         task.wait(0.03)
     end
-
-    percentL.Text = "100%"
-    statusLabel.Text = "done"
-    statusLabel.TextColor3 = Color3.fromRGB(120, 220, 140)
-    barFill.BackgroundColor3 = Color3.fromRGB(120, 220, 140)
-    barGlow.BackgroundColor3 = Color3.fromRGB(120, 220, 140)
-    barBgStroke.Color = Color3.fromRGB(120, 220, 140)
-end)
-
-task.spawn(function()
-    while not barDone do
-        task.wait(0.1)
-    end
     task.wait(1.5)
-
-    local fadeItems = {
-        {obj = backdrop, prop = "BackgroundTransparency", target = 1},
-        {obj = popup, prop = "BackgroundTransparency", target = 1},
-        {obj = title, prop = "TextTransparency", target = 1},
-        {obj = sub, prop = "TextTransparency", target = 1},
-        {obj = percentL, prop = "TextTransparency", target = 1},
-        {obj = statusLabel, prop = "TextTransparency", target = 1},
-        {obj = barBg, prop = "BackgroundTransparency", target = 1},
-        {obj = barFill, prop = "BackgroundTransparency", target = 1},
-        {obj = barGlow, prop = "BackgroundTransparency", target = 1},
-    }
-
-    for _, item in ipairs(fadeItems) do
-        TweenService:Create(item.obj, TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {[item.prop] = item.target}):Play()
-    end
-    TweenService:Create(barBgStroke, TweenInfo.new(0.8), {Transparency = 1}):Play()
-    TweenService:Create(borderStroke, TweenInfo.new(0.8), {Transparency = 1}):Play()
-
-    local scaleTween = TweenService:Create(popupScale, TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Scale = 0.85})
-    scaleTween:Play()
-    scaleTween.Completed:Wait()
-    task.wait(0.3)
+    pcall(function()
+        TweenService:Create(backdrop, TweenInfo.new(0.8), {BackgroundTransparency = 1}):Play()
+        TweenService:Create(popup, TweenInfo.new(0.8), {BackgroundTransparency = 1}):Play()
+        TweenService:Create(title, TweenInfo.new(0.8), {TextTransparency = 1}):Play()
+        TweenService:Create(sub, TweenInfo.new(0.8), {TextTransparency = 1}):Play()
+        TweenService:Create(percentL, TweenInfo.new(0.8), {TextTransparency = 1}):Play()
+        TweenService:Create(statusLabel, TweenInfo.new(0.8), {TextTransparency = 1}):Play()
+        TweenService:Create(barBg, TweenInfo.new(0.8), {BackgroundTransparency = 1}):Play()
+        TweenService:Create(barFill, TweenInfo.new(0.8), {BackgroundTransparency = 1}):Play()
+        TweenService:Create(barBgStroke, TweenInfo.new(0.8), {Transparency = 1}):Play()
+        TweenService:Create(borderStroke, TweenInfo.new(0.8), {Transparency = 1}):Play()
+    end)
+    task.wait(1)
     sg:Destroy()
 end)
 
@@ -989,7 +904,6 @@ statsGui.Name = "LegacyStats"
 statsGui.ResetOnSpawn = false
 statsGui.IgnoreGuiInset = true
 statsGui.DisplayOrder = 2147483647
-statsGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 statsGui.Parent = uiParent
 
 local box = Instance.new("Frame")

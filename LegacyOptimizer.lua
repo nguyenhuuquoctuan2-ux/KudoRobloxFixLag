@@ -20,11 +20,12 @@ pcall(function()
 end)
 
 local flagtables = {
+    -- Scheduler giảm xuống mức cân bằng
     ["DFIntTaskSchedulerTargetFps"] = "9999",
-    ["FIntTaskSchedulerAutoThreadLimit"] = "8",
-    ["FIntTaskSchedulerAsyncTasksMinimumThreadCount"] = "4",
-    ["FIntTaskSchedulerMaxNumOfJobs"] = "128",
-    ["FIntTaskSchedulerThreadMin"] = "2",
+    ["FIntTaskSchedulerAutoThreadLimit"] = "4",
+    ["FIntTaskSchedulerAsyncTasksMinimumThreadCount"] = "2",
+    ["FIntTaskSchedulerMaxNumOfJobs"] = "64",
+    ["FIntTaskSchedulerThreadMin"] = "1",
 
     ["DFFlagBrowserTrackerIdTelemetryEnabled"] = "False",
     ["DFFlagPreloadAsyncSupportTexturePack"] = "True",
@@ -50,7 +51,6 @@ local flagtables = {
     ["DFIntRakNetMtuValue2InBytes"] = "1240",
     ["DFIntRakNetMtuValue3InBytes"] = "1200",
     ["DFIntConnectionMTUSize"] = "1260",
-    ["DFFlagSampleAndRefreshRakPing"] = "True",
 
     ["DFIntMaxReceiveToDeserializeLatencyMilliseconds"] = "15",
     ["DFIntNetworkInDeserializeLimitGameplayMsClient"] = "6",
@@ -69,7 +69,6 @@ local flagtables = {
     ["DFIntDataSenderMaxBandwidthBps"] = "2147483647",
     ["DFIntDataSenderMaxJoinBandwidthBps"] = "2147483647",
 
-    -- Physics - giảm nhẹ nhưng không gây giật
     ["DFIntS2PhysicsSenderRate"] = "1000",
     ["DFIntS2NumPhysicsPacketsPerStep"] = "100",
     ["DFIntPhysicsSenderMaxBandwidthBps"] = "2147483647",
@@ -86,9 +85,10 @@ local flagtables = {
     ["DFIntSignalRCoreTimerMs"] = "750",
     ["DFIntSignalRCoreRpcQueueSize"] = "256",
 
-    ["DFIntAnimationLodFacsVisibilityDenominator"] = "0",
-    ["DFIntAnimationLodFacsDistanceMin"] = "0",
-    ["DFIntAnimationLodFacsDistanceMax"] = "0",
+    -- Animation LOD: bật lại để giảm tải
+    ["DFIntAnimationLodFacsVisibilityDenominator"] = "1",
+    ["DFIntAnimationLodFacsDistanceMin"] = "10",
+    ["DFIntAnimationLodFacsDistanceMax"] = "100",
     ["DFIntDebugFRMQualityLevelOverride"] = "1",
     ["DFIntDebugDynamicRenderKiloPixels"] = "800",
     ["DFIntDebugRestrictGCDistance"] = "1",
@@ -101,7 +101,7 @@ local flagtables = {
     ["FIntUITextureMaxRenderTextureSize"] = "512",
     ["FIntRakNetResendBufferArrayLength"] = "128",
     ["FIntTerrainOTAMaxTextureSize"] = "512",
-    ["FIntOcclusionWorkerThreadCount"] = "8",
+    ["FIntOcclusionWorkerThreadCount"] = "5",
     ["FIntDefaultMeshCacheSizeMB"] = "128",
     ["FIntRobloxGuiBlurIntensity"] = "0",
     ["FIntTerrainArraySliceSize"] = "0",
@@ -175,20 +175,20 @@ local flagtables = {
     ["FFlagDebugPauseVoxelizer"] = "True",
     ["DFIntSolverSpringDamping"] = "0",
 
-    -- Giữ physics ổn định để nhân vật không giật
+    -- Physics đủ để nhân vật mượt
     ["DFIntMaxSimultaneousPhysicsJobs"] = "4",
     ["DFIntPhysicsStepPerFrame"] = "2",
-    ["DFIntMaximumCollisionIterations"] = "2",
-    ["DFIntSolverConvergenceIterations"] = "2",
-    ["DFIntSolverIterations"] = "2",
+    ["DFIntMaximumCollisionIterations"] = "3",
+    ["DFIntSolverConvergenceIterations"] = "3",
+    ["DFIntSolverIterations"] = "3",
     ["DFFlagPhysicsSkipNonRealTimeHumanoidForceCalc2"] = "True",
-    ["DFIntPhysicsQualityOverride"] = "1",
+    ["DFIntPhysicsQualityOverride"] = "2",
 
     ["DFFlagDebugRenderForceTechnologyVoxel"] = "True",
     ["FFlagDebugPauseVoxelizer"] = "True",
     ["FFlagDisableFluidForces"] = "True",
     ["FFlagDisableAeroForces"] = "True",
-    ["FFlagSimplifyPhysics"] = "True",
+    ["FFlagSimplifyPhysics"] = "False",
 
     ["DFIntFrameBufferPoolSize"] = "1",
     ["DFIntMaxFrameBufferSize"] = "2",
@@ -219,10 +219,10 @@ local flagtables = {
     ["FFlagDisableGlobalShadows"] = "True",
     ["FFlagDisableLocalShadows"] = "True",
 
-    -- Animation: giữ blend nhưng giảm track
-    ["DFIntAnimationQualityOverride"] = "1",
+    -- Animation: bật full để không giật
+    ["DFIntAnimationQualityOverride"] = "4",
     ["FFlagDisableAnimationBlending"] = "False",
-    ["DFIntMaxAnimationTracks"] = "4",
+    ["DFIntMaxAnimationTracks"] = "8",
     ["FFlagSimplifyAnimations"] = "False",
 
     ["DFIntMaterialQualityOverride"] = "0",
@@ -237,7 +237,7 @@ local flagtables = {
     ["FFlagDisableMoon"] = "True",
     ["FFlagDisableSun"] = "True",
     ["FFlagDisableCelestialBodies"] = "True",
-    ["DFIntSolverMaxIterations"] = "2",
+    ["DFIntSolverMaxIterations"] = "3",
     ["FFlagDisableSkyboxTextures"] = "True",
     ["FFlagDisableCelestialBodyRendering"] = "True",
     ["FFlagDisableStarfieldRendering"] = "True",
@@ -289,9 +289,12 @@ local flagtables = {
     ["FFlagDisableTerrainGrass"] = "True",
     ["FFlagDisableTerrainClutter"] = "True",
     ["DFIntTerrainQuality"] = "0",
-    ["DFIntHumanoidAnimationQuality"] = "1",
-    ["FFlagSimplifyHumanoidAnimations"] = "True",
-    ["DFIntHumanoidAnimationRate"] = "30",
+
+    -- Animation humanoid chạy mượt
+    ["DFIntHumanoidAnimationQuality"] = "4",
+    ["FFlagSimplifyHumanoidAnimations"] = "False",
+    ["DFIntHumanoidAnimationRate"] = "60",
+
     ["DFIntGUIRenderQuality"] = "0",
     ["FFlagCacheGUIRendering"] = "True",
     ["FFlagReduceGUIRedraw"] = "True",
@@ -311,25 +314,28 @@ local flagtables = {
     ["DFIntLightingQuality"] = "0",
     ["DFIntShadowQuality"] = "0",
 
-    -- Physics step giữ ổn định
+    -- Physics step cao để nhân vật mượt
     ["FFlagOptimizePhysicsStepping"] = "True",
-    ["DFIntPhysicsStepRate"] = "30",
+    ["DFIntPhysicsStepRate"] = "60",
     ["FFlagSkipPhysicsWhenIdle"] = "True",
     ["FFlagReducePhysicsPrecision"] = "False",
-    ["DFIntPhysicsSolverIterations"] = "2",
+    ["DFIntPhysicsSolverIterations"] = "4",
 
-    ["FFlagReduceCameraUpdateRate"] = "True",
-    ["DFIntCameraUpdateRate"] = "45",
+    -- Camera update theo frame render
+    ["FFlagReduceCameraUpdateRate"] = "False",
+    ["DFIntCameraUpdateRate"] = "60",
     ["FFlagOptimizeCameraPhysics"] = "True",
-    ["FFlagOptimizeCharacterRendering"] = "True",
-    ["DFIntCharacterUpdateRate"] = "30",
+
+    -- Character render full
+    ["FFlagOptimizeCharacterRendering"] = "False",
+    ["DFIntCharacterUpdateRate"] = "60",
     ["FFlagReduceCharacterDetail"] = "False",
-    ["DFIntCharacterLODBias"] = "2",
+    ["DFIntCharacterLODBias"] = "1",
     ["FFlagOptimizeTerrainRendering"] = "True",
     ["DFIntTerrainRenderQuality"] = "0",
     ["FFlagDisableTerrainOcclusion"] = "True",
     ["FFlagDisableTerrainLighting"] = "True",
-    ["DFIntMaxDrawCalls"] = "50",
+    ["DFIntMaxDrawCalls"] = "100",
     ["FFlagReduceDrawCalls"] = "True",
     ["FFlagBatchDrawCalls"] = "True",
     ["FFlagOptimizeDrawOrder"] = "True"
@@ -364,7 +370,7 @@ end)
 
 pcall(function()
     if Camera then
-        Camera.FieldOfView = 100
+        Camera.FieldOfView = 95
     end
 end)
 
@@ -534,8 +540,8 @@ task.spawn(function()
     local descendants = Workspace:GetDescendants()
     local total = #descendants
     if total == 0 then return end
-    local BATCH_SIZE = 1500
-    local MAX_CONCURRENT = 100
+    local BATCH_SIZE = 1200
+    local MAX_CONCURRENT = 60
     local batches = {}
     local current = {}
     for i = 1, total do
@@ -627,7 +633,7 @@ task.spawn(function()
     end
 end)
 
-local CULL_DIST_SQ = 30 * 30
+local CULL_DIST_SQ = 35 * 35
 local culled = {}
 
 task.spawn(function()

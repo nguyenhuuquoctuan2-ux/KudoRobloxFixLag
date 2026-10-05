@@ -38,6 +38,7 @@ local flagtables = {
     ["DFFlagDisableDPIScale"] = "True",
     ["DFFlagDebugPerfMode"] = "True",
 
+    -- Network PING tối ưu
     ["DFIntRaknetBandwidthInfluxHundredthsPercentageV2"] = "10000",
     ["DFIntRakNetClockDriftAdjustmentPerPingMillisecond"] = "100",
     ["DFIntRaknetBandwidthPingSendEveryXSeconds"] = "1",
@@ -45,13 +46,13 @@ local flagtables = {
     ["DFIntRakNetNakResendDelayMsMax"] = "100",
     ["DFIntRakNetNakResendDelayMs"] = "10",
     ["DFIntRakNetResendRttMultiple"] = "1",
-    ["DFIntRakNetSelectTimeoutMs"] = "1",
-    ["DFIntRakNetLoopMs"] = "1",
     ["DFIntRakNetMinAckGrowthPercent"] = "0",
     ["DFIntRakNetMtuValue1InBytes"] = "1280",
     ["DFIntRakNetMtuValue2InBytes"] = "1240",
     ["DFIntRakNetMtuValue3InBytes"] = "1200",
     ["DFIntConnectionMTUSize"] = "1260",
+    ["DFFlagRakNetUseSlidingWindow4"] = "True",
+    ["DFFlagSampleAndRefreshRakPing"] = "True",
 
     ["DFIntMaxReceiveToDeserializeLatencyMilliseconds"] = "15",
     ["DFIntNetworkInDeserializeLimitGameplayMsClient"] = "6",
@@ -75,6 +76,8 @@ local flagtables = {
     ["DFIntPhysicsSenderMaxBandwidthBpsScaling"] = "1000",
     ["FIntPGSAngularDampingPermilPersecond"] = "0",
     ["DFFlagPhysicsSkipNonRealTimeHumanoidForceCalc2"] = "True",
+    ["DFFlagOptimizeNetworkSend"] = "True",
+    ["DFIntNetworkClusterPacketCache"] = "1",
 
     ["DFIntSignalRHubConnectionHeartbeatTimerRateMs"] = "1000",
     ["DFIntSignalRHubConnectionBaseRetryTimeMs"] = "100",
@@ -135,7 +138,6 @@ local flagtables = {
     ["FFlagDebugRenderingSetDeterministic"] = "True",
     ["FLogNetwork"] = "7",
 
-    -- Aggressive FFlag để x2 FPS
     ["DFIntTextureQualityOverride"] = "0",
     ["FFlagTextureQualityOverride"] = "True",
     ["FFlagDisableTextures"] = "True",
@@ -188,8 +190,6 @@ local flagtables = {
     ["FFlagRenderDisableForwardLights"] = "True",
     ["DFIntNumberOfRenderPasses"] = "1",
     ["DFIntMaxConcurrentRenderPasses"] = "1",
-    ["FFlagOptimizeNetworkSend"] = "True",
-    ["DFIntNetworkClusterPacketCache"] = "1",
     ["FFlagDisableTerrain"] = "True",
     ["FFlagDisableWater"] = "True",
     ["FFlagDisableSkybox"] = "True",
@@ -233,6 +233,8 @@ local flagtables = {
     ["FFlagDisableStarfieldRendering"] = "True",
     ["FFlagDisableSunRendering"] = "True",
     ["FFlagDisableMoonRendering"] = "True",
+
+    -- Sound giảm tải NETWORK (sound stream qua network)
     ["DFIntMaxActiveSounds"] = "4",
     ["DFIntMaxSoundChannels"] = "4",
     ["FFlagDisableSoundOcclusion"] = "True",
@@ -248,6 +250,7 @@ local flagtables = {
     ["FFlagDisableSoundReverb"] = "True",
     ["FFlagDisableSoundEcho"] = "True",
     ["FFlagDisableSoundReverbEffect"] = "True",
+
     ["DFIntMaxParticleCount"] = "0",
     ["DFIntMinParticleCount"] = "0",
     ["DFIntParticleThrottleThreshold"] = "0",
@@ -1306,4 +1309,4 @@ applyOpacity(0.5)
 
 showNotif("Script successfully loaded!", "FFlags applied. Optimization active.", 6)
 
-print("Legacy optimizer v1.2.0 by @realz79 loaded")
+print("Legacy optimizer v1.2.0 by @realz29001 loaded")

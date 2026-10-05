@@ -1,3 +1,8 @@
+-- ============================================
+-- LEGACY OPTIMIZER - ULTIMATE EDITION
+-- by @realz29001
+-- ============================================
+
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
@@ -16,29 +21,52 @@ local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
 local uiParent = PlayerGui
 pcall(function()
-    if gethui then uiParent = gethui() elseif cloneref then uiParent = cloneref(CoreGui) end
+    if gethui then
+        uiParent = gethui()
+    elseif cloneref then
+        uiParent = cloneref(CoreGui)
+    end
 end)
 
-local flagtables = {
-    -- Scheduler giảm xuống mức cân bằng
-    ["DFIntTaskSchedulerTargetFps"] = "9999",
-    ["FIntTaskSchedulerAutoThreadLimit"] = "4",
-    ["FIntTaskSchedulerAsyncTasksMinimumThreadCount"] = "2",
-    ["FIntTaskSchedulerMaxNumOfJobs"] = "64",
-    ["FIntTaskSchedulerThreadMin"] = "1",
+-- Executor detection
+local hasSetFFlag = pcall(function()
+    return setfflag ~= nil
+end) and setfflag ~= nil
 
+local hasGetFFlag = pcall(function()
+    return getfflag ~= nil
+end) and getfflag ~= nil
+
+-- FFlag table (Ultimate)
+local flagtables = {
+    -- Scheduler
+    ["DFIntTaskSchedulerTargetFps"] = "9999",
+    ["FIntTaskSchedulerAutoThreadLimit"] = "6",
+    ["FIntTaskSchedulerAsyncTasksMinimumThreadCount"] = "3",
+    ["FIntTaskSchedulerMaxNumOfJobs"] = "96",
+    ["FIntTaskSchedulerThreadMin"] = "2",
+
+    -- Telemetry OFF
     ["DFFlagBrowserTrackerIdTelemetryEnabled"] = "False",
+    ["DFFlagCoreScriptTelemetry2"] = "False",
+    ["FFlagEnableTelemetryService1"] = "False",
+    ["FFlagPerfDataOnTelemetryV2"] = "False",
+    ["FFlagOpenTelemetryEnabled2"] = "False",
+    ["FFlagSendRenderFidelityTelemetry2"] = "False",
+    ["FIntPerformanceTelemetryQueueProcessLimit"] = "0",
+    ["FIntTelemetryProfilerFrequency"] = "0",
+    ["FIntReportDeviceInfoRollout"] = "0",
+
+    -- Preload
     ["DFFlagPreloadAsyncSupportTexturePack"] = "True",
     ["DFFlagTextureQualityOverrideEnabled"] = "True",
     ["DFFlagVideoCaptureServiceEnabled"] = "False",
-    ["DFFlagSampleAndRefreshRakPing"] = "True",
-    ["DFFlagRakNetUseSlidingWindow4"] = "True",
-    ["DFFlagCoreScriptTelemetry2"] = "False",
     ["DFFlagEnableSoundPreloading"] = "True",
     ["DFFlagOptimizePartsInPart"] = "True",
     ["DFFlagDisableDPIScale"] = "True",
     ["DFFlagDebugPerfMode"] = "True",
 
+    -- Network RakNet
     ["DFIntRaknetBandwidthInfluxHundredthsPercentageV2"] = "10000",
     ["DFIntRakNetClockDriftAdjustmentPerPingMillisecond"] = "100",
     ["DFIntRaknetBandwidthPingSendEveryXSeconds"] = "1",
@@ -51,7 +79,10 @@ local flagtables = {
     ["DFIntRakNetMtuValue2InBytes"] = "1240",
     ["DFIntRakNetMtuValue3InBytes"] = "1200",
     ["DFIntConnectionMTUSize"] = "1260",
+    ["DFFlagSampleAndRefreshRakPing"] = "True",
+    ["DFFlagRakNetUseSlidingWindow4"] = "True",
 
+    -- Packet
     ["DFIntMaxReceiveToDeserializeLatencyMilliseconds"] = "15",
     ["DFIntNetworkInDeserializeLimitGameplayMsClient"] = "6",
     ["DFIntNetworkInProcessLimitGameplayMsClient"] = "6",
@@ -69,6 +100,7 @@ local flagtables = {
     ["DFIntDataSenderMaxBandwidthBps"] = "2147483647",
     ["DFIntDataSenderMaxJoinBandwidthBps"] = "2147483647",
 
+    -- Physics
     ["DFIntS2PhysicsSenderRate"] = "1000",
     ["DFIntS2NumPhysicsPacketsPerStep"] = "100",
     ["DFIntPhysicsSenderMaxBandwidthBps"] = "2147483647",
@@ -78,6 +110,7 @@ local flagtables = {
     ["DFFlagOptimizeNetworkSend"] = "True",
     ["DFIntNetworkClusterPacketCache"] = "1",
 
+    -- SignalR
     ["DFIntSignalRHubConnectionHeartbeatTimerRateMs"] = "1000",
     ["DFIntSignalRHubConnectionBaseRetryTimeMs"] = "100",
     ["DFIntSignalRCoreKeepAlivePingPeriodMs"] = "250",
@@ -85,23 +118,31 @@ local flagtables = {
     ["DFIntSignalRCoreTimerMs"] = "750",
     ["DFIntSignalRCoreRpcQueueSize"] = "256",
 
-    -- Animation LOD: bật lại để giảm tải
+    -- Animation
     ["DFIntAnimationLodFacsVisibilityDenominator"] = "1",
     ["DFIntAnimationLodFacsDistanceMin"] = "10",
     ["DFIntAnimationLodFacsDistanceMax"] = "100",
     ["DFIntDebugFRMQualityLevelOverride"] = "1",
-    ["DFIntDebugDynamicRenderKiloPixels"] = "800",
+    ["DFIntDebugDynamicRenderKiloPixels"] = "600",
     ["DFIntDebugRestrictGCDistance"] = "1",
+    ["DFIntAnimationQualityOverride"] = "4",
+    ["DFIntHumanoidAnimationQuality"] = "4",
+    ["DFIntHumanoidAnimationRate"] = "60",
+    ["FFlagSimplifyHumanoidAnimations"] = "False",
+    ["FFlagSimplifyAnimations"] = "False",
+    ["FFlagDisableAnimationBlending"] = "False",
+    ["DFIntMaxAnimationTracks"] = "8",
 
+    -- Wait Timers
     ["DFIntWaitOnUpdateNetworkLoopEndedMS"] = "100",
     ["DFIntWaitOnRecvFromLoopEndedMS"] = "100",
 
+    -- Rendering
     ["FIntRenderMaxShadowAtlasUsageBeforeDownscale"] = "80",
     ["FIntRenderShadowMapDepthCacheMemLimit"] = "192",
-    ["FIntUITextureMaxRenderTextureSize"] = "512",
-    ["FIntRakNetResendBufferArrayLength"] = "128",
-    ["FIntTerrainOTAMaxTextureSize"] = "512",
-    ["FIntOcclusionWorkerThreadCount"] = "5",
+    ["FIntUITextureMaxRenderTextureSize"] = "256",
+    ["FIntTerrainOTAMaxTextureSize"] = "256",
+    ["FIntOcclusionWorkerThreadCount"] = "6",
     ["FIntDefaultMeshCacheSizeMB"] = "128",
     ["FIntRobloxGuiBlurIntensity"] = "0",
     ["FIntTerrainArraySliceSize"] = "0",
@@ -111,25 +152,19 @@ local flagtables = {
     ["FIntFRMMinGrassDistance"] = "0",
     ["FIntGrassMovementReducedMotionFactor"] = "0",
     ["FIntDebugTextureManagerSkipMips"] = "8",
-    ["FIntPerformanceTelemetryQueueProcessLimit"] = "0",
-    ["FIntTelemetryProfilerFrequency"] = "0",
     ["FIntRenderLocalLightFadeInMs"] = "0",
-    ["FIntReportDeviceInfoRollout"] = "0",
 
+    -- FFlags core
     ["FFlagRenderAllocateShadowMapResourcesOnDemand"] = "True",
     ["FFlagSpecifyNetworkReplicatorScopeForItems"] = "True",
     ["FFlagTaskSchedulerLimitTargetFpsTo2402"] = "False",
     ["FFlagHandleAltEnterFullscreenManually"] = "False",
     ["FFlagGameBasicSettingsFramerateCap5"] = "False",
     ["FFlagSpecifyNetworkReplicatorScope"] = "True",
-    ["FFlagSendRenderFidelityTelemetry2"] = "False",
     ["FFlagRenderGpuTextureCompressor"] = "True",
     ["FFlagBaseThreadPoolUseRuntime2"] = "True",
     ["FFlagCacheTextBoundsInGuiText"] = "True",
-    ["FFlagEnableTelemetryService1"] = "False",
     ["FFlagDebugGraphicsPreferD3D11"] = "True",
-    ["FFlagPerfDataOnTelemetryV2"] = "False",
-    ["FFlagOpenTelemetryEnabled2"] = "False",
     ["FFlagRbxStorageUseMemCache"] = "True",
     ["FFlagDebugForceGenerateHSR"] = "True",
     ["FFlagRenderInitShadowmaps"] = "True",
@@ -138,6 +173,7 @@ local flagtables = {
     ["FFlagDebugRenderingSetDeterministic"] = "True",
     ["FLogNetwork"] = "7",
 
+    -- Texture
     ["DFIntTextureQualityOverride"] = "0",
     ["FFlagTextureQualityOverride"] = "True",
     ["FFlagDisableTextures"] = "True",
@@ -147,6 +183,17 @@ local flagtables = {
     ["FFlagDisableBumpMap"] = "True",
     ["FFlagDisableNormalMap"] = "True",
     ["FFlagDisableSpecularMap"] = "True",
+    ["FFlagReduceTextureMemory"] = "True",
+    ["DFIntTextureMemoryLimit"] = "64",
+    ["FFlagTextureStreaming"] = "False",
+    ["DFIntTextureStreamingBudget"] = "0",
+    ["FFlagPreloadTextures"] = "False",
+    ["FFlagAsyncTextureLoading"] = "True",
+    ["FFlagAsyncMeshLoading"] = "True",
+    ["DFIntAsyncLoadThreads"] = "2",
+    ["FFlagBackgroundLoading"] = "True",
+
+    -- PostFX
     ["DFFlagDisableSSAO"] = "True",
     ["FFlagDisableSSAO"] = "True",
     ["FFlagDisablePostFx"] = "True",
@@ -158,38 +205,118 @@ local flagtables = {
     ["FFlagDisableHDR"] = "True",
     ["FFlagDisableToneMapping"] = "True",
     ["FFlagDisableMultiSample"] = "True",
+    ["FFlagDisableAtmosphereEffects"] = "True",
+    ["FFlagDisableSkyGradient"] = "True",
+    ["FFlagDisableSunMoon"] = "True",
+    ["FFlagDisableFogEffect"] = "True",
+
+    -- Shadow
     ["FFlagRenderShadowIntensity"] = "0",
     ["FFlagRenderShadowIntensityOverride"] = "True",
     ["FFlagDisableShadows"] = "True",
-    ["FFlagDisableAtmosphere"] = "True",
+    ["FFlagDisableGlobalShadows"] = "True",
+    ["FFlagDisableLocalShadows"] = "True",
+    ["DFIntShadowQuality"] = "0",
+
+    -- Sky
+    ["FFlagDisableSkybox"] = "True",
     ["FFlagDisableSky"] = "True",
     ["FFlagDisableFog"] = "True",
+    ["FFlagDisableAtmosphere"] = "True",
+    ["FFlagDisableClouds"] = "True",
+    ["FFlagDisableStars"] = "True",
+    ["FFlagDisableMoon"] = "True",
+    ["FFlagDisableSun"] = "True",
+    ["FFlagDisableCelestialBodies"] = "True",
+    ["FFlagDisableSkyboxTextures"] = "True",
+    ["FFlagDisableCelestialBodyRendering"] = "True",
+    ["FFlagDisableStarfieldRendering"] = "True",
+    ["FFlagDisableSunRendering"] = "True",
+    ["FFlagDisableMoonRendering"] = "True",
+
+    -- Terrain
+    ["FFlagDisableTerrain"] = "True",
+    ["FFlagDisableWater"] = "True",
     ["FFlagDisableTerrainDecoration"] = "True",
     ["FFlagDisableGrass"] = "True",
+    ["FFlagDisableTerrainWater"] = "True",
+    ["FFlagDisableTerrainGrass"] = "True",
+    ["FFlagDisableTerrainClutter"] = "True",
+    ["DFIntTerrainQuality"] = "0",
+    ["DFIntTerrainRenderQuality"] = "0",
+    ["FFlagDisableTerrainOcclusion"] = "True",
+    ["FFlagDisableTerrainLighting"] = "True",
+    ["FFlagOptimizeTerrainRendering"] = "True",
+
+    -- Particle/Trail/Beam
+    ["FFlagDisableParticles"] = "True",
+    ["FFlagDisableTrails"] = "True",
+    ["FFlagDisableBeams"] = "True",
+    ["DFIntMaxVisibleParticles"] = "0",
+    ["DFIntMaxVisibleBeams"] = "0",
+    ["DFIntMaxVisibleTrails"] = "0",
+    ["DFIntMaxParticleCount"] = "0",
+    ["DFIntMinParticleCount"] = "0",
+    ["DFIntParticleThrottleThreshold"] = "0",
+    ["DFIntParticleMaxLifetime"] = "1",
+    ["FFlagDisableParticleEmission"] = "True",
+    ["FFlagParticleEmitterSkipRendering"] = "True",
+    ["DFIntParticleFrameRateLimit"] = "1",
+    ["DFIntMaxTrailLength"] = "0",
+    ["DFIntMaxBeamLength"] = "0",
+    ["FFlagTrailSkipRendering"] = "True",
+    ["FFlagBeamSkipRendering"] = "True",
+    ["DFIntParticleQualityOverride"] = "0",
+    ["FFlagDisableParticleLighting"] = "True",
+    ["FFlagDisableParticleShadows"] = "True",
+    ["FFlagDisableParticleReflections"] = "True",
+
+    -- Reflection
+    ["FFlagDisableReflections"] = "True",
+    ["FFlagDisableWaterReflections"] = "True",
+    ["FFlagDisableGlassReflections"] = "True",
+    ["DFIntReflectionQualityOverride"] = "0",
+
+    -- Lighting
+    ["DFIntLightingQualityOverride"] = "0",
+    ["DFFlagLightingQualityOverrideEnabled"] = "True",
+    ["FFlagDisablePointLights"] = "True",
+    ["FFlagDisableSpotLights"] = "True",
+    ["FFlagDisableSurfaceLights"] = "True",
+    ["DFIntMaxLights"] = "0",
+    ["DFIntLightingQuality"] = "0",
+    ["FFlagDisableVoxelLighting"] = "True",
+    ["FFlagDisableFutureLighting"] = "True",
+    ["FFlagForceVoxelLighting"] = "True",
+
+    -- LOD
     ["DFIntCSGLevelOfDetailSwitchingDistance"] = "0",
     ["FFlagDisableLODTransitions"] = "True",
     ["FFlagForceLOD0"] = "True",
     ["DFIntLODBias"] = "8",
     ["DFIntMeshQualityOverride"] = "0",
+
+    -- Physics tối ưu
     ["DFFlagDebugRenderForceTechnologyVoxel"] = "True",
     ["FFlagDebugPauseVoxelizer"] = "True",
     ["DFIntSolverSpringDamping"] = "0",
-
-    -- Physics đủ để nhân vật mượt
     ["DFIntMaxSimultaneousPhysicsJobs"] = "4",
     ["DFIntPhysicsStepPerFrame"] = "2",
     ["DFIntMaximumCollisionIterations"] = "3",
     ["DFIntSolverConvergenceIterations"] = "3",
     ["DFIntSolverIterations"] = "3",
-    ["DFFlagPhysicsSkipNonRealTimeHumanoidForceCalc2"] = "True",
     ["DFIntPhysicsQualityOverride"] = "2",
-
-    ["DFFlagDebugRenderForceTechnologyVoxel"] = "True",
-    ["FFlagDebugPauseVoxelizer"] = "True",
+    ["DFIntSolverMaxIterations"] = "3",
+    ["DFIntPhysicsSolverIterations"] = "4",
+    ["DFIntPhysicsStepRate"] = "60",
+    ["FFlagOptimizePhysicsStepping"] = "True",
+    ["FFlagSkipPhysicsWhenIdle"] = "True",
+    ["FFlagReducePhysicsPrecision"] = "False",
     ["FFlagDisableFluidForces"] = "True",
     ["FFlagDisableAeroForces"] = "True",
     ["FFlagSimplifyPhysics"] = "False",
 
+    -- Render pipeline
     ["DFIntFrameBufferPoolSize"] = "1",
     ["DFIntMaxFrameBufferSize"] = "2",
     ["DFIntDebugEngineOptimizationLevel"] = "3",
@@ -197,53 +324,23 @@ local flagtables = {
     ["FFlagRenderDisableForwardLights"] = "True",
     ["DFIntNumberOfRenderPasses"] = "1",
     ["DFIntMaxConcurrentRenderPasses"] = "1",
-    ["FFlagDisableTerrain"] = "True",
-    ["FFlagDisableWater"] = "True",
-    ["FFlagDisableSkybox"] = "True",
-    ["FFlagDisableParticles"] = "True",
-    ["FFlagDisableTrails"] = "True",
-    ["FFlagDisableBeams"] = "True",
-    ["DFIntMaxVisibleParticles"] = "0",
-    ["DFIntMaxVisibleBeams"] = "0",
-    ["DFIntMaxVisibleTrails"] = "0",
-    ["FFlagDisableReflections"] = "True",
-    ["FFlagDisableWaterReflections"] = "True",
-    ["FFlagDisableGlassReflections"] = "True",
-    ["DFIntReflectionQualityOverride"] = "0",
-    ["DFIntLightingQualityOverride"] = "0",
-    ["DFFlagLightingQualityOverrideEnabled"] = "True",
-    ["FFlagDisablePointLights"] = "True",
-    ["FFlagDisableSpotLights"] = "True",
-    ["FFlagDisableSurfaceLights"] = "True",
-    ["DFIntMaxLights"] = "0",
-    ["FFlagDisableGlobalShadows"] = "True",
-    ["FFlagDisableLocalShadows"] = "True",
+    ["DFIntMaxDrawCalls"] = "100",
+    ["FFlagReduceDrawCalls"] = "True",
+    ["FFlagBatchDrawCalls"] = "True",
+    ["FFlagOptimizeDrawOrder"] = "True",
+    ["FFlagEnableFastCluster"] = "True",
+    ["FFlagFastClusterEnabled"] = "True",
+    ["FFlagOptimizeClusterRendering"] = "True",
+    ["FFlagBatchingEnabled"] = "True",
+    ["FFlagUseBatching"] = "True",
+    ["FFlagEnableBatching"] = "True",
 
-    -- Animation: bật full để không giật
-    ["DFIntAnimationQualityOverride"] = "4",
-    ["FFlagDisableAnimationBlending"] = "False",
-    ["DFIntMaxAnimationTracks"] = "8",
-    ["FFlagSimplifyAnimations"] = "False",
-
+    -- Material
     ["DFIntMaterialQualityOverride"] = "0",
     ["FFlagDisableMaterialShaders"] = "True",
     ["FFlagForceSimpleMaterial"] = "True",
-    ["FFlagDisableParticleLighting"] = "True",
-    ["FFlagDisableParticleShadows"] = "True",
-    ["FFlagDisableParticleReflections"] = "True",
-    ["DFIntParticleQualityOverride"] = "0",
-    ["FFlagDisableClouds"] = "True",
-    ["FFlagDisableStars"] = "True",
-    ["FFlagDisableMoon"] = "True",
-    ["FFlagDisableSun"] = "True",
-    ["FFlagDisableCelestialBodies"] = "True",
-    ["DFIntSolverMaxIterations"] = "3",
-    ["FFlagDisableSkyboxTextures"] = "True",
-    ["FFlagDisableCelestialBodyRendering"] = "True",
-    ["FFlagDisableStarfieldRendering"] = "True",
-    ["FFlagDisableSunRendering"] = "True",
-    ["FFlagDisableMoonRendering"] = "True",
 
+    -- Sound tối ưu
     ["DFIntMaxActiveSounds"] = "4",
     ["DFIntMaxSoundChannels"] = "4",
     ["FFlagDisableSoundOcclusion"] = "True",
@@ -260,119 +357,61 @@ local flagtables = {
     ["FFlagDisableSoundEcho"] = "True",
     ["FFlagDisableSoundReverbEffect"] = "True",
 
-    ["DFIntMaxParticleCount"] = "0",
-    ["DFIntMinParticleCount"] = "0",
-    ["DFIntParticleThrottleThreshold"] = "0",
-    ["DFIntParticleMaxLifetime"] = "1",
-    ["FFlagDisableParticleEmission"] = "True",
-    ["FFlagParticleEmitterSkipRendering"] = "True",
-    ["DFIntParticleFrameRateLimit"] = "1",
-    ["DFIntMaxTrailLength"] = "0",
-    ["DFIntMaxBeamLength"] = "0",
-    ["FFlagTrailSkipRendering"] = "True",
-    ["FFlagBeamSkipRendering"] = "True",
-    ["FFlagDisableAtmosphereEffects"] = "True",
-    ["FFlagDisableSkyGradient"] = "True",
-    ["FFlagDisableSunMoon"] = "True",
-    ["FFlagDisableFogEffect"] = "True",
-    ["FFlagEnableFastCluster"] = "True",
-    ["FFlagFastClusterEnabled"] = "True",
-    ["FFlagOptimizeClusterRendering"] = "True",
-    ["FFlagBatchingEnabled"] = "True",
-    ["FFlagUseBatching"] = "True",
-    ["FFlagEnableBatching"] = "True",
-    ["DFIntMaxSkinnedMeshBones"] = "1",
-    ["FFlagDisableSkinnedMesh"] = "True",
-    ["FFlagDisableBoneTransforms"] = "True",
-    ["FFlagDisableMeshDeformation"] = "True",
-    ["FFlagDisableTerrainWater"] = "True",
-    ["FFlagDisableTerrainGrass"] = "True",
-    ["FFlagDisableTerrainClutter"] = "True",
-    ["DFIntTerrainQuality"] = "0",
-
-    -- Animation humanoid chạy mượt
-    ["DFIntHumanoidAnimationQuality"] = "4",
-    ["FFlagSimplifyHumanoidAnimations"] = "False",
-    ["DFIntHumanoidAnimationRate"] = "60",
-
+    -- GUI
     ["DFIntGUIRenderQuality"] = "0",
     ["FFlagCacheGUIRendering"] = "True",
     ["FFlagReduceGUIRedraw"] = "True",
     ["DFIntGUIRedrawRate"] = "30",
-    ["FFlagReduceTextureMemory"] = "True",
-    ["DFIntTextureMemoryLimit"] = "64",
-    ["FFlagTextureStreaming"] = "False",
-    ["DFIntTextureStreamingBudget"] = "0",
-    ["FFlagPreloadTextures"] = "False",
-    ["FFlagAsyncTextureLoading"] = "True",
-    ["FFlagAsyncMeshLoading"] = "True",
-    ["DFIntAsyncLoadThreads"] = "2",
-    ["FFlagBackgroundLoading"] = "True",
-    ["FFlagDisableVoxelLighting"] = "True",
-    ["FFlagDisableFutureLighting"] = "True",
-    ["FFlagForceVoxelLighting"] = "True",
-    ["DFIntLightingQuality"] = "0",
-    ["DFIntShadowQuality"] = "0",
 
-    -- Physics step cao để nhân vật mượt
-    ["FFlagOptimizePhysicsStepping"] = "True",
-    ["DFIntPhysicsStepRate"] = "60",
-    ["FFlagSkipPhysicsWhenIdle"] = "True",
-    ["FFlagReducePhysicsPrecision"] = "False",
-    ["DFIntPhysicsSolverIterations"] = "4",
-
-    -- Camera update theo frame render
+    -- Camera
     ["FFlagReduceCameraUpdateRate"] = "False",
     ["DFIntCameraUpdateRate"] = "60",
     ["FFlagOptimizeCameraPhysics"] = "True",
 
-    -- Character render full
+    -- Character
     ["FFlagOptimizeCharacterRendering"] = "False",
     ["DFIntCharacterUpdateRate"] = "60",
     ["FFlagReduceCharacterDetail"] = "False",
     ["DFIntCharacterLODBias"] = "1",
-    ["FFlagOptimizeTerrainRendering"] = "True",
-    ["DFIntTerrainRenderQuality"] = "0",
-    ["FFlagDisableTerrainOcclusion"] = "True",
-    ["FFlagDisableTerrainLighting"] = "True",
-    ["DFIntMaxDrawCalls"] = "100",
-    ["FFlagReduceDrawCalls"] = "True",
-    ["FFlagBatchDrawCalls"] = "True",
-    ["FFlagOptimizeDrawOrder"] = "True"
+
+    -- Skin/Mesh (giữ để không giật)
+    -- ["DFIntMaxSkinnedMeshBones"] = "1",
+    -- ["FFlagDisableSkinnedMesh"] = "True",
+    -- ["FFlagDisableBoneTransforms"] = "True",
+    -- ["FFlagDisableMeshDeformation"] = "True",
 }
 
-local function formatFlag(z)
-    z = z:gsub("^DFInt", "")
-    z = z:gsub("^DFFlag", "")
-    z = z:gsub("^FFlag", "")
-    z = z:gsub("^FInt", "")
-    z = z:gsub("FString", "")
-    z = z:gsub("FLog", "")
-    return z
-end
-
+-- Inject FFlag
 task.spawn(function()
-    if setfflag then
+    if hasSetFFlag then
         for k, v in pairs(flagtables) do
             pcall(function()
-                local formatted = formatFlag(k)
-                if getfflag and getfflag(formatted) then
-                    setfflag(formatted, v)
-                elseif getfflag and getfflag(k) then
-                    setfflag(k, v)
-                else
-                    setfflag(k, v)
+                if hasGetFFlag then
+                    local formatted = k:gsub("^DFInt", ""):gsub("^DFFlag", ""):gsub("^FFlag", ""):gsub("^FInt", ""):gsub("FString", ""):gsub("FLog", "")
+                    if getfflag(formatted) then
+                        setfflag(formatted, v)
+                        return
+                    elseif getfflag(k) then
+                        setfflag(k, v)
+                        return
+                    end
                 end
+                setfflag(k, v)
             end)
         end
     end
 end)
 
+-- FOV
 pcall(function()
     if Camera then
-        Camera.FieldOfView = 95
+        Camera.FieldOfView = 100
     end
 end)
+
+-- ============================================
+-- SKY XÁM + LIGHTING
+-- ============================================
 
 local SKY_GRAY = Color3.fromRGB(128, 128, 128)
 
@@ -412,10 +451,11 @@ task.spawn(function()
             Lighting.ColorShift_Top = SKY_GRAY
             Lighting.ColorShift_Bottom = SKY_GRAY
         end)
-        task.wait(0.3)
+        task.wait(0.15)
     end
 end)
 
+-- Water
 task.spawn(function()
     while true do
         pcall(function()
@@ -428,10 +468,11 @@ task.spawn(function()
                 Terrain.Decoration = false
             end
         end)
-        task.wait(0.5)
+        task.wait(0.3)
     end
 end)
 
+-- Anti-AFK
 task.spawn(function()
     while true do
         task.wait(120)
@@ -451,22 +492,57 @@ pcall(function()
     end)
 end)
 
+-- ============================================
+-- CHARACTER CACHE
+-- ============================================
+
 local charModels = {}
 local function watchChar(plr)
-    if plr.Character then charModels[plr.Character] = true end
-    plr.CharacterAdded:Connect(function(c) charModels[c] = true end)
+    if plr.Character then
+        charModels[plr.Character] = true
+        for _, d in ipairs(plr.Character:GetDescendants()) do
+            charModels[d] = true
+        end
+    end
+    plr.CharacterAdded:Connect(function(c)
+        charModels[c] = true
+        for _, d in ipairs(c:GetDescendants()) do
+            charModels[d] = true
+        end
+    end)
 end
 for _, plr in ipairs(Players:GetPlayers()) do watchChar(plr) end
 Players.PlayerAdded:Connect(watchChar)
 Players.PlayerRemoving:Connect(function(plr)
-    if plr.Character then charModels[plr.Character] = nil end
+    if plr.Character then
+        charModels[plr.Character] = nil
+        for _, d in ipairs(plr.Character:GetDescendants()) do
+            charModels[d] = nil
+        end
+    end
 end)
 
 local function isChar(v)
+    if charModels[v] then return true end
+    local cur = v
+    local depth = 0
+    while cur and depth < 5 do
+        if charModels[cur] then return true end
+        if cur:IsA("Accessory") or cur:IsA("Tool") or cur:IsA("Model") and cur:FindFirstChildOfClass("Humanoid") then
+            return true
+        end
+        cur = cur.Parent
+        depth = depth + 1
+    end
+    return false
+end
+
+local function isInCharacterModel(v)
     local cur = v
     while cur do
-        if charModels[cur] then return true end
-        if cur:IsA("Accessory") or cur:IsA("Tool") then return true end
+        if cur:IsA("Model") and (cur:FindFirstChildOfClass("Humanoid") or cur:FindFirstChildOfClass("Animator")) then
+            return true
+        end
         cur = cur.Parent
     end
     return false
@@ -480,11 +556,14 @@ local function isProtected(v)
         or v:IsA("ImageLabel")
         or v:IsA("ImageButton")
         or v:IsA("Humanoid")
+        or v:IsA("HumanoidDescription")
+        or v:IsA("Animator")
+        or v:IsA("AnimationController")
+        or v:IsA("Animation")
         or v:IsA("ProximityPrompt")
         or v:IsA("ProximityPromptService")
         or v:IsA("ClickDetector")
         or v:IsA("SurfaceGui")
-        or v:IsA("SurfaceAppearance")
         or v:IsA("ScreenGui")
         or v:IsA("GuiObject")
         or v:IsA("GuiMain")
@@ -497,10 +576,25 @@ local function isProtected(v)
         or v:IsA("RemoteFunction")
         or v:IsA("BindableEvent")
         or v:IsA("BindableFunction")
-        or v:IsA("Animation")
-        or v:IsA("AnimationController")
-        or v:IsA("Animator")
+        or v:IsA("SurfaceAppearance")
+        or v:IsA("Accessory")
+        or v:IsA("Motor6D")
+        or v:IsA("Weld")
+        or v:IsA("Attachment")
+        or v:IsA("Bone")
+        or v:IsA("WrapLayer")
+        or v:IsA("WrapTarget")
+        or v:IsA("Shirt")
+        or v:IsA("Pants")
+        or v:IsA("ShirtGraphic")
+        or v:IsA("BodyColors")
+        or v:IsA("CharacterMesh")
+        or v:IsA("Decal")
 end
+
+-- ============================================
+-- OBJECT CLEANUP
+-- ============================================
 
 local killTypes = {
     ParticleEmitter = true, Trail = true, Smoke = true, Fire = true,
@@ -510,12 +604,11 @@ local killTypes = {
     Atmosphere = true, Clouds = true,
     DepthOfFieldEffect = true, BloomEffect = true, BlurEffect = true,
     ColorCorrectionEffect = true, SunRaysEffect = true,
-    Decal = true, Texture = true, SpecialMesh = true,
-    Cloth = true, WrapLayer = true, WrapTarget = true,
+    SpecialMesh = true,
 }
 
 local function handleObject(v)
-    if isProtected(v) or isChar(v) then return end
+    if isProtected(v) or isChar(v) or isInCharacterModel(v) then return end
     local cn = v.ClassName
     if killTypes[cn] then
         pcall(function() v:Destroy() end)
@@ -525,7 +618,6 @@ local function handleObject(v)
             v.Reflectance = 0
             v.CastShadow = false
             if v:IsA("MeshPart") then
-                v.TextureID = ""
                 v.RenderFidelity = Enum.RenderFidelity.Performance
             end
         end)
@@ -536,12 +628,13 @@ local function handleObject(v)
     end
 end
 
+-- Ultra-fast scan
 task.spawn(function()
     local descendants = Workspace:GetDescendants()
     local total = #descendants
     if total == 0 then return end
-    local BATCH_SIZE = 1200
-    local MAX_CONCURRENT = 60
+    local BATCH_SIZE = 2000
+    local MAX_CONCURRENT = 120
     local batches = {}
     local current = {}
     for i = 1, total do
@@ -579,22 +672,26 @@ Workspace.DescendantAdded:Connect(function(v)
     end)
 end)
 
+-- Fast particle disable
 task.spawn(function()
     while true do
-        task.wait(0.5)
+        task.wait(0.3)
         pcall(function()
             for _, v in ipairs(Workspace:GetDescendants()) do
                 if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam") or v:IsA("Smoke") or v:IsA("Fire") or v:IsA("Sparkles") then
-                    if v.Enabled then v.Enabled = false end
+                    if not isChar(v) and not isInCharacterModel(v) and v.Enabled then
+                        v.Enabled = false
+                    end
                 end
             end
         end)
     end
 end)
 
+-- Fast light disable
 task.spawn(function()
     while true do
-        task.wait(0.5)
+        task.wait(0.3)
         pcall(function()
             for _, v in ipairs(Lighting:GetDescendants()) do
                 if v:IsA("PointLight") or v:IsA("SpotLight") or v:IsA("SurfaceLight") then
@@ -605,14 +702,17 @@ task.spawn(function()
     end
 end)
 
+-- Fast decal/texture destroy
 task.spawn(function()
     while true do
-        task.wait(1.5)
+        task.wait(1)
         pcall(function()
             for _, v in ipairs(Workspace:GetDescendants()) do
                 if v:IsA("Decal") or v:IsA("Texture") then
-                    pcall(function() v:Destroy() end)
-                elseif v:IsA("MeshPart") and v.TextureID ~= "" then
+                    if not isChar(v) and not isInCharacterModel(v) then
+                        pcall(function() v:Destroy() end)
+                    end
+                elseif v:IsA("MeshPart") and not isChar(v) and not isInCharacterModel(v) and v.TextureID ~= "" then
                     pcall(function() v.TextureID = "" end)
                 end
             end
@@ -620,10 +720,12 @@ task.spawn(function()
     end
 end)
 
+-- Fast GC
 task.spawn(function()
     while true do
-        task.wait(5)
+        task.wait(3)
         pcall(function()
+            collectgarbage("collect")
             collectgarbage("collect")
             collectgarbage("collect")
             collectgarbage("collect")
@@ -633,36 +735,9 @@ task.spawn(function()
     end
 end)
 
-local CULL_DIST_SQ = 35 * 35
-local culled = {}
-
-task.spawn(function()
-    while true do
-        task.wait(0.1)
-        pcall(function()
-            if not Camera then return end
-            local camPos = Camera.CFrame.Position
-            for _, v in ipairs(Workspace:GetChildren()) do
-                if v:IsA("BasePart") and not isChar(v) then
-                    if not v:FindFirstChildOfClass("Humanoid") and not v:FindFirstChildOfClass("BillboardGui") then
-                        local pos = v.Position
-                        if pos.Y >= camPos.Y - 3 then
-                            local dx, dy, dz = pos.X - camPos.X, pos.Y - camPos.Y, pos.Z - camPos.Z
-                            local shouldHide = (dx*dx + dy*dy + dz*dz) > CULL_DIST_SQ
-                            if shouldHide and not culled[v] then
-                                culled[v] = true
-                                pcall(function() v.LocalTransparencyModifier = 1 end)
-                            elseif not shouldHide and culled[v] then
-                                culled[v] = false
-                                pcall(function() v.LocalTransparencyModifier = 0 end)
-                            end
-                        end
-                    end
-                end
-            end
-        end)
-    end
-end)
+-- ============================================
+-- NOTIFICATION
+-- ============================================
 
 local notifGui = Instance.new("ScreenGui")
 notifGui.Name = "LegacyNotif_" .. HttpService:GenerateGUID(false):sub(1, 8)
@@ -780,6 +855,10 @@ local function showNotif(titleText, messageText, duration)
     closeBtn.MouseButton1Click:Connect(closeNotif)
     task.delay(duration, closeNotif)
 end
+
+-- ============================================
+-- LOADER UI
+-- ============================================
 
 local sg = Instance.new("ScreenGui")
 sg.Name = "LegacyLoader"
@@ -983,6 +1062,10 @@ task.spawn(function()
     task.wait(0.3)
     sg:Destroy()
 end)
+
+-- ============================================
+-- STATS UI
+-- ============================================
 
 local statsGui = Instance.new("ScreenGui")
 statsGui.Name = "LegacyStats"
@@ -1320,6 +1403,11 @@ end)
 task.wait(0.1)
 applyOpacity(0.5)
 
-showNotif("Script successfully loaded!", "FFlags applied. Optimization active.", 2)
+if hasSetFFlag then
+    showNotif("Script successfully loaded!", "Ultimate mode: FFlag + Lua optimization.", 3)
+else
+    showNotif("Script loaded (Lua-only)", "Executor has no setfflag. Install Delta/Codex for full effect.", 5)
+end
 
-print("Legacy optimizer v1.2.0 by @realz29001 loaded")
+print("Legacy optimizer v1.2.0 ULTIMATE by @realz29001 loaded")
+print("Executor setfflag support:", hasSetFFlag)

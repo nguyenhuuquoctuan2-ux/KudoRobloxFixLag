@@ -38,7 +38,6 @@ local flagtables = {
     ["DFFlagDisableDPIScale"] = "True",
     ["DFFlagDebugPerfMode"] = "True",
 
-    -- Network PING tối ưu
     ["DFIntRaknetBandwidthInfluxHundredthsPercentageV2"] = "10000",
     ["DFIntRakNetClockDriftAdjustmentPerPingMillisecond"] = "100",
     ["DFIntRaknetBandwidthPingSendEveryXSeconds"] = "1",
@@ -51,7 +50,6 @@ local flagtables = {
     ["DFIntRakNetMtuValue2InBytes"] = "1240",
     ["DFIntRakNetMtuValue3InBytes"] = "1200",
     ["DFIntConnectionMTUSize"] = "1260",
-    ["DFFlagRakNetUseSlidingWindow4"] = "True",
     ["DFFlagSampleAndRefreshRakPing"] = "True",
 
     ["DFIntMaxReceiveToDeserializeLatencyMilliseconds"] = "15",
@@ -70,6 +68,8 @@ local flagtables = {
     ["DFIntDataSenderRate"] = "1000",
     ["DFIntDataSenderMaxBandwidthBps"] = "2147483647",
     ["DFIntDataSenderMaxJoinBandwidthBps"] = "2147483647",
+
+    -- Physics - giảm nhẹ nhưng không gây giật
     ["DFIntS2PhysicsSenderRate"] = "1000",
     ["DFIntS2NumPhysicsPacketsPerStep"] = "100",
     ["DFIntPhysicsSenderMaxBandwidthBps"] = "2147483647",
@@ -174,15 +174,22 @@ local flagtables = {
     ["DFFlagDebugRenderForceTechnologyVoxel"] = "True",
     ["FFlagDebugPauseVoxelizer"] = "True",
     ["DFIntSolverSpringDamping"] = "0",
-    ["DFIntMaxSimultaneousPhysicsJobs"] = "1",
-    ["DFIntPhysicsStepPerFrame"] = "1",
-    ["DFIntMaximumCollisionIterations"] = "1",
-    ["DFIntSolverConvergenceIterations"] = "1",
-    ["DFIntSolverIterations"] = "1",
+
+    -- Giữ physics ổn định để nhân vật không giật
+    ["DFIntMaxSimultaneousPhysicsJobs"] = "4",
+    ["DFIntPhysicsStepPerFrame"] = "2",
+    ["DFIntMaximumCollisionIterations"] = "2",
+    ["DFIntSolverConvergenceIterations"] = "2",
+    ["DFIntSolverIterations"] = "2",
+    ["DFFlagPhysicsSkipNonRealTimeHumanoidForceCalc2"] = "True",
+    ["DFIntPhysicsQualityOverride"] = "1",
+
+    ["DFFlagDebugRenderForceTechnologyVoxel"] = "True",
+    ["FFlagDebugPauseVoxelizer"] = "True",
     ["FFlagDisableFluidForces"] = "True",
     ["FFlagDisableAeroForces"] = "True",
     ["FFlagSimplifyPhysics"] = "True",
-    ["DFIntPhysicsQualityOverride"] = "0",
+
     ["DFIntFrameBufferPoolSize"] = "1",
     ["DFIntMaxFrameBufferSize"] = "2",
     ["DFIntDebugEngineOptimizationLevel"] = "3",
@@ -211,10 +218,13 @@ local flagtables = {
     ["DFIntMaxLights"] = "0",
     ["FFlagDisableGlobalShadows"] = "True",
     ["FFlagDisableLocalShadows"] = "True",
-    ["DFIntAnimationQualityOverride"] = "0",
-    ["FFlagDisableAnimationBlending"] = "True",
-    ["DFIntMaxAnimationTracks"] = "1",
-    ["FFlagSimplifyAnimations"] = "True",
+
+    -- Animation: giữ blend nhưng giảm track
+    ["DFIntAnimationQualityOverride"] = "1",
+    ["FFlagDisableAnimationBlending"] = "False",
+    ["DFIntMaxAnimationTracks"] = "4",
+    ["FFlagSimplifyAnimations"] = "False",
+
     ["DFIntMaterialQualityOverride"] = "0",
     ["FFlagDisableMaterialShaders"] = "True",
     ["FFlagForceSimpleMaterial"] = "True",
@@ -227,14 +237,13 @@ local flagtables = {
     ["FFlagDisableMoon"] = "True",
     ["FFlagDisableSun"] = "True",
     ["FFlagDisableCelestialBodies"] = "True",
-    ["DFIntSolverMaxIterations"] = "1",
+    ["DFIntSolverMaxIterations"] = "2",
     ["FFlagDisableSkyboxTextures"] = "True",
     ["FFlagDisableCelestialBodyRendering"] = "True",
     ["FFlagDisableStarfieldRendering"] = "True",
     ["FFlagDisableSunRendering"] = "True",
     ["FFlagDisableMoonRendering"] = "True",
 
-    -- Sound giảm tải NETWORK (sound stream qua network)
     ["DFIntMaxActiveSounds"] = "4",
     ["DFIntMaxSoundChannels"] = "4",
     ["FFlagDisableSoundOcclusion"] = "True",
@@ -282,7 +291,7 @@ local flagtables = {
     ["DFIntTerrainQuality"] = "0",
     ["DFIntHumanoidAnimationQuality"] = "1",
     ["FFlagSimplifyHumanoidAnimations"] = "True",
-    ["DFIntHumanoidAnimationRate"] = "15",
+    ["DFIntHumanoidAnimationRate"] = "30",
     ["DFIntGUIRenderQuality"] = "0",
     ["FFlagCacheGUIRendering"] = "True",
     ["FFlagReduceGUIRedraw"] = "True",
@@ -301,18 +310,21 @@ local flagtables = {
     ["FFlagForceVoxelLighting"] = "True",
     ["DFIntLightingQuality"] = "0",
     ["DFIntShadowQuality"] = "0",
+
+    -- Physics step giữ ổn định
     ["FFlagOptimizePhysicsStepping"] = "True",
-    ["DFIntPhysicsStepRate"] = "15",
+    ["DFIntPhysicsStepRate"] = "30",
     ["FFlagSkipPhysicsWhenIdle"] = "True",
-    ["FFlagReducePhysicsPrecision"] = "True",
-    ["DFIntPhysicsSolverIterations"] = "1",
+    ["FFlagReducePhysicsPrecision"] = "False",
+    ["DFIntPhysicsSolverIterations"] = "2",
+
     ["FFlagReduceCameraUpdateRate"] = "True",
-    ["DFIntCameraUpdateRate"] = "30",
+    ["DFIntCameraUpdateRate"] = "45",
     ["FFlagOptimizeCameraPhysics"] = "True",
     ["FFlagOptimizeCharacterRendering"] = "True",
-    ["DFIntCharacterUpdateRate"] = "15",
-    ["FFlagReduceCharacterDetail"] = "True",
-    ["DFIntCharacterLODBias"] = "4",
+    ["DFIntCharacterUpdateRate"] = "30",
+    ["FFlagReduceCharacterDetail"] = "False",
+    ["DFIntCharacterLODBias"] = "2",
     ["FFlagOptimizeTerrainRendering"] = "True",
     ["DFIntTerrainRenderQuality"] = "0",
     ["FFlagDisableTerrainOcclusion"] = "True",
@@ -991,45 +1003,41 @@ bxStroke.Thickness = 1
 bxStroke.Transparency = 0.5
 bxStroke.Parent = box
 
-local header = Instance.new("Frame")
-header.Size = UDim2.new(1, 0, 0, 16)
-header.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
-header.BackgroundTransparency = 0.7
-header.BorderSizePixel = 0
-header.Parent = box
-Instance.new("UICorner", header).CornerRadius = UDim.new(0, 8)
-
 local function mkLabel(t, y)
     local l = Instance.new("TextLabel")
-    l.Size = UDim2.new(0, 55, 0, 18)
+    l.Size = UDim2.new(0, 60, 0, 20)
     l.Position = UDim2.new(0, 12, 0, y)
     l.BackgroundTransparency = 1
     l.Text = t
     l.Font = Enum.Font.GothamBold
-    l.TextSize = 11
-    l.TextColor3 = Color3.fromRGB(180, 180, 180)
+    l.TextSize = 13
+    l.TextColor3 = Color3.fromRGB(220, 220, 220)
     l.TextXAlignment = Enum.TextXAlignment.Left
+    l.TextStrokeTransparency = 0.5
+    l.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
     l.Parent = box
 end
 
 local function mkValue(y)
     local v = Instance.new("TextLabel")
-    v.Size = UDim2.new(0, 120, 0, 18)
-    v.Position = UDim2.new(1, -132, 0, y)
+    v.Size = UDim2.new(0, 130, 0, 20)
+    v.Position = UDim2.new(1, -142, 0, y)
     v.BackgroundTransparency = 1
     v.Text = "--"
     v.Font = Enum.Font.GothamBold
-    v.TextSize = 13
+    v.TextSize = 15
     v.TextColor3 = Color3.fromRGB(0, 255, 120)
     v.TextXAlignment = Enum.TextXAlignment.Right
+    v.TextStrokeTransparency = 0.5
+    v.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
     v.Parent = box
     return v
 end
 
-mkLabel("FPS", 24)
-local fpsV = mkValue(24)
-mkLabel("PING", 44)
-local pingV = mkValue(44)
+mkLabel("FPS", 20)
+local fpsV = mkValue(20)
+mkLabel("PING", 42)
+local pingV = mkValue(42)
 mkLabel("TIME", 64)
 local timeV = mkValue(64)
 timeV.TextColor3 = Color3.fromRGB(255, 100, 100)
@@ -1152,7 +1160,6 @@ Instance.new("UICorner", sliderKnob).CornerRadius = UDim.new(1, 0)
 local function applyOpacity(value)
     local transparency = 1 - value
     box.BackgroundTransparency = math.clamp(0.1 + transparency * 0.85, 0, 1)
-    header.BackgroundTransparency = math.clamp(0.4 + transparency * 0.5, 0, 1)
     bxStroke.Transparency = math.clamp(0.4 + transparency * 0.55, 0, 1)
     for _, child in ipairs(box:GetDescendants()) do
         local skip = false
@@ -1307,6 +1314,6 @@ end)
 task.wait(0.1)
 applyOpacity(0.5)
 
-showNotif("Script successfully loaded!", "FFlags applied. Optimization active.", 6)
+showNotif("Script successfully loaded!", "FFlags applied. Optimization active.", 2)
 
 print("Legacy optimizer v1.2.0 by @realz29001 loaded")

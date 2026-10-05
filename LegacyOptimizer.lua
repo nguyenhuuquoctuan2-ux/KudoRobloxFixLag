@@ -21,10 +21,10 @@ end)
 
 local flagtables = {
     ["DFIntTaskSchedulerTargetFps"] = "9999",
-    ["FIntTaskSchedulerAutoThreadLimit"] = "6",
-    ["FIntTaskSchedulerAsyncTasksMinimumThreadCount"] = "2",
-    ["FIntTaskSchedulerMaxNumOfJobs"] = "86",
-    ["FIntTaskSchedulerThreadMin"] = "1",
+    ["FIntTaskSchedulerAutoThreadLimit"] = "8",
+    ["FIntTaskSchedulerAsyncTasksMinimumThreadCount"] = "4",
+    ["FIntTaskSchedulerMaxNumOfJobs"] = "128",
+    ["FIntTaskSchedulerThreadMin"] = "2",
 
     ["DFFlagBrowserTrackerIdTelemetryEnabled"] = "False",
     ["DFFlagPreloadAsyncSupportTexturePack"] = "True",
@@ -87,7 +87,7 @@ local flagtables = {
     ["DFIntAnimationLodFacsDistanceMin"] = "0",
     ["DFIntAnimationLodFacsDistanceMax"] = "0",
     ["DFIntDebugFRMQualityLevelOverride"] = "1",
-    ["DFIntDebugDynamicRenderKiloPixels"] = "1100",
+    ["DFIntDebugDynamicRenderKiloPixels"] = "800",
     ["DFIntDebugRestrictGCDistance"] = "1",
 
     ["DFIntWaitOnUpdateNetworkLoopEndedMS"] = "100",
@@ -95,11 +95,11 @@ local flagtables = {
 
     ["FIntRenderMaxShadowAtlasUsageBeforeDownscale"] = "80",
     ["FIntRenderShadowMapDepthCacheMemLimit"] = "192",
-    ["FIntUITextureMaxRenderTextureSize"] = "1024",
+    ["FIntUITextureMaxRenderTextureSize"] = "512",
     ["FIntRakNetResendBufferArrayLength"] = "128",
-    ["FIntTerrainOTAMaxTextureSize"] = "1024",
-    ["FIntOcclusionWorkerThreadCount"] = "5",
-    ["FIntDefaultMeshCacheSizeMB"] = "256",
+    ["FIntTerrainOTAMaxTextureSize"] = "512",
+    ["FIntOcclusionWorkerThreadCount"] = "8",
+    ["FIntDefaultMeshCacheSizeMB"] = "128",
     ["FIntRobloxGuiBlurIntensity"] = "0",
     ["FIntTerrainArraySliceSize"] = "0",
     ["FIntDebugForceMSAASamples"] = "1",
@@ -107,7 +107,7 @@ local flagtables = {
     ["FIntFRMMaxGrassDistance"] = "0",
     ["FIntFRMMinGrassDistance"] = "0",
     ["FIntGrassMovementReducedMotionFactor"] = "0",
-    ["FIntDebugTextureManagerSkipMips"] = "7",
+    ["FIntDebugTextureManagerSkipMips"] = "8",
     ["FIntPerformanceTelemetryQueueProcessLimit"] = "0",
     ["FIntTelemetryProfilerFrequency"] = "0",
     ["FIntRenderLocalLightFadeInMs"] = "0",
@@ -133,7 +133,191 @@ local flagtables = {
     ["FFlagFastGPULightCulling3"] = "True",
     ["FFlagDebugSkyGray"] = "True",
     ["FFlagDebugRenderingSetDeterministic"] = "True",
-    ["FLogNetwork"] = "7"
+    ["FLogNetwork"] = "7",
+
+    -- Aggressive FFlag để x2 FPS
+    ["DFIntTextureQualityOverride"] = "0",
+    ["FFlagTextureQualityOverride"] = "True",
+    ["FFlagDisableTextures"] = "True",
+    ["FFlagDisableSurfaceAppearance"] = "True",
+    ["FFlagDisableDecals"] = "True",
+    ["FFlagDisableMaterialTextures"] = "True",
+    ["FFlagDisableBumpMap"] = "True",
+    ["FFlagDisableNormalMap"] = "True",
+    ["FFlagDisableSpecularMap"] = "True",
+    ["DFFlagDisableSSAO"] = "True",
+    ["FFlagDisableSSAO"] = "True",
+    ["FFlagDisablePostFx"] = "True",
+    ["FFlagDisableBloom"] = "True",
+    ["FFlagDisableDepthOfField"] = "True",
+    ["FFlagDisableSunRays"] = "True",
+    ["FFlagDisableAntiAliasing"] = "True",
+    ["FFlagDisableMotionBlur"] = "True",
+    ["FFlagDisableHDR"] = "True",
+    ["FFlagDisableToneMapping"] = "True",
+    ["FFlagDisableMultiSample"] = "True",
+    ["FFlagRenderShadowIntensity"] = "0",
+    ["FFlagRenderShadowIntensityOverride"] = "True",
+    ["FFlagDisableShadows"] = "True",
+    ["FFlagDisableAtmosphere"] = "True",
+    ["FFlagDisableSky"] = "True",
+    ["FFlagDisableFog"] = "True",
+    ["FFlagDisableTerrainDecoration"] = "True",
+    ["FFlagDisableGrass"] = "True",
+    ["DFIntCSGLevelOfDetailSwitchingDistance"] = "0",
+    ["FFlagDisableLODTransitions"] = "True",
+    ["FFlagForceLOD0"] = "True",
+    ["DFIntLODBias"] = "8",
+    ["DFIntMeshQualityOverride"] = "0",
+    ["DFFlagDebugRenderForceTechnologyVoxel"] = "True",
+    ["FFlagDebugPauseVoxelizer"] = "True",
+    ["DFIntSolverSpringDamping"] = "0",
+    ["DFIntMaxSimultaneousPhysicsJobs"] = "1",
+    ["DFIntPhysicsStepPerFrame"] = "1",
+    ["DFIntMaximumCollisionIterations"] = "1",
+    ["DFIntSolverConvergenceIterations"] = "1",
+    ["DFIntSolverIterations"] = "1",
+    ["FFlagDisableFluidForces"] = "True",
+    ["FFlagDisableAeroForces"] = "True",
+    ["FFlagSimplifyPhysics"] = "True",
+    ["DFIntPhysicsQualityOverride"] = "0",
+    ["DFIntFrameBufferPoolSize"] = "1",
+    ["DFIntMaxFrameBufferSize"] = "2",
+    ["DFIntDebugEngineOptimizationLevel"] = "3",
+    ["DFFlagDisableGPUOcclusion"] = "True",
+    ["FFlagRenderDisableForwardLights"] = "True",
+    ["DFIntNumberOfRenderPasses"] = "1",
+    ["DFIntMaxConcurrentRenderPasses"] = "1",
+    ["FFlagOptimizeNetworkSend"] = "True",
+    ["DFIntNetworkClusterPacketCache"] = "1",
+    ["FFlagDisableTerrain"] = "True",
+    ["FFlagDisableWater"] = "True",
+    ["FFlagDisableSkybox"] = "True",
+    ["FFlagDisableParticles"] = "True",
+    ["FFlagDisableTrails"] = "True",
+    ["FFlagDisableBeams"] = "True",
+    ["DFIntMaxVisibleParticles"] = "0",
+    ["DFIntMaxVisibleBeams"] = "0",
+    ["DFIntMaxVisibleTrails"] = "0",
+    ["FFlagDisableReflections"] = "True",
+    ["FFlagDisableWaterReflections"] = "True",
+    ["FFlagDisableGlassReflections"] = "True",
+    ["DFIntReflectionQualityOverride"] = "0",
+    ["DFIntLightingQualityOverride"] = "0",
+    ["DFFlagLightingQualityOverrideEnabled"] = "True",
+    ["FFlagDisablePointLights"] = "True",
+    ["FFlagDisableSpotLights"] = "True",
+    ["FFlagDisableSurfaceLights"] = "True",
+    ["DFIntMaxLights"] = "0",
+    ["FFlagDisableGlobalShadows"] = "True",
+    ["FFlagDisableLocalShadows"] = "True",
+    ["DFIntAnimationQualityOverride"] = "0",
+    ["FFlagDisableAnimationBlending"] = "True",
+    ["DFIntMaxAnimationTracks"] = "1",
+    ["FFlagSimplifyAnimations"] = "True",
+    ["DFIntMaterialQualityOverride"] = "0",
+    ["FFlagDisableMaterialShaders"] = "True",
+    ["FFlagForceSimpleMaterial"] = "True",
+    ["FFlagDisableParticleLighting"] = "True",
+    ["FFlagDisableParticleShadows"] = "True",
+    ["FFlagDisableParticleReflections"] = "True",
+    ["DFIntParticleQualityOverride"] = "0",
+    ["FFlagDisableClouds"] = "True",
+    ["FFlagDisableStars"] = "True",
+    ["FFlagDisableMoon"] = "True",
+    ["FFlagDisableSun"] = "True",
+    ["FFlagDisableCelestialBodies"] = "True",
+    ["DFIntSolverMaxIterations"] = "1",
+    ["FFlagDisableSkyboxTextures"] = "True",
+    ["FFlagDisableCelestialBodyRendering"] = "True",
+    ["FFlagDisableStarfieldRendering"] = "True",
+    ["FFlagDisableSunRendering"] = "True",
+    ["FFlagDisableMoonRendering"] = "True",
+    ["DFIntMaxActiveSounds"] = "4",
+    ["DFIntMaxSoundChannels"] = "4",
+    ["FFlagDisableSoundOcclusion"] = "True",
+    ["DFIntSoundRollOffQuality"] = "0",
+    ["DFIntSoundMaxDistance"] = "60",
+    ["DFIntMaxSoundsPlaying"] = "4",
+    ["FFlagDisableSoundStreaming"] = "True",
+    ["DFIntSoundBufferSize"] = "512",
+    ["FFlagReduceSoundQuality"] = "True",
+    ["DFIntSoundQuality"] = "0",
+    ["FFlagDisable3DSound"] = "True",
+    ["FFlagDisableSoundDoppler"] = "True",
+    ["FFlagDisableSoundReverb"] = "True",
+    ["FFlagDisableSoundEcho"] = "True",
+    ["FFlagDisableSoundReverbEffect"] = "True",
+    ["DFIntMaxParticleCount"] = "0",
+    ["DFIntMinParticleCount"] = "0",
+    ["DFIntParticleThrottleThreshold"] = "0",
+    ["DFIntParticleMaxLifetime"] = "1",
+    ["FFlagDisableParticleEmission"] = "True",
+    ["FFlagParticleEmitterSkipRendering"] = "True",
+    ["DFIntParticleFrameRateLimit"] = "1",
+    ["DFIntMaxTrailLength"] = "0",
+    ["DFIntMaxBeamLength"] = "0",
+    ["FFlagTrailSkipRendering"] = "True",
+    ["FFlagBeamSkipRendering"] = "True",
+    ["FFlagDisableAtmosphereEffects"] = "True",
+    ["FFlagDisableSkyGradient"] = "True",
+    ["FFlagDisableSunMoon"] = "True",
+    ["FFlagDisableFogEffect"] = "True",
+    ["FFlagEnableFastCluster"] = "True",
+    ["FFlagFastClusterEnabled"] = "True",
+    ["FFlagOptimizeClusterRendering"] = "True",
+    ["FFlagBatchingEnabled"] = "True",
+    ["FFlagUseBatching"] = "True",
+    ["FFlagEnableBatching"] = "True",
+    ["DFIntMaxSkinnedMeshBones"] = "1",
+    ["FFlagDisableSkinnedMesh"] = "True",
+    ["FFlagDisableBoneTransforms"] = "True",
+    ["FFlagDisableMeshDeformation"] = "True",
+    ["FFlagDisableTerrainWater"] = "True",
+    ["FFlagDisableTerrainGrass"] = "True",
+    ["FFlagDisableTerrainClutter"] = "True",
+    ["DFIntTerrainQuality"] = "0",
+    ["DFIntHumanoidAnimationQuality"] = "1",
+    ["FFlagSimplifyHumanoidAnimations"] = "True",
+    ["DFIntHumanoidAnimationRate"] = "15",
+    ["DFIntGUIRenderQuality"] = "0",
+    ["FFlagCacheGUIRendering"] = "True",
+    ["FFlagReduceGUIRedraw"] = "True",
+    ["DFIntGUIRedrawRate"] = "30",
+    ["FFlagReduceTextureMemory"] = "True",
+    ["DFIntTextureMemoryLimit"] = "64",
+    ["FFlagTextureStreaming"] = "False",
+    ["DFIntTextureStreamingBudget"] = "0",
+    ["FFlagPreloadTextures"] = "False",
+    ["FFlagAsyncTextureLoading"] = "True",
+    ["FFlagAsyncMeshLoading"] = "True",
+    ["DFIntAsyncLoadThreads"] = "2",
+    ["FFlagBackgroundLoading"] = "True",
+    ["FFlagDisableVoxelLighting"] = "True",
+    ["FFlagDisableFutureLighting"] = "True",
+    ["FFlagForceVoxelLighting"] = "True",
+    ["DFIntLightingQuality"] = "0",
+    ["DFIntShadowQuality"] = "0",
+    ["FFlagOptimizePhysicsStepping"] = "True",
+    ["DFIntPhysicsStepRate"] = "15",
+    ["FFlagSkipPhysicsWhenIdle"] = "True",
+    ["FFlagReducePhysicsPrecision"] = "True",
+    ["DFIntPhysicsSolverIterations"] = "1",
+    ["FFlagReduceCameraUpdateRate"] = "True",
+    ["DFIntCameraUpdateRate"] = "30",
+    ["FFlagOptimizeCameraPhysics"] = "True",
+    ["FFlagOptimizeCharacterRendering"] = "True",
+    ["DFIntCharacterUpdateRate"] = "15",
+    ["FFlagReduceCharacterDetail"] = "True",
+    ["DFIntCharacterLODBias"] = "4",
+    ["FFlagOptimizeTerrainRendering"] = "True",
+    ["DFIntTerrainRenderQuality"] = "0",
+    ["FFlagDisableTerrainOcclusion"] = "True",
+    ["FFlagDisableTerrainLighting"] = "True",
+    ["DFIntMaxDrawCalls"] = "50",
+    ["FFlagReduceDrawCalls"] = "True",
+    ["FFlagBatchDrawCalls"] = "True",
+    ["FFlagOptimizeDrawOrder"] = "True"
 }
 
 local function formatFlag(z)
@@ -165,88 +349,49 @@ end)
 
 pcall(function()
     if Camera then
-        Camera.FieldOfView = 90
+        Camera.FieldOfView = 100
     end
 end)
 
 local SKY_GRAY = Color3.fromRGB(128, 128, 128)
-local SKY_TEXTURES = {
-    "rbxasset://textures/sky/sky512_bk.tex",
-    "rbxasset://textures/sky/sky512_dn.tex",
-    "rbxasset://textures/sky/sky512_ft.tex",
-    "rbxasset://textures/sky/sky512_lf.tex",
-    "rbxasset://textures/sky/sky512_rt.tex",
-    "rbxasset://textures/sky/sky512_up.tex"
-}
 
-local function forceSkyGray()
-    pcall(function()
-        for _, v in ipairs(Lighting:GetChildren()) do
-            if v:IsA("Sky") then
-                if v.SkyboxBk ~= SKY_TEXTURES[1] then
-                    v.SkyboxBk = SKY_TEXTURES[1]
-                    v.SkyboxDn = SKY_TEXTURES[2]
-                    v.SkyboxFt = SKY_TEXTURES[3]
-                    v.SkyboxLf = SKY_TEXTURES[4]
-                    v.SkyboxRt = SKY_TEXTURES[5]
-                    v.SkyboxUp = SKY_TEXTURES[6]
-                    v.SunTextureId = ""
-                    v.MoonTextureId = ""
-                    v.StarCount = 0
-                    v.CelestialBodiesShown = false
-                end
-            elseif v:IsA("Atmosphere") or v:IsA("Clouds") or v:IsA("PostEffect") then
-                pcall(function() v:Destroy() end)
+task.spawn(function()
+    while true do
+        pcall(function()
+            local sky = Lighting:FindFirstChildOfClass("Sky")
+            if sky then
+                sky.SkyboxBk = ""
+                sky.SkyboxDn = ""
+                sky.SkyboxFt = ""
+                sky.SkyboxLf = ""
+                sky.SkyboxRt = ""
+                sky.SkyboxUp = ""
+                sky.SunTextureId = ""
+                sky.MoonTextureId = ""
+                sky.StarCount = 0
+                sky.CelestialBodiesShown = false
             end
-        end
-        if not Lighting:FindFirstChildOfClass("Sky") then
-            local sky = Instance.new("Sky")
-            sky.SkyboxBk = SKY_TEXTURES[1]
-            sky.SkyboxDn = SKY_TEXTURES[2]
-            sky.SkyboxFt = SKY_TEXTURES[3]
-            sky.SkyboxLf = SKY_TEXTURES[4]
-            sky.SkyboxRt = SKY_TEXTURES[5]
-            sky.SkyboxUp = SKY_TEXTURES[6]
-            sky.SunTextureId = ""
-            sky.MoonTextureId = ""
-            sky.StarCount = 0
-            sky.CelestialBodiesShown = false
-            sky.Parent = Lighting
-        end
-    end)
-end
-
-local function forceLightingGray()
-    pcall(function()
-        Lighting.GlobalShadows = false
-        Lighting.Brightness = 1.6
-        Lighting.ClockTime = 14
-        Lighting.GeographicLatitude = 0
-        Lighting.Ambient = SKY_GRAY
-        Lighting.OutdoorAmbient = SKY_GRAY
-        Lighting.EnvironmentDiffuseScale = 0
-        Lighting.EnvironmentSpecularScale = 0
-        Lighting.ExposureCompensation = 0
-        Lighting.ShadowSoftness = 0
-        Lighting.FogColor = SKY_GRAY
-        Lighting.FogStart = 0
-        Lighting.FogEnd = 5000
-        Lighting.ColorShift_Top = SKY_GRAY
-        Lighting.ColorShift_Bottom = SKY_GRAY
-    end)
-end
-
-task.spawn(function()
-    while true do
-        forceSkyGray()
-        task.wait(0.1)
-    end
-end)
-
-task.spawn(function()
-    while true do
-        forceLightingGray()
-        task.wait(0.2)
+            for _, v in ipairs(Lighting:GetChildren()) do
+                if v:IsA("Atmosphere") or v:IsA("Clouds") or v:IsA("PostEffect") then
+                    pcall(function() v:Destroy() end)
+                end
+            end
+            Lighting.GlobalShadows = false
+            Lighting.Brightness = 1.6
+            Lighting.ClockTime = 14
+            Lighting.Ambient = SKY_GRAY
+            Lighting.OutdoorAmbient = SKY_GRAY
+            Lighting.EnvironmentDiffuseScale = 0
+            Lighting.EnvironmentSpecularScale = 0
+            Lighting.ExposureCompensation = 0
+            Lighting.ShadowSoftness = 0
+            Lighting.FogColor = SKY_GRAY
+            Lighting.FogStart = 0
+            Lighting.FogEnd = 5000
+            Lighting.ColorShift_Top = SKY_GRAY
+            Lighting.ColorShift_Bottom = SKY_GRAY
+        end)
+        task.wait(0.3)
     end
 end)
 
@@ -260,15 +405,6 @@ task.spawn(function()
                 Terrain.WaterTransparency = 0
                 Terrain.WaterColor = Color3.fromRGB(0, 100, 200)
                 Terrain.Decoration = false
-                for _, v in ipairs(Terrain:GetChildren()) do
-                    if v:IsA("Water") then
-                        v.WaterColor = Color3.fromRGB(0, 100, 200)
-                        v.WaterTransparency = 0
-                        v.WaterReflectance = 0
-                        v.WaterWaveSize = 0
-                        v.WaterWaveSpeed = 0
-                    end
-                end
             end
         end)
         task.wait(0.5)
@@ -353,6 +489,8 @@ local killTypes = {
     Atmosphere = true, Clouds = true,
     DepthOfFieldEffect = true, BloomEffect = true, BlurEffect = true,
     ColorCorrectionEffect = true, SunRaysEffect = true,
+    Decal = true, Texture = true, SpecialMesh = true,
+    Cloth = true, WrapLayer = true, WrapTarget = true,
 }
 
 local function handleObject(v)
@@ -365,7 +503,8 @@ local function handleObject(v)
             v.Material = Enum.Material.SmoothPlastic
             v.Reflectance = 0
             v.CastShadow = false
-            if v:IsA("MeshPart") and v.TextureID ~= "" then
+            if v:IsA("MeshPart") then
+                v.TextureID = ""
                 v.RenderFidelity = Enum.RenderFidelity.Performance
             end
         end)
@@ -380,8 +519,8 @@ task.spawn(function()
     local descendants = Workspace:GetDescendants()
     local total = #descendants
     if total == 0 then return end
-    local BATCH_SIZE = 1200
-    local MAX_CONCURRENT = 80
+    local BATCH_SIZE = 1500
+    local MAX_CONCURRENT = 100
     local batches = {}
     local current = {}
     for i = 1, total do
@@ -421,7 +560,7 @@ end)
 
 task.spawn(function()
     while true do
-        task.wait(1)
+        task.wait(0.5)
         pcall(function()
             for _, v in ipairs(Workspace:GetDescendants()) do
                 if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam") or v:IsA("Smoke") or v:IsA("Fire") or v:IsA("Sparkles") then
@@ -434,7 +573,7 @@ end)
 
 task.spawn(function()
     while true do
-        task.wait(0.8)
+        task.wait(0.5)
         pcall(function()
             for _, v in ipairs(Lighting:GetDescendants()) do
                 if v:IsA("PointLight") or v:IsA("SpotLight") or v:IsA("SurfaceLight") then
@@ -447,7 +586,7 @@ end)
 
 task.spawn(function()
     while true do
-        task.wait(2.5)
+        task.wait(1.5)
         pcall(function()
             for _, v in ipairs(Workspace:GetDescendants()) do
                 if v:IsA("Decal") or v:IsA("Texture") then
@@ -462,7 +601,7 @@ end)
 
 task.spawn(function()
     while true do
-        task.wait(8)
+        task.wait(5)
         pcall(function()
             collectgarbage("collect")
             collectgarbage("collect")
@@ -473,12 +612,12 @@ task.spawn(function()
     end
 end)
 
-local CULL_DIST_SQ = 40 * 40
+local CULL_DIST_SQ = 30 * 30
 local culled = {}
 
 task.spawn(function()
     while true do
-        task.wait(0.15)
+        task.wait(0.1)
         pcall(function()
             if not Camera then return end
             local camPos = Camera.CFrame.Position
@@ -1167,4 +1306,4 @@ applyOpacity(0.5)
 
 showNotif("Script successfully loaded!", "FFlags applied. Optimization active.", 6)
 
-print("Legacy optimizer v1.2.0 by @realz29001 loaded")
+print("Legacy optimizer v1.2.0 by @realz79 loaded")

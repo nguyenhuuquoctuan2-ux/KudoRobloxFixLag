@@ -25,6 +25,7 @@ local flagtables = {
     ["FIntTaskSchedulerAsyncTasksMinimumThreadCount"] = "2",
     ["FIntTaskSchedulerMaxNumOfJobs"] = "86",
     ["FIntTaskSchedulerThreadMin"] = "1",
+
     ["DFFlagBrowserTrackerIdTelemetryEnabled"] = "False",
     ["DFFlagPreloadAsyncSupportTexturePack"] = "True",
     ["DFFlagTextureQualityOverrideEnabled"] = "True",
@@ -36,6 +37,7 @@ local flagtables = {
     ["DFFlagOptimizePartsInPart"] = "True",
     ["DFFlagDisableDPIScale"] = "True",
     ["DFFlagDebugPerfMode"] = "True",
+
     ["DFIntRaknetBandwidthInfluxHundredthsPercentageV2"] = "10000",
     ["DFIntRakNetClockDriftAdjustmentPerPingMillisecond"] = "100",
     ["DFIntRaknetBandwidthPingSendEveryXSeconds"] = "1",
@@ -50,6 +52,7 @@ local flagtables = {
     ["DFIntRakNetMtuValue2InBytes"] = "1240",
     ["DFIntRakNetMtuValue3InBytes"] = "1200",
     ["DFIntConnectionMTUSize"] = "1260",
+
     ["DFIntMaxReceiveToDeserializeLatencyMilliseconds"] = "15",
     ["DFIntNetworkInDeserializeLimitGameplayMsClient"] = "6",
     ["DFIntNetworkInProcessLimitGameplayMsClient"] = "6",
@@ -72,21 +75,24 @@ local flagtables = {
     ["DFIntPhysicsSenderMaxBandwidthBpsScaling"] = "1000",
     ["FIntPGSAngularDampingPermilPersecond"] = "0",
     ["DFFlagPhysicsSkipNonRealTimeHumanoidForceCalc2"] = "True",
-    ["FFlagDebugDisplayFPS"] = "True",
+
     ["DFIntSignalRHubConnectionHeartbeatTimerRateMs"] = "1000",
     ["DFIntSignalRHubConnectionBaseRetryTimeMs"] = "100",
     ["DFIntSignalRCoreKeepAlivePingPeriodMs"] = "250",
     ["DFIntSignalRCoreServerTimeoutMs"] = "11100",
     ["DFIntSignalRCoreTimerMs"] = "750",
     ["DFIntSignalRCoreRpcQueueSize"] = "256",
+
     ["DFIntAnimationLodFacsVisibilityDenominator"] = "0",
     ["DFIntAnimationLodFacsDistanceMin"] = "0",
     ["DFIntAnimationLodFacsDistanceMax"] = "0",
     ["DFIntDebugFRMQualityLevelOverride"] = "1",
     ["DFIntDebugDynamicRenderKiloPixels"] = "1100",
     ["DFIntDebugRestrictGCDistance"] = "1",
+
     ["DFIntWaitOnUpdateNetworkLoopEndedMS"] = "100",
     ["DFIntWaitOnRecvFromLoopEndedMS"] = "100",
+
     ["FIntRenderMaxShadowAtlasUsageBeforeDownscale"] = "80",
     ["FIntRenderShadowMapDepthCacheMemLimit"] = "192",
     ["FIntUITextureMaxRenderTextureSize"] = "1024",
@@ -106,6 +112,7 @@ local flagtables = {
     ["FIntTelemetryProfilerFrequency"] = "0",
     ["FIntRenderLocalLightFadeInMs"] = "0",
     ["FIntReportDeviceInfoRollout"] = "0",
+
     ["FFlagRenderAllocateShadowMapResourcesOnDemand"] = "True",
     ["FFlagSpecifyNetworkReplicatorScopeForItems"] = "True",
     ["FFlagTaskSchedulerLimitTargetFpsTo2402"] = "False",
@@ -232,8 +239,14 @@ end
 task.spawn(function()
     while true do
         forceSkyGray()
+        task.wait(0.1)
+    end
+end)
+
+task.spawn(function()
+    while true do
         forceLightingGray()
-        task.wait(0.05)
+        task.wait(0.2)
     end
 end)
 
@@ -367,8 +380,8 @@ task.spawn(function()
     local descendants = Workspace:GetDescendants()
     local total = #descendants
     if total == 0 then return end
-    local BATCH_SIZE = 1000
-    local MAX_CONCURRENT = 60
+    local BATCH_SIZE = 1200
+    local MAX_CONCURRENT = 80
     local batches = {}
     local current = {}
     for i = 1, total do
@@ -408,7 +421,7 @@ end)
 
 task.spawn(function()
     while true do
-        task.wait(1.5)
+        task.wait(1)
         pcall(function()
             for _, v in ipairs(Workspace:GetDescendants()) do
                 if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam") or v:IsA("Smoke") or v:IsA("Fire") or v:IsA("Sparkles") then
@@ -421,7 +434,7 @@ end)
 
 task.spawn(function()
     while true do
-        task.wait(1)
+        task.wait(0.8)
         pcall(function()
             for _, v in ipairs(Lighting:GetDescendants()) do
                 if v:IsA("PointLight") or v:IsA("SpotLight") or v:IsA("SurfaceLight") then
@@ -434,7 +447,7 @@ end)
 
 task.spawn(function()
     while true do
-        task.wait(3)
+        task.wait(2.5)
         pcall(function()
             for _, v in ipairs(Workspace:GetDescendants()) do
                 if v:IsA("Decal") or v:IsA("Texture") then
@@ -449,8 +462,9 @@ end)
 
 task.spawn(function()
     while true do
-        task.wait(10)
+        task.wait(8)
         pcall(function()
+            collectgarbage("collect")
             collectgarbage("collect")
             collectgarbage("collect")
             collectgarbage("collect")
@@ -459,12 +473,12 @@ task.spawn(function()
     end
 end)
 
-local CULL_DIST_SQ = 45 * 45
+local CULL_DIST_SQ = 40 * 40
 local culled = {}
 
 task.spawn(function()
     while true do
-        task.wait(0.2)
+        task.wait(0.15)
         pcall(function()
             if not Camera then return end
             local camPos = Camera.CFrame.Position
@@ -820,7 +834,7 @@ statsGui.Parent = uiParent
 
 local box = Instance.new("Frame")
 box.Size = UDim2.new(0, 220, 0, 108)
-box.Position = UDim2.new(1, -230, 1, -118)
+box.Position = UDim2.new(1, -230, 0.5, -54)
 box.AnchorPoint = Vector2.new(1, 0)
 box.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 box.BackgroundTransparency = 0.3
